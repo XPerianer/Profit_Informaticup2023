@@ -1,0 +1,25 @@
+name: Format
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Generate Makefiles
+      # Build your program with the given configuration
+      run: cmake .
+
+    - name: Run format-check
+      run: make clang-format-check
+
