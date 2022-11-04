@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Build Directories
+cmake-build-*
+build/
+build-*/
+
+# Tooling and IDEs
+.idea/
+.vscode/
+.cache/
+*.swp
+compile_commands.json
