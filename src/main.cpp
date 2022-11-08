@@ -1,6 +1,8 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
+#include "Field.cpp"
+
 struct Input {
   int32_t width;
   int32_t height;
@@ -28,6 +30,6 @@ Input parse_input() {
 
 int main() {
   Input input = parse_input();
-
-  std::cout << "We have " << input.time << " seconds to do something smart" << std::endl;
+  Field field(input.width, input.height);
+  std::cout << field << std::endl;
 }
