@@ -6,3 +6,4 @@ Checks: >
     -modernize-use-trailing-return-type,
     -*-default-arguments*,
     -google-readability-todo,
+    -fuchsia-overloaded-operator,

@@ -3,13 +3,15 @@
 #include <nlohmann/json.hpp>
 #include <variant>
 #include <vector>
+#include <string>
 
-#include "Combiner.cpp"
-#include "Conveyor.cpp"
-#include "Deposit.cpp"
-#include "Factory.cpp"
-#include "Mine.cpp"
-#include "Obstacle.cpp"
+#include "Combiner.hpp"
+#include "Conveyor.hpp"
+#include "Deposit.hpp"
+#include "Factory.hpp"
+#include "Mine.hpp"
+#include "Obstacle.hpp"
+#include "assert.hpp"
 
 using Object = std::variant<Deposit, Obstacle, Mine, Conveyor, Combiner, Factory>;
 
@@ -20,8 +22,8 @@ struct Product {
 };
 
 struct Input {
-  int32_t width;
-  int32_t height;
+  uint8_t width;
+  uint8_t height;
   int32_t turns;
   int32_t time;
   std::vector<Product> products;
@@ -32,9 +34,9 @@ struct Input {
 
 class InputParser {
  public:
-  static Input parse(std::istream& is) {
+  static Input parse(std::istream& stream) {
     nlohmann::json json_input;
-    is >> json_input;
+    stream >> json_input;
 
     Input input{};
     input.width = json_input["width"];
@@ -53,22 +55,32 @@ class InputParser {
     return input;
   }
 
+  static Rotation subtype_as_rotation(int subtype) {
+    return static_cast<Rotation>(subtype % 4);
+  }
+
   static Object parseObject(const nlohmann::json& input) {
     std::string type = input["type"];
-    int32_t x = input["x"];
-    int32_t y = input["y"];
+    Vec2 coordinate = {input["x"], input["y"]};
     if (type == "deposit") {
-      return Deposit(x, y, input["subtype"]);
-    } else if (type == "obstacle") {
-      return Obstacle(x, y);
-    } else if (type == "mine") {
-      return Mine(x, y, input["subtype"]);
-    } else if (type == "conveyor") {
-      return Conveyor(x, y, input["subtype"]);
-    } else if (type == "combiner") {
-      return Combiner(x, y, input["subtype"]);
-    } else {
-      return Factory(x, y, input["subtype"]);
+      return Deposit(coordinate, subtype_as_rotation(input["subtype"]));
     }
+    if (type == "obstacle") {
+      return Obstacle(coordinate);
+    }
+    if (type == "mine") {
+      return Mine(coordinate, subtype_as_rotation(input["subtype"]));
+    }
+    if (type == "conveyor") {
+      return Conveyor(coordinate, subtype_as_rotation(input["subtype"]));
+    }
+    if (type == "combiner") {
+      return Combiner(coordinate, subtype_as_rotation(input["subtype"]));
+    }
+    if (type == "factory") {
+      return Factory(coordinate, subtype_as_rotation(input["subtype"]));
+    }
+
+    FAIL("unexpected input object type.");
   }
 };
