@@ -20,8 +20,9 @@ struct Mine {
 };
 
 struct Factory {
+  using TypeT = uint8_t;
   Vec2 handle;
-  uint8_t subtype;
+  TypeT subtype;
 };
 
 using PlaceableObject = std::variant<Combiner, Conveyor, Factory, Mine>;
