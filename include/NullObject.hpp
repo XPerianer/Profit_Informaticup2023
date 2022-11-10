@@ -5,15 +5,17 @@
 
 #include "ObjectInterface.hpp"
 
-class NullObject : public ObjectInterface {
+class NullObject {
  public:
   // TODO: Richard: Evaluieren
-  NullObject() : ObjectInterface({0,0}) {}
+  NullObject() noexcept = default;
 
-  [[nodiscard]] std::string type() const override { return "null"; }
-  [[nodiscard]] char toChar() const override { return ' '; }
+  bool operator==(const NullObject& other) const = default;
 
-  [[nodiscard]] std::vector<Vec2> occupiedFields() const override { return {}; }
-  [[nodiscard]] std::vector<Vec2> entrances() const override { return {}; }
-  [[nodiscard]] std::vector<Vec2> exits() const override { return {}; }
+  [[nodiscard]] std::string type() const { return "null"; }
+  [[nodiscard]] char toChar() const { return ' '; }
+
+  [[nodiscard]] std::vector<Vec2> occupiedFields() const  { return {}; }
+  [[nodiscard]] std::vector<Vec2> entrances() const  { return {}; }
+  [[nodiscard]] std::vector<Vec2> exits() const  { return {}; }
 };

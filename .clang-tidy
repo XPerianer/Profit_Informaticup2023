@@ -7,3 +7,5 @@ Checks: >
     -*-default-arguments*,
     -google-readability-todo,
     -fuchsia-overloaded-operator,
+    -fuchsia-statically-constructed-objects,
+

@@ -19,6 +19,7 @@ struct Vec2 {
   bool operator==(const Vec2 & other) const = default;
 };
 
+  /*
 class ObjectInterface {
  public:
   explicit ObjectInterface(Vec2 coordinate, Rotation rotation = Rotation::LEFT_TO_RIGHT)
@@ -52,3 +53,4 @@ class ObjectInterface {
   Vec2 coordinate_;
   Rotation rotation_;
 };
+*/

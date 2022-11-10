@@ -6,18 +6,12 @@
 #include <variant>
 #include <vector>
 
-#include "Combiner.hpp"
-#include "Conveyor.hpp"
-#include "Deposit.hpp"
-#include "Factory.hpp"
-#include "Mine.hpp"
 #include "NullObject.hpp"
 #include "ObjectInterface.hpp"
-#include "Obstacle.hpp"
 #include "assert.hpp"
 
 using ObjectVariant =
-    std::variant<Combiner, Conveyor, Deposit, Factory, Mine, NullObject, Obstacle>;
+    std::variant<NullObject>;
 
 struct Field {
   using FieldIdT = uint32_t;
@@ -28,7 +22,6 @@ struct Field {
  public:
   explicit Field(Vec2 dimensions)
       : ids(static_cast<size_t>(dimensions.x) * dimensions.y, EMPTY),
-        objects(),
         height_(dimensions.y),
         width_(dimensions.x) {}
 
@@ -40,8 +33,6 @@ struct Field {
   }
 
   const ObjectVariant& operator[](Vec2 coordinate) const {
-    static ObjectVariant null_object = NullObject();
-
     DEBUG_ASSERT(coordinate.x < width_ && coordinate.y < height_, "Trying to access out of bounds");
     if (getId(coordinate) == EMPTY) {
       return null_object;
@@ -61,6 +52,8 @@ struct Field {
       return false;
     }
 
+    ObjectVariant copy = object;
+
     objects.push_back(object);
     std::for_each(neededCoords.begin(), neededCoords.end(), [this](const auto & coord) {
       ids[width_ * coord.y + coord.x ] = objects.size();
@@ -69,18 +62,6 @@ struct Field {
   }
 
   [[nodiscard]] Vec2 dimensions() const { return {width_, height_}; }
-
-  friend std::ostream& operator<<(std::ostream& s, const Field& f) {
-    const auto dims = f.dimensions();
-    for (uint8_t y = 0; y < dims.y; y++) {
-      for (uint8_t x = 0; x < dims.x; x++) {
-        s << std::visit([&](const auto& typed_object) -> char {return typed_object[{x, y}];}, f) << ' ';
-      }
-      s << '\n';
-    }
-
-    return s;
-  }
 
  private:
   [[nodiscard]] FieldIdT getId(Vec2 coordinate) const {
