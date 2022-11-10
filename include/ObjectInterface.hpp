@@ -15,6 +15,8 @@ enum Rotation {
 struct Vec2 {
   uint8_t x;
   uint8_t y;
+
+  bool operator==(const Vec2 & other) const = default;
 };
 
 class ObjectInterface {
@@ -27,6 +29,8 @@ class ObjectInterface {
   ObjectInterface(ObjectInterface&& other) = default;
   ObjectInterface& operator=(const ObjectInterface& other) = delete;
   ObjectInterface& operator=(ObjectInterface&& other) = default;
+
+  bool operator==(const ObjectInterface & other) const = default;
 
   [[nodiscard]] Vec2 coordinate() const { return coordinate_; }
   Rotation rotation() { return rotation_; }

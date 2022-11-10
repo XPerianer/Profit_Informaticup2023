@@ -6,7 +6,5 @@
 
 int main() {
   Input input = InputParser::parse(std::cin);
-  Field field(input.width, input.height, input.objects);
-
-  std::cout << field << std::endl;
+  Field field({input.width, input.height});
 }

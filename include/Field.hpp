@@ -23,11 +23,12 @@ struct Field {
   using FieldIdT = uint32_t;
 
   constexpr static FieldIdT EMPTY = std::numeric_limits<FieldIdT>::max();
+  inline static const ObjectVariant null_object = NullObject();
 
  public:
   explicit Field(Vec2 dimensions)
-      : ids(static_cast<size_t>(dimensions.x) * dimensions.y, -1),
-        objects({}),
+      : ids(static_cast<size_t>(dimensions.x) * dimensions.y, EMPTY),
+        objects(),
         height_(dimensions.y),
         width_(dimensions.x) {}
 
@@ -51,18 +52,18 @@ struct Field {
 
   bool place(const ObjectVariant& object) {
     std::vector<Vec2> neededCoords =
-        std::visit([](const auto& typed_object) { return typed_object.occupiedFields(); });
+        std::visit([](const auto& typed_object) { return typed_object.occupiedFields(); }, object);
 
     if (std::any_of(neededCoords.begin(), neededCoords.end(), [this](auto coord) {
-          return std::get<0>(coord) >= width_ || std::get<1>(coord) >= height_ ||
-                 this(std::get<0>(coord), std::get<1>(coord)) >= 0;
+          return coord.x >= width_ || coord.y >= height_ ||
+                 (*this)[coord] == null_object;
         })) {
       return false;
     }
 
     objects.push_back(object);
-    std::for_each(neededCoords.begin(), neededCoords.end(), [this](auto coord) {
-      this(std::get<0>(coord), std::get<1>(coord), objects.size());
+    std::for_each(neededCoords.begin(), neededCoords.end(), [this](const auto & coord) {
+      ids[width_ * coord.y + coord.x ] = objects.size();
     });
     return true;
   }
