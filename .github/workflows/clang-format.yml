@@ -1,0 +1,26 @@
+name: Format
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run clang-format
+      uses: DoozyX/clang-format-lint-action@v0.14
+      with:
+        source: '.'
+        exclude: './lib'
+        extensions: 'h,cpp,c'
+        clangFormatVersion: 14
+        inplace: True
