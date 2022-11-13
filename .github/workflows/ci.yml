@@ -1,4 +1,4 @@
-name: CMake
+name: Continuous Integration
 
 on:
   push:
@@ -47,3 +47,11 @@ jobs:
         extensions: 'h,cpp,c'
         clangFormatVersion: 14
         inplace: True
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: clang-tidy
+    uses: HorstBaerbel/action-clang-tidy@1.2
