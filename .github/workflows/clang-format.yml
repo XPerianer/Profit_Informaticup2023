@@ -21,6 +21,6 @@ jobs:
       with:
         source: '.'
         exclude: './lib'
-        extensions: 'h,cpp,c'
+        extensions: 'hpp,cpp'
         clangFormatVersion: 14
         inplace: True
