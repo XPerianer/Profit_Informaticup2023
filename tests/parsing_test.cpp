@@ -11,12 +11,12 @@
 using namespace parsing;
 
 TEST(Parsing, ParseTaskOne) {
-  auto expected = Input{/* width= */ 30,
-                        /* height= */ 20,
-                        /* turns= */ 50,
-                        /* time= */ 300,
-                        /* products= */ {Product{0, {3, 3, 3, 0, 0, 0, 0, 0}, 10}},
-                        /* objects= */
+  auto expected = Input{/* width */ 30,
+                        /* height */ 20,
+                        /* turns */ 50,
+                        /* time */ 300,
+                        /* products */ {Product{0, {3, 3, 3, 0, 0, 0, 0, 0}, 10}},
+                        /* objects */
                         {
                             Deposit{{1, 1}, {5, 5}, 0},
                             Deposit{{1, 14}, {5, 5}, 1},
@@ -58,7 +58,6 @@ TEST(Parsing, ParseTaskThree) {
   EXPECT_EQ(expected, parse(stream));
 }
 
-
 TEST(Parsing, ParseTaskFour) {
   auto expected = Input{
       /*width*/ 29,
@@ -74,4 +73,26 @@ TEST(Parsing, ParseTaskFour) {
        Obstacle{{12, 0}, {5, 1}}, Obstacle{{12, 22}, {5, 1}}}};
   std::istringstream stream{std::string{examples::TASK4}};
   EXPECT_EQ(expected, parse(stream));
+}
+
+TEST(Input, DifferentOrdering) {
+  auto input_a = Input{
+      /*width*/ 10,
+      /*height*/ 10,
+      /*turns*/ 50,
+      /*time*/ 120,
+      /*products*/
+      {Product{0, {10, 10, 0, 0, 0, 0, 0, 0}, 10}, Product{1, {0, 0, 10, 10, 0, 0, 0, 0}, 10}},
+      /*objects*/
+      {Obstacle{{8, 0}, {4, 11}}, Obstacle{{3, 12}, {15, 3}}, Deposit{{0, 0}, {8, 9}, 0}}};
+  auto input_b = Input{
+      /*width*/ 10,
+      /*height*/ 10,
+      /*turns*/ 50,
+      /*time*/ 120,
+      /*products*/
+      {Product{1, {0, 0, 10, 10, 0, 0, 0, 0}, 10}, Product{0, {10, 10, 0, 0, 0, 0, 0, 0}, 10}},
+      /*objects*/
+      {Obstacle{{3, 12}, {15, 3}}, Obstacle{{8, 0}, {4, 11}}, Deposit{{0, 0}, {8, 9}, 0}}};
+  EXPECT_EQ(input_a, input_b);
 }

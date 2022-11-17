@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -20,7 +21,12 @@ struct Input {
   std::vector<LandscapeObject> objects;
 
   static constexpr int32_t DEFAULT_TIME = 300;
-  bool operator==(const Input& other) const = default;
+  bool operator==(const Input& other) const {
+    return width == other.width && height == other.height && turns == other.turns &&
+           time == other.time &&
+           std::is_permutation(products.begin(), products.end(), other.products.begin()) &&
+           std::is_permutation(objects.begin(), objects.end(), other.objects.begin());
+  }
 };
 
 inline LandscapeObject parse_object(const nlohmann::json& input) {
