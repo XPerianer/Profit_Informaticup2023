@@ -35,3 +35,11 @@ add_executable(main src/main.cpp)
 enable_testing()
 
 add_subdirectory(tests)
+
+
+##### FORMAT ####
+file(GLOB_RECURSE ALL_SOURCE_FILES src/*.cpp include/*.hpp tests/*.cpp)
+
+add_custom_target(clang-format COMMAND clang-format -style=file -i${INCLUDE_DIRECTORIES} ${ALL_SOURCE_FILES})
+
+add_custom_target(format DEPENDS clang-format)

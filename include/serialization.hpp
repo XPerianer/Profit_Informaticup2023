@@ -5,7 +5,7 @@
 namespace serialization {
 
 template <class... Ts>
-struct overloaded : Ts... { // NOLINT(fuchsia-multiple-inheritance)
+struct overloaded : Ts... {  // NOLINT(fuchsia-multiple-inheritance)
   using Ts::operator()...;
 };
 template <class... Ts>
