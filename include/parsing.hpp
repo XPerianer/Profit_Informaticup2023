@@ -20,6 +20,7 @@ struct Input {
   std::vector<LandscapeObject> objects;
 
   static constexpr int32_t DEFAULT_TIME = 300;
+  bool operator==(const Input& other) const = default;
 };
 
 inline LandscapeObject parse_object(const nlohmann::json& input) {

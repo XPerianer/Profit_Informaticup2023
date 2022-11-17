@@ -23,11 +23,11 @@ class Vec2 {
   [[nodiscard]] uint8_t width() const { return x_; };
   [[nodiscard]] uint8_t height() const { return y_; };
 
+  bool operator==(const Vec2& other) const = default;
  private:
   CoordT x_;
   CoordT y_;
 
-  bool operator==(const Vec2& other) const = default;
 };
 
 // TODO(Richard): Namespace / Code Structuring überlegen?
@@ -37,4 +37,5 @@ struct Product {
   int8_t subtype;
   std::array<int32_t, resource_type_count> requirements;
   int32_t points;
+  bool operator==(const Product& other) const = default;
 };

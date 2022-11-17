@@ -7,7 +7,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(
   unit_test
-  test_serialization.cpp
+  serialization_test.cpp
+  parsing_test.cpp
 )
 
 target_link_libraries(
