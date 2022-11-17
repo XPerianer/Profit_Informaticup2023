@@ -6,14 +6,14 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_executable(
-    unit_test
-    test_serialization.cpp
-  )
+  unit_test
+  test_serialization.cpp
+)
 
-  target_link_libraries(
-    unit_test
-    GTest::gtest_main
-  )
-  
-  include(GoogleTest)
-  gtest_discover_tests(unit_test)
+target_link_libraries(
+  unit_test
+  GTest::gtest_main
+)
+
+include(GoogleTest)
+gtest_discover_tests(unit_test)
