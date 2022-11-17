@@ -1,4 +1,3 @@
-
 Checks: >
     *,
     -altera-*,
@@ -8,4 +7,3 @@ Checks: >
     -google-readability-todo,
     -fuchsia-overloaded-operator,
     -fuchsia-statically-constructed-objects,
-
