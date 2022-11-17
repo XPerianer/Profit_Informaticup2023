@@ -48,7 +48,7 @@ inline nlohmann::json serialize_object(const PlaceableObject& object) {
 }
 
 inline nlohmann::json serialize(const std::vector<PlaceableObject>& objects) {
-  nlohmann::json out;
+  nlohmann::json out = nlohmann::json::array();
   for (const auto& object : objects) {
     out.emplace_back(serialize_object(object));
   }
