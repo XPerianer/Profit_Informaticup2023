@@ -7,7 +7,6 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(
     unit_test
-    test_NullObject.cpp
     test_serialization.cpp
   )
 
