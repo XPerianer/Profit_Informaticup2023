@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "parsing.hpp"
+#include "serialization.hpp"
 #include "placeable.hpp"
 #include "two_dimensional_vector.hpp"
 #include "utils.hpp"
@@ -78,9 +79,9 @@ namespace production_realization {
 
       // TODO: Ausprobieren
       // 3-unit conveyor
-      for(Rotation rot = 0; rot < 4; ++rot) {
+      // for(Rotation rot = 0; rot < 4; ++rot) {
         
-      }
+      // 
       // 4-unit conveyor
       // combinern
     }

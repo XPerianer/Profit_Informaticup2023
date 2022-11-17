@@ -9,12 +9,12 @@ struct Combiner {
   Rotation rotation;
 };
 
-struct Conveyor {
+struct Conveyor3 {
   Vec2 handle;
   Rotation rotation;
 };
 
-struct Mine {
+struct Conveyor4 {
   Vec2 handle;
   Rotation rotation;
 };
@@ -25,4 +25,9 @@ struct Factory {
   TypeT subtype;
 };
 
-using PlaceableObject = std::variant<Combiner, Conveyor, Factory, Mine>;
+struct Mine {
+  Vec2 handle;
+  Rotation rotation;
+};
+
+using PlaceableObject = std::variant<Combiner, Conveyor3, Conveyor4, Factory, Mine>;
