@@ -6,14 +6,15 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 add_executable(
-    test_NullObject
-    src/test_NullObject.cpp
+    unit_test
+    test_NullObject.cpp
+    test_serialization.cpp
   )
 
   target_link_libraries(
-    test_NullObject
+    unit_test
     GTest::gtest_main
   )
   
   include(GoogleTest)
-  gtest_discover_tests(test_NullObject)
+  gtest_discover_tests(unit_test)
