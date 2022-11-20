@@ -41,5 +41,6 @@ add_subdirectory(tests)
 file(GLOB_RECURSE ALL_SOURCE_FILES src/*.cpp include/*.hpp tests/*.cpp)
 
 add_custom_target(clang-format COMMAND clang-format -style=file -i${INCLUDE_DIRECTORIES} ${ALL_SOURCE_FILES})
+add_custom_target(clang-format-check COMMAND clang-format -style=file -i${INCLUDE_DIRECTORIES} ${ALL_SOURCE_FILES} --dry-run -Werror)
 
 add_custom_target(format DEPENDS clang-format)

@@ -24,10 +24,10 @@ class Vec2 {
   [[nodiscard]] uint8_t height() const { return y_; };
 
   bool operator==(const Vec2& other) const = default;
+
  private:
   CoordT x_;
   CoordT y_;
-
 };
 
 // TODO(Richard): Namespace / Code Structuring überlegen?

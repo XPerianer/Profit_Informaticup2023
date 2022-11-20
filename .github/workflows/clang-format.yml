@@ -16,11 +16,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Run clang-format
-      uses: DoozyX/clang-format-lint-action@v0.14
-      with:
-        source: '.'
-        exclude: './lib'
-        extensions: 'hpp,cpp'
-        clangFormatVersion: 14
-        inplace: True
+    - name: Generate Makefiles
+      # Build your program with the given configuration
+      run: cmake .
+
+    - name: Run format-check
+      run: make clang-format-check
+

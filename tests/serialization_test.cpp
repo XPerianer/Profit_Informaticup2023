@@ -1,13 +1,12 @@
+#include "serialization.hpp"
+
 #include <gtest/gtest.h>
 
-#include "serialization.hpp"
 #include "utils.hpp"
 
 using namespace serialization;
 
-TEST(Serialization, EmptyInput) {
-  EXPECT_EQ(nlohmann::json::array(), serialize({}));
-}
+TEST(Serialization, EmptyInput) { EXPECT_EQ(nlohmann::json::array(), serialize({})); }
 
 TEST(Serialization, ReturnObjectsAsArray) {
   auto combiner = Combiner{{1, 2}, UP_TO_DOWN};
