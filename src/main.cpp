@@ -9,7 +9,15 @@
 
 int main() {
   parsing::Input input = parsing::parse(std::cin);
-  (void)input;
+
+  // lots of changes to input here
+
+  // Extented output for profit website
+  serialization::Output output = serialization::Output(input);
+  std::cout << serialization::serialize_detailed(output);
+  // Simple for expected output
+  // std::cout << serialization::serialize({});
+  return 0;
 }
 
 /*
