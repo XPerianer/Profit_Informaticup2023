@@ -8,25 +8,15 @@
 namespace serialization {
 
 struct Output {
-  uint8_t width;
-  uint8_t height;
+  Vec2 dimensions;
   int32_t turns;
   int32_t time;
   std::vector<Product> products;
   std::vector<LandscapeObject> landscape_objects;
   std::vector<PlaceableObject> placeable_objects;
 
-  Output(const parsing::Input& input)
-      : width{input.width},
-        height{input.height},
-        turns{input.turns},
-        time{input.time},
-        products{input.products},
-        landscape_objects{input.objects} {}
-
   bool operator==(const Output& other) const {
-    return width == other.width && height == other.height && turns == other.turns &&
-           time == other.time &&
+    return dimensions == other.dimensions && turns == other.turns && time == other.time &&
            std::is_permutation(products.begin(), products.end(), other.products.begin()) &&
            std::is_permutation(landscape_objects.begin(), landscape_objects.end(),
                                other.landscape_objects.begin()) &&
@@ -116,8 +106,8 @@ inline nlohmann::json serialize(const std::vector<PlaceableObject>& objects) {
 
 inline nlohmann::json serialize_detailed(const Output& output) {
   nlohmann::json out;
-  out["width"] = output.width;
-  out["height"] = output.height;
+  out["width"] = output.dimensions.x();
+  out["height"] = output.dimensions.y();
 
   nlohmann::json objects = nlohmann::json::array();
   for (const auto& object : output.landscape_objects) {

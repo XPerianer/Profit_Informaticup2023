@@ -14,6 +14,7 @@ class Vec2 {
  public:
   using CoordT = uint8_t;
 
+  Vec2() = default;
   // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
   Vec2(CoordT arg1, CoordT arg2) : x_{arg1}, y_{arg2} {}
 
@@ -24,10 +25,10 @@ class Vec2 {
   [[nodiscard]] uint8_t height() const { return y_; };
 
   bool operator==(const Vec2& other) const = default;
+
  private:
   CoordT x_;
   CoordT y_;
-
 };
 
 // TODO(Richard): Namespace / Code Structuring überlegen?

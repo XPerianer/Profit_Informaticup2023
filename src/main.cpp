@@ -10,13 +10,17 @@
 int main() {
   parsing::Input input = parsing::parse(std::cin);
 
-  // lots of changes to input here
+  // TODO: lots of calculations with input
+  std::vector<PlaceableObject> result = {};
 
+#ifdef NDEBUG
+  std::cout << serialization::serialize(result);
+#else
   // Extented output for profit website
-  serialization::Output output = serialization::Output(input);
+  serialization::Output output = serialization::Output{input.dimensions, input.turns,   input.time,
+                                                       input.products,   input.objects, result};
   std::cout << serialization::serialize_detailed(output);
-  // Simple for expected output
-  // std::cout << serialization::serialize({});
+#endif
   return 0;
 }
 

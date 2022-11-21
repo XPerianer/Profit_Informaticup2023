@@ -21,7 +21,8 @@ TEST(Serialization, ReturnsInput) {
   std::istringstream input_stream{std::string{examples::TASK1}};
   nlohmann::json serialized_input = nlohmann::json::parse(input_stream.str());
   auto input = parsing::parse(input_stream);
-  auto output = Output(input);
+  auto output =
+      Output{input.dimensions, input.turns, input.time, input.products, input.objects, {}};
   nlohmann::json serialized_output = serialize_detailed(output);
   EXPECT_EQ(serialized_input, serialized_output);
 }
@@ -67,4 +68,29 @@ TEST(Serialization, SerializeProduct) {
                             {"resources", {10, 0, 0, 0, 0, 0, 0, 0}},
                             {"points", 10}}),
             serialize_product(Product{0, {10, 0, 0, 0, 0, 0, 0, 0}, 10}));
+}
+
+TEST(Output, DifferentOrdering) {
+  auto output_a = Output{
+      /* dimensions */ {10, 10},
+      /*turns*/ 50,
+      /*time*/ 120,
+      /*products*/
+      {Product{0, {10, 10, 0, 0, 0, 0, 0, 0}, 10}, Product{1, {0, 0, 10, 10, 0, 0, 0, 0}, 10}},
+      /*landscape*/
+      {Obstacle{{8, 0}, {4, 11}}, Obstacle{{3, 12}, {15, 3}}, Deposit{{0, 0}, {8, 9}, 0}},
+      /*placeables*/
+      {Mine{{8, 0}, UP_TO_DOWN}, Factory{{3, 12}, 2}}};
+  auto output_b = Output{
+      /* dimensions */ {10, 10},
+      /*turns*/ 50,
+      /*time*/ 120,
+      /*products*/
+      {Product{1, {0, 0, 10, 10, 0, 0, 0, 0}, 10}, Product{0, {10, 10, 0, 0, 0, 0, 0, 0}, 10}},
+      /*landscape*/
+      {Obstacle{{8, 0}, {4, 11}}, Obstacle{{3, 12}, {15, 3}}, Deposit{{0, 0}, {8, 9}, 0}},
+      /*placeables*/
+      {Factory{{3, 12}, 2}, Mine{{8, 0}, UP_TO_DOWN}}};
+
+  EXPECT_EQ(output_a, output_b);
 }

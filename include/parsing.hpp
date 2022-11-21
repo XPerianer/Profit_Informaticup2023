@@ -13,8 +13,7 @@
 namespace parsing {
 
 struct Input {
-  uint8_t width;
-  uint8_t height;
+  Vec2 dimensions;
   int32_t turns;
   int32_t time;
   std::vector<Product> products;
@@ -22,8 +21,7 @@ struct Input {
 
   static constexpr int32_t DEFAULT_TIME = 300;
   bool operator==(const Input& other) const {
-    return width == other.width && height == other.height && turns == other.turns &&
-           time == other.time &&
+    return dimensions == other.dimensions && turns == other.turns && time == other.time &&
            std::is_permutation(products.begin(), products.end(), other.products.begin()) &&
            std::is_permutation(objects.begin(), objects.end(), other.objects.begin());
   }
@@ -48,9 +46,8 @@ inline Input parse(std::istream& stream) {
   nlohmann::json json_input;
   stream >> json_input;
 
-  Input input{};
-  input.width = json_input["width"];
-  input.height = json_input["height"];
+  Input input;
+  input.dimensions = Vec2{json_input["width"], json_input["height"]};
   input.turns = json_input["turns"];
   for (const auto& product_json : json_input["products"]) {
     input.products.push_back(
