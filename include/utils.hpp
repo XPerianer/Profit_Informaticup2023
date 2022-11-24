@@ -10,19 +10,21 @@ enum Rotation {
   DOWN_TO_UP = 3,
 };
 
+constexpr size_t FIELD_PADDING = 6;
+
+using CoordT = int8_t;
+
 class Vec2 {
  public:
-  using CoordT = uint8_t;
-
   Vec2() = default;
   // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
   Vec2(CoordT arg1, CoordT arg2) : x_{arg1}, y_{arg2} {}
 
-  [[nodiscard]] uint8_t x() const { return x_; };
-  [[nodiscard]] uint8_t y() const { return y_; };
+  [[nodiscard]] CoordT x() const { return x_; };
+  [[nodiscard]] CoordT y() const { return y_; };
 
-  [[nodiscard]] uint8_t width() const { return x_; };
-  [[nodiscard]] uint8_t height() const { return y_; };
+  [[nodiscard]] CoordT width() const { return x_; };
+  [[nodiscard]] CoordT height() const { return y_; };
 
   bool operator==(const Vec2& other) const = default;
 
@@ -40,3 +42,10 @@ struct Product {
   int32_t points;
   bool operator==(const Product& other) const = default;
 };
+
+template <class... Ts>
+struct overloaded : Ts... {  // NOLINT(fuchsia-multiple-inheritance)
+  using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
