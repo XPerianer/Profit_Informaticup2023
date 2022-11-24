@@ -57,16 +57,6 @@ int main() {
 
 namespace production_realization {
 
-std::vector<Deposit> get_deposits(const parsing::Input &input) {
-  std::vector<Deposit> deposits;
-  for (auto const &object : input.objects) {
-    std::visit(utils::overloaded{[&](const Deposit &deposit) { deposits.push_back(deposit); },
-                                 [](const Obstacle &obstacle) {}},
-               object);
-  }
-  return deposits;
-}
-
 // Idee: Immer erstmal nur eine Produktionspipeline (-> genau eine Fabrik) bauen
 // Mehrere Fabriken dienen nur der Latenzoptimierung
 // Latenzoptimierung machen wir im zweiten Schritt

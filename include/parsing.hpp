@@ -28,6 +28,16 @@ struct Input {
   }
 };
 
+inline std::vector<Deposit> get_deposits(const Input& input) {
+  std::vector<Deposit> deposits;
+  for (auto const &object : input.objects) {
+    std::visit(utils::overloaded{[&](const Deposit &deposit) { deposits.push_back(deposit); },
+                                 [](const Obstacle &obstacle) {}},
+               object);
+  }
+  return deposits;
+}
+
 inline LandscapeObject parse_object(const nlohmann::json& input) {
   std::string type = input["type"];
   Vec2 coordinate = {static_cast<int>(input["x"]), static_cast<int>(input["y"])};
