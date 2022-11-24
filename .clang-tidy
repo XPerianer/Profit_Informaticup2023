@@ -1,15 +1,94 @@
+HeaderFilterRegex: '(src/.*\.hpp)|(test/\.*.hpp)|(include/.*\.hpp)'
+
 Checks: >
     *,
+    -abseil-*,
     -altera-*,
+    -android-*,
+    -boost-*,
+    -darwin-*,
+    -fuchsia-*,
+    -google-objc-*,
+    -linuxkernel-*,
+    -llvm-*,
     -llvmlibc-*,
+    -mpi-*,
+    -objc-*,
+    -openmp-*,
+    -zircon-*,
+    -hicpp-*,
+    hicpp-exception-baseclass,
+    hicpp-multiway-paths-covered,
+    hicpp-no-assembler,
+    hicpp-signed-bitwise,
+    -cert-*,
+    cert-dcl21-cpp,
+    cert-dcl50-cpp,
+    cert-dcl58-cpp,
+    cert-env33-c,
+    cert-err33-c,
+    cert-err34-c,
+    cert-err52-cpp,
+    cert-err58-cpp,
+    cert-err60-cpp,
+    cert-flp30-c,
+    cert-mem57-cpp,
+    cert-msc50-cpp,
+    cert-msc51-cpp,
+    cert-oop57-cpp,
+    cert-oop58-cpp,
+    -bugprone-narrowing-conversions,
+    -cppcoreguidelines-avoid-c-arrays,
+    -cppcoreguidelines-avoid-magic-numbers,
+    -cppcoreguidelines-c-copy-assignment-signature,
+    -cppcoreguidelines-explicit-virtual-functions,
+    -cppcoreguidelines-macro-to-enum,
+    -cppcoreguidelines-non-private-member-variables-in-classes,
     -modernize-use-trailing-return-type,
-    -*-default-arguments*,
-    -google-readability-todo,
-    -fuchsia-overloaded-operator,
-    -fuchsia-statically-constructed-objects,
-    -fuchsia-trailing-return,
-    -bugprone-exception-escape,
     -misc-non-private-member-variables-in-classes,
+    -google-readability-todo,
+    -*-use-nullptr,
+    -google-upgrade-googletest-case,
+
+
+### Reasons for exclusions
+## Generally not applicable
+# abseil                                                we don't use the abseil library
+# altera                                                doesn't apply (OpenCL FPGA programming)
+# android                                               doesn't apply (Android)
+# boost                                                 doesn't apply (we don't use boost)
+# darwin                                                doesn't apply (we're not darwin)
+# fuchsia                                               we don't follow the fuchsia coding conventions
+# google-objc                                           doesn't apply (no Objective-C code)
+# linuxkernel                                           doesn't apply (we're not the linux kernel)
+# llvm                                                  specific to LLVM codebase or aliases or don't apply to us
+# llvmlibc                                              doesn't apply (we're not the llvm libc)
+# mpi                                                   doesn't apply (we're not using MPI)
+# objc                                                  doesn't apply (no Objective-C code)
+# openMP                                                doesn't apply (we're not using OpenMP)
+# zircon                                                utility checks that would need configuration
+
+## Aliasses
+# Having check aliases enabled harms performance in clang-tidy and is annoying to ignore locally, so we disable some aliases
+# The hicpp-* checks are generally aliasses (25) and only have a few original checks (4), so we use whitelisting here.
+# The cert-* checks are 22 aliasses and 15 original checks, so we also use whitelisting here.
+# bugprone-narrowing-conversions                               alias to cppcoreguidelines-narrowing-conversions
+# cppcoreguidelines-avoid-c-arrays                             alias to modernize-avoid-c-arrays
+# cppcoreguidelines-avoid-magic-numbers                        alias to readability-magic-numbers
+# cppcoreguidelines-c-copy-assignment-signature                alias to misc-unconventional-assign-operator
+# cppcoreguidelines-explicit-virtual-functions                 alias to modernize-use-override
+# cppcoreguidelines-macro-to-enum                              alias to modernize-macro-to-enum
+# cppcoreguidelines-non-private-member-variables-in-classes    alias to misc-non-private-member-variables-in-classes
+
+## Actually disabled checks
+# modernize-use-trailing-return-type                    we allow traditional return type syntax
+# llvm-header-guard                                     we use #pragma once
+# misc-non-private-member-variables-in-classes          we follow CppCoreGuideline C.2 and use structs with public members if there are no invariants
+# google-readability-todo                               we don't require a username / issue number with TODOs (for now)
+# *-use-nullptr                                         sadly gets triggered by defaulted spaceship comparison operators (see https://github.com/llvm/llvm-project/issues/55919)
+# google-upgrade-googletest-case                        slow, we don't need it
+
+
 
 CheckOptions:
   - key: readability-identifier-length.IgnoredVariableNames
