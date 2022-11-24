@@ -42,3 +42,6 @@ build-*/
 .cache/
 *.swp
 compile_commands.json
+
+# Temporary results
+results/

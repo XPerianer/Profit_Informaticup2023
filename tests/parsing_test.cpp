@@ -11,8 +11,7 @@
 using namespace parsing;
 
 TEST(Parsing, ParseTaskOne) {
-  auto expected = Input{/* width */ 30,
-                        /* height */ 20,
+  auto expected = Input{/* dimensions */ {30, 20},
                         /* turns */ 50,
                         /* time */ 300,
                         /* products */ {Product{0, {3, 3, 3, 0, 0, 0, 0, 0}, 10}},
@@ -29,8 +28,7 @@ TEST(Parsing, ParseTaskOne) {
 }
 
 TEST(Parsing, ParseTaskTwo) {
-  auto expected = Input{/*width*/ 26,
-                        /*height*/ 5,
+  auto expected = Input{/* dimensions */ {26, 5},
                         /*turns*/ 20,
                         /*time*/ 60,
                         /*products*/ {Product{0, {10, 0, 0, 0, 0, 0, 0, 0}, 10}},
@@ -44,8 +42,7 @@ TEST(Parsing, ParseTaskTwo) {
 }
 
 TEST(Parsing, ParseTaskThree) {
-  auto expected = Input{/*width*/ 40,
-                        /*height*/ 40,
+  auto expected = Input{/* dimensions */ {40, 40},
                         /*turns*/ 14,
                         /*time*/ 300,
                         /*products*/ {Product{0, {36, 3, 0, 0, 0, 0, 0, 0}, 10}},
@@ -60,8 +57,7 @@ TEST(Parsing, ParseTaskThree) {
 
 TEST(Parsing, ParseTaskFour) {
   auto expected = Input{
-      /*width*/ 29,
-      /*height*/ 23,
+      /* dimensions */ {29, 23},
       /*turns*/ 50,
       /*time*/ 120,
       /*products*/
@@ -77,8 +73,7 @@ TEST(Parsing, ParseTaskFour) {
 
 TEST(Input, DifferentOrdering) {
   auto input_a = Input{
-      /*width*/ 10,
-      /*height*/ 10,
+      /* dimensions */ {10, 10},
       /*turns*/ 50,
       /*time*/ 120,
       /*products*/
@@ -86,8 +81,7 @@ TEST(Input, DifferentOrdering) {
       /*objects*/
       {Obstacle{{8, 0}, {4, 11}}, Obstacle{{3, 12}, {15, 3}}, Deposit{{0, 0}, {8, 9}, 0}}};
   auto input_b = Input{
-      /*width*/ 10,
-      /*height*/ 10,
+      /* dimensions */ {10, 10},
       /*turns*/ 50,
       /*time*/ 120,
       /*products*/

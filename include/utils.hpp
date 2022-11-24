@@ -14,6 +14,7 @@ class Vec2 {
  public:
   using CoordT = uint8_t;
 
+  Vec2() = default;
   // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
   Vec2(CoordT arg1, CoordT arg2) : x_{arg1}, y_{arg2} {}
 

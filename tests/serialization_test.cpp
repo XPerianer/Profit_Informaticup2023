@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include "example_tasks.hpp"
 #include "utils.hpp"
 
 using namespace serialization;
@@ -14,6 +15,16 @@ TEST(Serialization, ReturnObjectsAsArray) {
   auto serialized_combiner = serialize_object(combiner);
   nlohmann::json expected_json = {serialized_combiner, serialized_combiner};
   EXPECT_EQ(expected_json, serialize(objects));
+}
+
+TEST(Serialization, ReturnsInput) {
+  std::istringstream input_stream{std::string{examples::TASK1}};
+  nlohmann::json serialized_input = nlohmann::json::parse(input_stream.str());
+  auto input = parsing::parse(input_stream);
+  auto output =
+      Output{input.dimensions, input.turns, input.time, input.products, input.objects, {}};
+  nlohmann::json serialized_output = serialize_detailed(output);
+  EXPECT_EQ(serialized_input, serialized_output);
 }
 
 TEST(Serialization, SerializeCombiner) {
@@ -36,4 +47,50 @@ TEST(Serialization, SerializeFactory) {
 TEST(Serialization, SerializeMine) {
   EXPECT_EQ(nlohmann::json({{"type", "mine"}, {"subtype", 1}, {"x", 15}, {"y", 10}}),
             serialize_object(Mine{{15, 10}, UP_TO_DOWN}));
+}
+
+TEST(Serialization, SerializeDeposit) {
+  EXPECT_EQ(
+      nlohmann::json(
+          {{"type", "deposit"}, {"subtype", 1}, {"x", 15}, {"y", 10}, {"width", 5}, {"height", 5}}),
+      serialize_object(Deposit{{15, 10}, {5, 5}, 1}));
+}
+
+TEST(Serialization, SerializeObstacle) {
+  EXPECT_EQ(
+      nlohmann::json({{"type", "obstacle"}, {"x", 15}, {"y", 10}, {"width", 5}, {"height", 5}}),
+      serialize_object(Obstacle{{15, 10}, {5, 5}}));
+}
+
+TEST(Serialization, SerializeProduct) {
+  EXPECT_EQ(nlohmann::json({{"type", "product"},
+                            {"subtype", 0},
+                            {"resources", {10, 0, 0, 0, 0, 0, 0, 0}},
+                            {"points", 10}}),
+            serialize_product(Product{0, {10, 0, 0, 0, 0, 0, 0, 0}, 10}));
+}
+
+TEST(Output, DifferentOrdering) {
+  auto output_a = Output{
+      /* dimensions */ {10, 10},
+      /*turns*/ 50,
+      /*time*/ 120,
+      /*products*/
+      {Product{0, {10, 10, 0, 0, 0, 0, 0, 0}, 10}, Product{1, {0, 0, 10, 10, 0, 0, 0, 0}, 10}},
+      /*landscape*/
+      {Obstacle{{8, 0}, {4, 11}}, Obstacle{{3, 12}, {15, 3}}, Deposit{{0, 0}, {8, 9}, 0}},
+      /*placeables*/
+      {Mine{{8, 0}, UP_TO_DOWN}, Factory{{3, 12}, 2}}};
+  auto output_b = Output{
+      /* dimensions */ {10, 10},
+      /*turns*/ 50,
+      /*time*/ 120,
+      /*products*/
+      {Product{1, {0, 0, 10, 10, 0, 0, 0, 0}, 10}, Product{0, {10, 10, 0, 0, 0, 0, 0, 0}, 10}},
+      /*landscape*/
+      {Obstacle{{8, 0}, {4, 11}}, Obstacle{{3, 12}, {15, 3}}, Deposit{{0, 0}, {8, 9}, 0}},
+      /*placeables*/
+      {Factory{{3, 12}, 2}, Mine{{8, 0}, UP_TO_DOWN}}};
+
+  EXPECT_EQ(output_a, output_b);
 }
