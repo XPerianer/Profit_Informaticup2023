@@ -22,7 +22,6 @@ Checks: >
     hicpp-no-assembler,
     hicpp-signed-bitwise,
     -cert-*,
-    cert-dcl21-cpp,
     cert-dcl50-cpp,
     cert-dcl58-cpp,
     cert-env33-c,
@@ -87,6 +86,8 @@ Checks: >
 # google-readability-todo                               we don't require a username / issue number with TODOs (for now)
 # *-use-nullptr                                         sadly gets triggered by defaulted spaceship comparison operators (see https://github.com/llvm/llvm-project/issues/55919)
 # google-upgrade-googletest-case                        slow, we don't need it
+# cert-dcl21-cpp                                        we want to return non-const values.
+
 
 
 

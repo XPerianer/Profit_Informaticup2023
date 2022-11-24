@@ -102,26 +102,19 @@ OccupancyMap createOccupancyMap(const parsing::Input& input) {
   OccupancyMap occupancyMap(input.dimensions);
   for (const auto& object : input.objects) {
     std::visit(utils::overloaded{[&](const Deposit& deposit) {
-                                   const auto top_left = deposit.handle;
-                                   const auto bottom_right = utils::bottom_right(deposit);
-
-                                   for (CoordT y = top_left.y(); y < bottom_right.y(); ++y) {
-                                     for (CoordT x = top_left.x(); x < bottom_right.x(); ++x) {
-                                       if (utils::is_border({x, y}, top_left, bottom_right)) {
-                                         occupancyMap.set({x, y}, CellOccupancy::OUTPUT);
-                                       } else {
-                                         occupancyMap.set({x, y}, CellOccupancy::BLOCKED);
-                                       }
+                                   const Rectangle rect = Rectangle::from(deposit);
+                                   for (Vec2 coordinate : rect) {
+                                     if (is_on_border(rect, coordinate)) {
+                                       occupancyMap.set(coordinate, CellOccupancy::OUTPUT);
+                                     } else {
+                                       occupancyMap.set(coordinate, CellOccupancy::BLOCKED);
                                      }
                                    }
                                  },
                                  [&](const Obstacle& obstacle) {
-                                   const auto bottom_right = utils::bottom_right(obstacle);
-                                   for (CoordT y = obstacle.handle.y(); y < bottom_right.y(); ++y) {
-                                     for (CoordT x = obstacle.handle.x(); x < bottom_right.x();
-                                          ++x) {
-                                       occupancyMap.set({x, y}, CellOccupancy::BLOCKED);
-                                     }
+                                   const Rectangle rect = Rectangle::from(obstacle);
+                                   for (Vec2 coordinate : rect) {
+                                     occupancyMap.set(coordinate, CellOccupancy::BLOCKED);
                                    }
                                  }},
                object);
@@ -146,12 +139,13 @@ DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupanci
   // (Feld-Wert) Schritten, und hier dürfen Inputs für Conveyors/Combiners hin
   std::queue<Vec2> reached_ingestion_fields;
 
-  const Vec2 bottom_right = utils::bottom_right(deposit);
-  for (CoordT y = deposit.handle.y(); y < bottom_right.y(); ++y) {
+  Rectangle deposit_rect = Rectangle::from(deposit);
+
+  for (Vec2 egress : left_border(deposit_rect)) {
     // Check left side
     for (auto rotation : rotations) {
       // Check if mine can be placed
-      auto mine = Mine::with_ingress({deposit.handle.x() - 1, y}, static_cast<Rotation>(rotation));
+      auto mine = Mine::with_ingress(egress - Vec2{1, 0}, static_cast<Rotation>(rotation));
       if (collides(mine, occupancies)) {
         continue;
       }
