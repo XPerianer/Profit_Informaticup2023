@@ -6,12 +6,17 @@
 #include "assert.hpp"
 
 struct CoordT {
-  using UnderlyingT = uint8_t;
+  using UnderlyingT = int8_t;
 
   CoordT() = default;
-  CoordT(UnderlyingT value)  // NOLINT(google-explicit-constructor): We want instances to be
-                             // implicitly constructible to allow arithmetic with integer literals.
-      : value_{value} {}
+
+  template <std::integral T>
+  CoordT(T value)  // NOLINT(google-explicit-constructor): We want instances to be implicitly
+                   // constructible to allow arithmetic with integer literals.
+      : value_{static_cast<UnderlyingT>(value)} {
+    DEBUG_ASSERT(value >= std::numeric_limits<CoordT::UnderlyingT>::min(), "Coordinate overflow");
+    DEBUG_ASSERT(value <= std::numeric_limits<CoordT::UnderlyingT>::max(), "Coordinate overflow");
+  }
 
   template <std::integral T>
   explicit operator T() const {
@@ -35,21 +40,11 @@ struct CoordT {
 };
 
 inline CoordT operator+(CoordT lhs, CoordT rhs) {
-  int result = static_cast<CoordT::UnderlyingT>(lhs) + static_cast<CoordT::UnderlyingT>(rhs);
-  DEBUG_ASSERT(result >= std::numeric_limits<CoordT::UnderlyingT>::min(),
-               "Coordinate arithmetic overflow");
-  DEBUG_ASSERT(result <= std::numeric_limits<CoordT::UnderlyingT>::max(),
-               "Coordinate arithmetic overflow");
-  return static_cast<CoordT>(result);
+  return CoordT{static_cast<CoordT::UnderlyingT>(lhs) + static_cast<CoordT::UnderlyingT>(rhs)};
 }
 
 inline CoordT operator-(CoordT lhs, CoordT rhs) {
-  int result = static_cast<CoordT::UnderlyingT>(lhs) - static_cast<CoordT::UnderlyingT>(rhs);
-  DEBUG_ASSERT(result >= std::numeric_limits<CoordT::UnderlyingT>::min(),
-               "Coordinate arithmetic overflow");
-  DEBUG_ASSERT(result <= std::numeric_limits<CoordT::UnderlyingT>::max(),
-               "Coordinate arithmetic overflow");
-  return static_cast<CoordT>(result);
+  return CoordT{static_cast<CoordT::UnderlyingT>(lhs) - static_cast<CoordT::UnderlyingT>(rhs)};
 }
 
 class Vec2 {
