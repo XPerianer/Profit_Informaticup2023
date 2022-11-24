@@ -12,13 +12,9 @@ class Requirements {
  public:
   Requirements() = default;
 
-  template <typename ContainerT>
-  Requirements(const ContainerT& resource_counts) {
-    ASSERT(resource_counts.size() == RESOURCE_TYPE_COUNT, "Invalid count of resources");
-    std::copy(resource_counts.begin(), resource_counts.end(), requirements_.begin());
-  }
+  Requirements(std::initializer_list<int> resource_counts) : Requirements(std::vector<int>(resource_counts)) {}
 
-  Requirements(std::initializer_list<int> resource_counts) {
+  explicit Requirements(std::vector<int> resource_counts) {
     ASSERT(resource_counts.size() == RESOURCE_TYPE_COUNT, "Invalid count of resources");
     std::copy(resource_counts.begin(), resource_counts.end(), requirements_.begin());
   }
