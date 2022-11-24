@@ -37,10 +37,15 @@ enable_testing()
 add_subdirectory(tests)
 
 
-##### FORMAT ####
-file(GLOB_RECURSE ALL_SOURCE_FILES src/*.cpp include/*.hpp tests/*.cpp)
+##### FORMATTING AND LINTING ####
+file(GLOB_RECURSE ALL_HEADER_FILES include/*.hpp)
+file(GLOB_RECURSE ALL_CPP_FILES src/*.cpp tests/*.cpp)
+list(APPEND ALL_SOURCE_FILES ${ALL_HEADER_FILES} ${ALL_CPP_FILES})
 
 add_custom_target(clang-format COMMAND clang-format -style=file -i${INCLUDE_DIRECTORIES} ${ALL_SOURCE_FILES})
 add_custom_target(clang-format-check COMMAND clang-format -style=file -i${INCLUDE_DIRECTORIES} ${ALL_SOURCE_FILES} --dry-run -Werror)
 
+add_custom_target(clang-tidy COMMAND run-clang-tidy -quiet ${ALL_CPP_FILES})
+
+add_custom_target(tidy DEPENDS clang-tidy)
 add_custom_target(format DEPENDS clang-format)

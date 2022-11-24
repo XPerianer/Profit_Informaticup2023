@@ -1,6 +1,5 @@
 [![Format](https://github.com/XPerianer/Profit_Informaticup2023/actions/workflows/clang-format.yml/badge.svg)](https://github.com/XPerianer/Profit_Informaticup2023/actions/workflows/clang-format.yml)
 [![Clang-Tidy](https://github.com/XPerianer/Profit_Informaticup2023/actions/workflows/clang-tidy.yml/badge.svg)](https://github.com/XPerianer/Profit_Informaticup2023/actions/workflows/clang-tidy.yml)
-[![Build](https://github.com/XPerianer/Profit_Informaticup2023/actions/workflows/build.yml/badge.svg)](https://github.com/XPerianer/Profit_Informaticup2023/actions/workflows/build.yml)
 [![Tests](https://github.com/XPerianer/Profit_Informaticup2023/actions/workflows/test.yml/badge.svg)](https://github.com/XPerianer/Profit_Informaticup2023/actions/workflows/test.yml)
 
 # Solution of Team uwunauten for the Informaticup 2023
