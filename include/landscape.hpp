@@ -2,13 +2,14 @@
 
 #include <variant>
 
+#include "resource_type.hpp"
 #include "utils.hpp"
 
 struct Deposit {
   Vec2 handle;
   Vec2 dimensions;
 
-  uint8_t subtype;
+  ResourceType type{};
   bool operator==(const Deposit& other) const = default;
 };
 

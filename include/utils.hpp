@@ -1,47 +1,26 @@
 #pragma once
-#include <array>
-#include <cstddef>
-#include <cstdint>
+#include <concepts>
 
-enum Rotation {
-  LEFT_TO_RIGHT = 0,
-  UP_TO_DOWN = 1,
-  RIGHT_TO_LEFT = 2,
-  DOWN_TO_UP = 3,
+#include "vec2.hpp"
+
+namespace utils {
+
+template <typename T>
+concept ThingWithHandleAndDimensions = requires(T thing) {
+  { thing.handle } -> std::convertible_to<Vec2>;
+  { thing.dimensions } -> std::convertible_to<Vec2>;
 };
 
-constexpr size_t FIELD_PADDING = 6;
+template <ThingWithHandleAndDimensions ThingT>
+Vec2 bottom_right(ThingT thing) {
+  return {thing.handle.x() + thing.dimensions.width(),
+          thing.handle.y() + thing.dimensions.height()};
+}
 
-using CoordT = int8_t;
-
-class Vec2 {
- public:
-  Vec2() = default;
-  // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-  Vec2(CoordT arg1, CoordT arg2) : x_{arg1}, y_{arg2} {}
-
-  [[nodiscard]] CoordT x() const { return x_; };
-  [[nodiscard]] CoordT y() const { return y_; };
-
-  [[nodiscard]] CoordT width() const { return x_; };
-  [[nodiscard]] CoordT height() const { return y_; };
-
-  bool operator==(const Vec2& other) const = default;
-
- private:
-  CoordT x_;
-  CoordT y_;
-};
-
-// TODO(Richard): Namespace / Code Structuring überlegen?
-struct Product {
-  static constexpr size_t resource_type_count = 8;
-
-  int8_t subtype;
-  std::array<int32_t, resource_type_count> requirements;
-  int32_t points;
-  bool operator==(const Product& other) const = default;
-};
+inline bool is_border(Vec2 coordinate, Vec2 top_left, Vec2 bottom_right) {
+  return coordinate.x() == top_left.x() || coordinate.x() == bottom_right.x() - 1 ||
+         coordinate.y() == top_left.y() || coordinate.y() == bottom_right.y() - 1;
+}
 
 template <class... Ts>
 struct overloaded : Ts... {  // NOLINT(fuchsia-multiple-inheritance)
@@ -49,3 +28,5 @@ struct overloaded : Ts... {  // NOLINT(fuchsia-multiple-inheritance)
 };
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
+
+}  // namespace utils

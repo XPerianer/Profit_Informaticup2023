@@ -3,25 +3,22 @@
 
 #include "utils.hpp"
 
-template <typename T>
+template <typename T, T InitialValue = T{}>
 class TwoDimensionalVector {
  public:
   explicit TwoDimensionalVector(Vec2 dimensions)
-      : data_(dimensions.width() * dimensions.height()), width_{dimensions.width()} {}
+      : data_(static_cast<size_t>(dimensions.width()) * static_cast<size_t>(dimensions.height()),
+              InitialValue),
+        dimensions_{dimensions} {}
 
-  T& operator[](Vec2 index) { return data_[index.y() * width_ + index.y()]; }
+  [[nodiscard]] Vec2 dimensions() const { return dimensions_; }
+
+  T& operator[](Vec2 index) {
+    return data_[static_cast<size_t>(index.y()) * static_cast<size_t>(dimensions_.width()) +
+                 static_cast<size_t>(index.y())];
+  }
 
  private:
   std::vector<T> data_;
-  size_t width_;
-};
-
-template <size_t OffsetX, size_t OffsetY, typename ContainerT>
-class OffsetAccess {
- public:
-  explicit OffsetAccess(ContainerT container) : data_{container} {};
-  auto& operator[](Vec2 index) { return data_[{index.x() - OffsetX, index.y() - OffsetY}]; }
-
- private:
-  ContainerT data_;
+  Vec2 dimensions_;
 };

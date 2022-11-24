@@ -9,7 +9,10 @@ Checks: >
     -fuchsia-statically-constructed-objects,
     -fuchsia-trailing-return,
     -bugprone-exception-escape,
+    -misc-non-private-member-variables-in-classes,
 
 CheckOptions:
   - key: readability-identifier-length.IgnoredVariableNames
+    value: x|y|i|j
+  - key: readability-identifier-length.IgnoredLoopCounterNames
     value: x|y|i|j

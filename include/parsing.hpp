@@ -9,13 +9,14 @@
 #include "assert.hpp"
 #include "landscape.hpp"
 #include "placeable.hpp"
+#include "product.hpp"
 
 namespace parsing {
 
 struct Input {
   Vec2 dimensions;
-  int32_t turns;
-  int32_t time;
+  int32_t turns = 0;
+  int32_t time = 0;
   std::vector<Product> products;
   std::vector<LandscapeObject> objects;
 
@@ -29,8 +30,8 @@ struct Input {
 
 inline LandscapeObject parse_object(const nlohmann::json& input) {
   std::string type = input["type"];
-  Vec2 coordinate = {input["x"], input["y"]};
-  Vec2 dimensions = {input["width"], input["height"]};
+  Vec2 coordinate = {static_cast<int>(input["x"]), static_cast<int>(input["y"])};
+  Vec2 dimensions = {static_cast<int>(input["width"]), static_cast<int>(input["height"])};
 
   if (type == "deposit") {
     return Deposit{coordinate, dimensions, input["subtype"]};
@@ -47,12 +48,16 @@ inline Input parse(std::istream& stream) {
   stream >> json_input;
 
   Input input;
-  input.dimensions = Vec2{json_input["width"], json_input["height"]};
+  input.dimensions =
+      Vec2{static_cast<int>(json_input["width"]), static_cast<int>(json_input["height"])};
   input.turns = json_input["turns"];
+
   for (const auto& product_json : json_input["products"]) {
-    input.products.push_back(
-        {product_json["subtype"], product_json["resources"], product_json["points"]});
+    auto type = static_cast<ProductType>(static_cast<int>(product_json["subtype"]));
+    Requirements requirements(static_cast<std::vector<int>>(product_json["resources"]));
+    input.products.push_back({type, requirements, product_json["points"]});
   }
+
   for (const auto& object_json : json_input["objects"]) {
     input.objects.push_back(parse_object(object_json));
   }
