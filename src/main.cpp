@@ -161,7 +161,7 @@ DistanceMap distances_from(const Deposit &deposit, const OccupancyMap &occupanci
     for (auto rotation : rotations) {
       // Check if mine can be placed
       auto mine = Mine::with_ingress({deposit.handle.x() - 1, y}, static_cast<Rotation>(rotation));
-      if(collides(mine, occupancies)) {
+      if (collides(mine, occupancies)) {
         continue;
       }
     }
