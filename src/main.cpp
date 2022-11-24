@@ -59,7 +59,7 @@ namespace production_realization {
 //    Überlegung: Kürzester Weg könnte kritisches Feld belagern, was uns später nicht erlaubt,
 //    weitere Pipelines zu bauen Evtl explizite Kreuzungen setzen?
 
-bool attempt_realize(const std::vector<Deposit>& deposits, Factory::TypeT factory_type) {
+bool attempt_realize(const std::vector<Deposit>& /*deposits*/, Factory::TypeT /*factory_type*/) {
   return false;
 }
 
@@ -73,9 +73,9 @@ enum FieldOccupancy {
 
 using OccupancyMap = TwoDimensionalVector<FieldOccupancy>;
 
-std::optional<std::vector<PlaceableObject>> connect(Vec2 egress_start_field,
-                                                    Vec2 ingress_target_field,
-                                                    const OccupancyMap& occupancies) {
+std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
+                                                    Vec2 /*ingress_target_field*/,
+                                                    const OccupancyMap& /*occupancies*/) {
   // Breitensuche, von Start, immer mit allen 4 (Conveyor3) + 4 (Conveyor4) + 4 (Combiner)
   // Bewegungsmöglichkeiten
   return std::nullopt;

@@ -8,3 +8,4 @@ Checks: >
     -fuchsia-overloaded-operator,
     -fuchsia-statically-constructed-objects,
     -fuchsia-trailing-return,
+    -bugprone-exception-escape,
