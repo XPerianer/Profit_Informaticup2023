@@ -12,8 +12,8 @@
 #include "two_dimensional_vector.hpp"
 #include "utils.hpp"
 
-// NOLINTNEXTLINE(bugprone-exception-escape): For now, we allow exception escape (causing std::terminate -> error shown)
-int main() {
+// For now, we allow exception escape (causing std::terminate -> error shown)
+int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
 
   // TODO: lots of calculations with input
@@ -66,22 +66,22 @@ namespace production_realization {
 //    Überlegung: Kürzester Weg könnte kritisches Feld belagern, was uns später nicht erlaubt,
 //    weitere Pipelines zu bauen Evtl explizite Kreuzungen setzen?
 
-bool attempt_realize(const std::vector<Deposit> & /*deposits*/, FactoryType /*factory_type*/) {
+bool attempt_realize(const std::vector<Deposit>& /*deposits*/, FactoryType /*factory_type*/) {
   // minen platzieren
   // fabrik platzieren
   // verbinden
   return false;
 }
 
-void select_deposits_and_products(const parsing::Input &input) {
+void select_deposits_and_products(const parsing::Input& input) {
   // Simplest algorithm: Try all products one by one
-  for (const auto &product : input.products) {
-    const auto &requirements = product.requirements;
+  for (const auto& product : input.products) {
+    const auto& requirements = product.requirements;
     const std::vector<Deposit> input_deposits = get_deposits(input);
 
     std::vector<Deposit> useful_deposits;
     std::copy_if(input_deposits.begin(), input_deposits.end(), std::back_inserter(useful_deposits),
-                 [&](const Deposit &deposit) { return requirements[deposit.type] != 0; });
+                 [&](const Deposit& deposit) { return requirements[deposit.type] != 0; });
 
     // Now try if we can make this work
     attempt_realize(useful_deposits, product.type);
@@ -98,10 +98,10 @@ enum class CellOccupancy {
 
 using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy::EMPTY>;
 
-OccupancyMap createOccupancyMap(const parsing::Input &input) {
+OccupancyMap createOccupancyMap(const parsing::Input& input) {
   OccupancyMap occupancyMap(input.dimensions);
-  for (const auto &object : input.objects) {
-    std::visit(utils::overloaded{[&](const Deposit &deposit) {
+  for (const auto& object : input.objects) {
+    std::visit(utils::overloaded{[&](const Deposit& deposit) {
                                    const auto top_left = deposit.handle;
                                    const auto bottom_right = utils::bottom_right(deposit);
 
@@ -115,7 +115,7 @@ OccupancyMap createOccupancyMap(const parsing::Input &input) {
                                      }
                                    }
                                  },
-                                 [&](const Obstacle &obstacle) {
+                                 [&](const Obstacle& obstacle) {
                                    const auto bottom_right = utils::bottom_right(obstacle);
                                    for (CoordT y = obstacle.handle.y(); y < bottom_right.y(); ++y) {
                                      for (CoordT x = obstacle.handle.x(); x < bottom_right.x();
@@ -129,7 +129,7 @@ OccupancyMap createOccupancyMap(const parsing::Input &input) {
   return occupancyMap;
 }
 
-bool collides(const Mine & /*mine*/, const OccupancyMap & /*occupancies*/) {
+bool collides(const Mine& /*mine*/, const OccupancyMap& /*occupancies*/) {
   // TODO
   return false;
 }
@@ -139,7 +139,7 @@ constexpr DistanceT NOT_REACHABLE = -1;
 
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
 
-DistanceMap distances_from(const Deposit &deposit, const OccupancyMap &occupancies) {
+DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancies) {
   DistanceMap distances(occupancies.dimensions());
 
   // Invariante: Für Felder, die in der queue sind, gilt: Dieses Feld haben wir erreicht, in
@@ -165,7 +165,7 @@ DistanceMap distances_from(const Deposit &deposit, const OccupancyMap &occupanci
 
 std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
                                                     Vec2 /*ingress_target_field*/,
-                                                    const OccupancyMap & /*occupancies*/) {
+                                                    const OccupancyMap& /*occupancies*/) {
   // Breitensuche, von Start, immer mit allen 4 (Conveyor3) + 4 (Conveyor4) + 4 (Combiner)
   // Bewegungsmöglichkeiten
   return std::nullopt;

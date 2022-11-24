@@ -12,7 +12,8 @@ class Requirements {
  public:
   Requirements() = default;
 
-  Requirements(std::initializer_list<int> resource_counts) : Requirements(std::vector<int>(resource_counts)) {}
+  Requirements(std::initializer_list<int> resource_counts)
+      : Requirements(std::vector<int>(resource_counts)) {}
 
   explicit Requirements(std::vector<int> resource_counts) {
     ASSERT(resource_counts.size() == RESOURCE_TYPE_COUNT, "Invalid count of resources");
@@ -20,12 +21,12 @@ class Requirements {
   }
 
   int32_t& operator[](ResourceType type) {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index): Enum value is guaranteed to be in-bounds
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index): Enum value is in bounds.
     return requirements_[static_cast<size_t>(type)];
   }
 
   const int32_t& operator[](ResourceType type) const {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index): Enum value is guaranteed to be in-bounds
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index): Enum value is in bounds.
     return requirements_[static_cast<size_t>(type)];
   }
 

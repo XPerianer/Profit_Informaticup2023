@@ -30,9 +30,9 @@ struct Input {
 
 inline std::vector<Deposit> get_deposits(const Input& input) {
   std::vector<Deposit> deposits;
-  for (auto const &object : input.objects) {
-    std::visit(utils::overloaded{[&](const Deposit &deposit) { deposits.push_back(deposit); },
-                                 [](const Obstacle &obstacle) {}},
+  for (auto const& object : input.objects) {
+    std::visit(utils::overloaded{[&](const Deposit& deposit) { deposits.push_back(deposit); },
+                                 [](const Obstacle& obstacle) {}},
                object);
   }
   return deposits;
