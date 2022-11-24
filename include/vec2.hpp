@@ -9,7 +9,9 @@ struct CoordT {
   using UnderlyingT = uint8_t;
 
   CoordT() = default;
-  CoordT(UnderlyingT value) : value_{value} {}
+  CoordT(UnderlyingT value)  // NOLINT(google-explicit-constructor): We want instances to be
+                             // implicitly constructible to allow arithmetic with integer literals.
+      : value_{value} {}
 
   template <std::integral T>
   explicit operator T() const {
@@ -53,7 +55,7 @@ inline CoordT operator-(CoordT lhs, CoordT rhs) {
 class Vec2 {
  public:
   Vec2() = default;
-  // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+  // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): Order for x and y is pretty clear
   Vec2(CoordT arg1, CoordT arg2) : x_{arg1}, y_{arg2} {}
 
   [[nodiscard]] CoordT x() const { return x_; };

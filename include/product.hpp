@@ -19,9 +19,13 @@ class Requirements {
     std::copy(resource_counts.begin(), resource_counts.end(), requirements_.begin());
   }
 
-  int32_t& operator[](ResourceType type) { return requirements_[static_cast<size_t>(type)]; }
+  int32_t& operator[](ResourceType type) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index): Enum value is guaranteed to be in-bounds
+    return requirements_[static_cast<size_t>(type)];
+  }
 
   const int32_t& operator[](ResourceType type) const {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index): Enum value is guaranteed to be in-bounds
     return requirements_[static_cast<size_t>(type)];
   }
 

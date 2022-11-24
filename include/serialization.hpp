@@ -27,7 +27,7 @@ struct Output {
 };
 
 template <class... Ts>
-struct overloaded : Ts... {  // NOLINT(fuchsia-multiple-inheritance)
+struct overloaded : Ts... {
   using Ts::operator()...;
 };
 template <class... Ts>

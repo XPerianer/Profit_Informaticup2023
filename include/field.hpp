@@ -13,7 +13,7 @@ class Field {
  public:
   explicit Field(Vec2 dimensions) : dimensions_{dimensions}, map_(dimensions) {}
 
-  CellT at(Vec2 coordinates) const {
+  [[nodiscard]] CellT at(Vec2 coordinates) const {
     if (coordinates.x() < 0 || coordinates.y() < 0 || coordinates.x() >= dimensions_.width() ||
         coordinates.y() >= dimensions_.height()) {
       return OutOfBoundsValue;
@@ -28,6 +28,7 @@ class Field {
                  "Out-of-bounds write on field");
     map_[coordinates] = value;
   }
+
   [[nodiscard]] Vec2 dimensions() const { return dimensions_; }
 
  private:

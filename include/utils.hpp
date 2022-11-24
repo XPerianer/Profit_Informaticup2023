@@ -23,7 +23,7 @@ inline bool is_border(Vec2 coordinate, Vec2 top_left, Vec2 bottom_right) {
 }
 
 template <class... Ts>
-struct overloaded : Ts... {  // NOLINT(fuchsia-multiple-inheritance)
+struct overloaded : Ts... {
   using Ts::operator()...;
 };
 template <class... Ts>

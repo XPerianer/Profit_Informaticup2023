@@ -12,6 +12,7 @@
 #include "two_dimensional_vector.hpp"
 #include "utils.hpp"
 
+// NOLINTNEXTLINE(bugprone-exception-escape): For now, we allow exception escape (causing std::terminate -> error shown)
 int main() {
   parsing::Input input = parsing::parse(std::cin);
 
