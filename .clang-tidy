@@ -9,3 +9,7 @@ Checks: >
     -fuchsia-statically-constructed-objects,
     -fuchsia-trailing-return,
     -bugprone-exception-escape,
+
+CheckOptions:
+  - key: readability-identifier-length.IgnoredVariableNames
+    value: x|y|i|j
