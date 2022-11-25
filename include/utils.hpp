@@ -1,8 +1,6 @@
 #pragma once
 #include <concepts>
 
-#include "vec2.hpp"
-
 namespace utils {
 
 template <class... Ts>
