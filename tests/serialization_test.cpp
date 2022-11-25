@@ -5,7 +5,7 @@
 #include "constants/example_tasks.hpp"
 #include "constants/rotation.hpp"
 #include "constants/subtype.hpp"
-#include "data_structures/Vec2.hpp"
+#include "data_structures/vec2.hpp"
 #include "product.hpp"
 
 using namespace serialization;

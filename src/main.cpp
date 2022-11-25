@@ -4,7 +4,7 @@
 #include "IO/parsing.hpp"
 #include "IO/serialization.hpp"
 #include "constants/subtype.hpp"
-#include "data_structures/Vec2.hpp"
+#include "data_structures/vec2.hpp"
 #include "placeable.hpp"
 #include "two_dimensional_vector.hpp"
 

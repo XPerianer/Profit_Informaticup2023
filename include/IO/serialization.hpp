@@ -1,6 +1,6 @@
 #include <nlohmann/json.hpp>
 
-#include "data_structures/Vec2.hpp"
+#include "data_structures/vec2.hpp"
 #include "landscape.hpp"
 #include "parsing.hpp"
 #include "placeable.hpp"

@@ -3,7 +3,7 @@
 #include <variant>
 
 #include "constants/subtype.hpp"
-#include "data_structures/Vec2.hpp"
+#include "data_structures/vec2.hpp"
 
 struct Deposit {
   Vec2 handle;

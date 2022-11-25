@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "assert.hpp"
-#include "data_structures/Vec2.hpp"
+#include "data_structures/vec2.hpp"
 #include "landscape.hpp"
 #include "placeable.hpp"
 #include "product.hpp"
