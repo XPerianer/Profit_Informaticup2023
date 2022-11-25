@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "utils.hpp"
+#include "data_structures/Vec2.hpp"
 
 template <typename T>
 class TwoDimensionalVector {

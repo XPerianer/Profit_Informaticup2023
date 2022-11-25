@@ -7,15 +7,17 @@
 #include <vector>
 
 #include "assert.hpp"
+#include "data_structures/Vec2.hpp"
 #include "landscape.hpp"
 #include "placeable.hpp"
+#include "product.hpp"
 
 namespace parsing {
 
 struct Input {
   Vec2 dimensions;
-  int32_t turns;
-  int32_t time;
+  int32_t turns = 0;
+  int32_t time = 0;
   std::vector<Product> products;
   std::vector<LandscapeObject> objects;
 
@@ -50,8 +52,9 @@ inline Input parse(std::istream& stream) {
   input.dimensions = Vec2{json_input["width"], json_input["height"]};
   input.turns = json_input["turns"];
   for (const auto& product_json : json_input["products"]) {
-    input.products.push_back(
-        {product_json["subtype"], product_json["resources"], product_json["points"]});
+    auto type = static_cast<Subtype>(static_cast<int>(product_json["subtype"]));
+    Requirements requirements(static_cast<std::vector<int>>(product_json["resources"]));
+    input.products.push_back({type, requirements, product_json["points"]});
   }
   for (const auto& object_json : json_input["objects"]) {
     input.objects.push_back(parse_object(object_json));

@@ -1,11 +1,12 @@
 #include <iostream>
 #include <vector>
 
-#include "parsing.hpp"
+#include "IO/parsing.hpp"
+#include "IO/serialization.hpp"
+#include "constants/subtype.hpp"
+#include "data_structures/Vec2.hpp"
 #include "placeable.hpp"
-#include "serialization.hpp"
 #include "two_dimensional_vector.hpp"
-#include "utils.hpp"
 
 int main() {
   parsing::Input input = parsing::parse(std::cin);
@@ -59,7 +60,7 @@ namespace production_realization {
 //    Überlegung: Kürzester Weg könnte kritisches Feld belagern, was uns später nicht erlaubt,
 //    weitere Pipelines zu bauen Evtl explizite Kreuzungen setzen?
 
-bool attempt_realize(const std::vector<Deposit>& /*deposits*/, Factory::TypeT /*factory_type*/) {
+bool attempt_realize(const std::vector<Deposit>& /*deposits*/, Subtype /*factory_type*/) {
   return false;
 }
 

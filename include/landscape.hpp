@@ -2,13 +2,14 @@
 
 #include <variant>
 
-#include "utils.hpp"
+#include "constants/subtype.hpp"
+#include "data_structures/Vec2.hpp"
 
 struct Deposit {
   Vec2 handle;
   Vec2 dimensions;
 
-  uint8_t subtype;
+  Subtype subtype{};
   bool operator==(const Deposit& other) const = default;
 };
 
