@@ -1,5 +1,7 @@
 HeaderFilterRegex: '(src/.*\.hpp)|(test/\.*.hpp)|(include/.*\.hpp)'
 
+WarningsAsErrors: '*'
+
 Checks: >
     *,
     -abseil-*,

@@ -6,6 +6,8 @@
 #include "placeable.hpp"
 #include "utils.hpp"
 
+namespace profit {
+
 namespace serialization {
 
 struct Output {
@@ -131,3 +133,4 @@ inline nlohmann::json serialize_detailed(const Output& output) {
 }
 
 }  // namespace serialization
+}//

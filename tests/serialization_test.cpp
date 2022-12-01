@@ -5,6 +5,7 @@
 #include "example_tasks.hpp"
 #include "utils.hpp"
 
+using namespace profit;
 using namespace serialization;
 
 TEST(Serialization, EmptyInput) { EXPECT_EQ(nlohmann::json::array(), serialize({})); }

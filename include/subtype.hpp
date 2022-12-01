@@ -1,6 +1,8 @@
 #pragma once
 #include <cstddef>
 
+namespace profit {
+
 enum class Subtype {
   TYPE0 = 0,
   TYPE1 = 1,
@@ -13,3 +15,4 @@ enum class Subtype {
 };
 
 constexpr size_t SUBTYPE_COUNT = 8;
+}

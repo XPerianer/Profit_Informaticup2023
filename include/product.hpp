@@ -8,6 +8,8 @@
 #include "assert.hpp"
 #include "resource_type.hpp"
 
+namespace profit {
+
 class Requirements {
  public:
   Requirements() = default;
@@ -48,3 +50,4 @@ struct Product {
   int32_t points{};
   bool operator==(const Product& other) const = default;
 };
+}

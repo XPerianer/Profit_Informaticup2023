@@ -11,6 +11,8 @@
 #include "placeable.hpp"
 #include "product.hpp"
 
+namespace profit {
+
 namespace parsing {
 
 struct Input {
@@ -77,3 +79,4 @@ inline Input parse(std::istream& stream) {
   return input;
 }
 }  // namespace parsing
+}  // namespace profit

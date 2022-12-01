@@ -9,6 +9,8 @@
 #include "subtype.hpp"
 #include "utils.hpp"
 
+namespace profit {
+
 using geometry::Rectangle;
 using geometry::Vec2;
 
@@ -78,3 +80,4 @@ struct Mine {
 };
 
 using PlaceableObject = std::variant<Combiner, Conveyor3, Conveyor4, Factory, Mine>;
+}

@@ -8,6 +8,7 @@
 #include "example_tasks.hpp"
 #include "utils.hpp"
 
+using namespace profit;
 using namespace parsing;
 
 TEST(Parsing, ParseTaskOne) {

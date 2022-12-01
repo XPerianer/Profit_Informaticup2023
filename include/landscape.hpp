@@ -7,6 +7,8 @@
 #include "resource_type.hpp"
 #include "utils.hpp"
 
+namespace profit {
+
 using geometry::Rectangle;
 using geometry::Vec2;
 
@@ -32,4 +34,5 @@ inline Rectangle as_rectangle(const Deposit& deposit) {
 
 inline Rectangle as_rectangle(const Obstacle& obstacle) {
   return Rectangle::from_top_left_and_dimensions(obstacle.handle, obstacle.dimensions);
+}
 }

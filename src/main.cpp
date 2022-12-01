@@ -12,7 +12,8 @@
 #include "serialization.hpp"
 #include "utils.hpp"
 
-using geometry::Rectangle;
+using namespace profit;
+using namespace geometry;
 
 // For now, we allow exception escape (causing std::terminate -> error shown)
 int main() {  // NOLINT(bugprone-exception-escape)

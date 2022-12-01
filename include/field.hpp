@@ -4,6 +4,8 @@
 #include "geometry/vec2.hpp"
 #include "utils.hpp"
 
+namespace profit {
+
 /*
  * A helper class that allows us to look up information per cell on a play field.
  * To simplify our algorithms, we allow access out-of-bounds and always return a specific value
@@ -36,3 +38,4 @@ class Field {
   geometry::Vec2 dimensions_;
   geometry::TwoDimensionalVector<CellT, InitialValue> map_;
 };
+}  // namespace profit
