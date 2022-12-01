@@ -104,28 +104,28 @@ enum class CellOccupancy {
 
 using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy::EMPTY>;
 
-inline OccupancyMap createOccupancyMap(const parsing::Input& input) {
-  OccupancyMap occupancyMap(input.dimensions);
+inline OccupancyMap create_occupancy_map(const parsing::Input& input) {
+  OccupancyMap occupancy_map(input.dimensions);
   for (const auto& object : input.objects) {
-    std::visit(utils::overloaded{[&](const Deposit& deposit) {
+    std::visit(utils::Overloaded{[&](const Deposit& deposit) {
                                    const auto rect = as_rectangle(deposit);
                                    for (Vec2 coordinate : rect) {
                                      if (is_on_border(rect, coordinate)) {
-                                       occupancyMap.set(coordinate, CellOccupancy::OUTPUT);
+                                       occupancy_map.set(coordinate, CellOccupancy::OUTPUT);
                                      } else {
-                                       occupancyMap.set(coordinate, CellOccupancy::BLOCKED);
+                                       occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
                                      }
                                    }
                                  },
                                  [&](const Obstacle& obstacle) {
                                    const auto rect = as_rectangle(obstacle);
                                    for (Vec2 coordinate : rect) {
-                                     occupancyMap.set(coordinate, CellOccupancy::BLOCKED);
+                                     occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
                                    }
                                  }},
                object);
   }
-  return occupancyMap;
+  return occupancy_map;
 }
 
 inline bool collides(const Mine& /*mine*/, const OccupancyMap& /*occupancies*/) {

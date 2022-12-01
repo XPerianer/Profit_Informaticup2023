@@ -26,15 +26,8 @@ struct Output {
   }
 };
 
-template <class... Ts>
-struct overloaded : Ts... {
-  using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
 inline nlohmann::json serialize_object(const PlaceableObject& object) {
-  return std::visit(overloaded{
+  return std::visit(utils::Overloaded{
                         [&](const Combiner& combiner) -> nlohmann::json {
                           return {{"type", "combiner"},
                                   {"x", static_cast<int>(combiner.handle.x())},
@@ -70,7 +63,7 @@ inline nlohmann::json serialize_object(const PlaceableObject& object) {
 }
 
 inline nlohmann::json serialize_object(const LandscapeObject& object) {
-  return std::visit(overloaded{
+  return std::visit(utils::Overloaded{
                         [&](const Deposit& deposit) -> nlohmann::json {
                           return {{"type", "deposit"},
                                   {"x", static_cast<int>(deposit.handle.x())},
