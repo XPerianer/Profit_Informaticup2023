@@ -22,7 +22,8 @@ struct Coordinate {
   }
 
   template <std::integral T>
-  constexpr explicit operator T() const {
+  // NOLINTNEXTLINE(google-explicit-constructor): We want implicit conversions for arithmetic
+  constexpr operator T() const {
     return value_;
   }
 

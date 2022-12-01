@@ -1,5 +1,6 @@
 #pragma once
 #include <concepts>
+#include <vector>
 
 #include "geometry/vec2.hpp"
 
@@ -80,8 +81,23 @@ constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
          coordinate.y() == rect.top_left().y() || coordinate.y() == rect.bottom_right().y() - 1;
 }
 
-constexpr Rectangle left_border(const Rectangle& rect) {
-  return Rectangle::from_top_left_and_dimensions(rect.top_left(), {1, rect.dimensions().height()});
+/* Cells that are connected a border cell of the rectangle */
+constexpr std::vector<Vec2> outer_connected_border_cells(const Rectangle& rect) {
+  std::vector<Vec2> result(2 * rect.dimensions().width() + 2 * rect.dimensions.height());
+
+  auto it = result.begin();
+
+  for (size_t offset = 0; offset < rect.dimensions.width(); ++offset) {
+    *it++ = rect.handle() + {offset, -1};
+    *it++ = rect.handle() + {offset, rect.dimensions().height() + 1};
+  }
+
+  for (size_t offset = 0; offset < rect.dimensions.height(); ++offset) {
+    *it++ = rect.handle() + {-1, offset};
+    *it++ = rect.handle() + {rect.dimensions().width() + 1, offset};
+  }
+
+  return result;
 }
 
 [[nodiscard]] constexpr Rectangle::Iterator begin(const Rectangle& rect) {

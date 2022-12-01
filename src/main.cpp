@@ -98,8 +98,9 @@ enum class CellOccupancy {
   EMPTY,
   BLOCKED,
   CONVEYOR_CROSSING,
-  INPUT,
-  OUTPUT,
+  INGRESS,
+  RAW_EGRESS,
+  MINED_EGRESS,
 };
 
 using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy::EMPTY>;
@@ -111,7 +112,7 @@ inline OccupancyMap create_occupancy_map(const parsing::Input& input) {
                                    const auto rect = as_rectangle(deposit);
                                    for (Vec2 coordinate : rect) {
                                      if (is_on_border(rect, coordinate)) {
-                                       occupancy_map.set(coordinate, CellOccupancy::OUTPUT);
+                                       occupancy_map.set(coordinate, CellOccupancy::RAW_EGRESS);
                                      } else {
                                        occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
                                      }
@@ -128,9 +129,10 @@ inline OccupancyMap create_occupancy_map(const parsing::Input& input) {
   return occupancy_map;
 }
 
-inline bool collides(const Mine& /*mine*/, const OccupancyMap& /*occupancies*/) {
-  // TODO
-  return false;
+inline bool collides(const Mine& mine, const OccupancyMap& occupancies) {
+  return std::ranges::any_of(mine.occupied_cells(), [&](const Vec2 cell) {
+    return occupancies.at(cell) != CellOccupancy::EMPTY;
+  });
 }
 
 using DistanceT = int16_t;
@@ -138,22 +140,22 @@ constexpr DistanceT NOT_REACHABLE = -1;
 
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
 
+/* Returns an approximation */
 inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancies) {
   DistanceMap distances(occupancies.dimensions());
 
   // Invariante: Für Felder, die in der queue sind, gilt: Dieses Feld haben wir erreicht, in
   // (Feld-Wert) Schritten, und hier dürfen Inputs für Conveyors/Combiners hin
-  std::queue<Vec2> reached_ingestion_fields;
+  std::queue<Vec2> reached_ingress_fields;
 
-  const auto deposit_rect = as_rectangle(deposit);
-
-  for (Vec2 egress : left_border(deposit_rect)) {
-    // Check left side
+  for (Vec2 possible_ingress_location : outer_connected_border_cells(as_rectangle(deposit))) {
     for (auto rotation : ROTATIONS) {
-      // Check if mine can be placed
-      auto mine = Mine::with_ingress(egress - Vec2{1, 0}, static_cast<Rotation>(rotation));
-      if (collides(mine, occupancies)) {
-        continue;
+      auto mine = Mine::with_ingress(possible_ingress_location, rotation);
+      if (!collides(mine, occupancies)) {
+        for (const Vec2 downstream_ingress_cell : mine.downstream_ingress_cells()) {
+          // TODO: Check if ingress field is connected to another egress on the map
+          reached_ingress_fields.emplace(downstream_ingress_cell);
+        }
       }
     }
   }

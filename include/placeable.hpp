@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <variant>
 
 #include "assert.hpp"
@@ -58,25 +59,70 @@ struct Mine {
   Rotation rotation{};
   bool operator==(const Mine& other) const = default;
 
+  constexpr static size_t OCCUPIED_CELL_COUNT = 6;
+
   static Mine with_ingress(Vec2 coordinate, Rotation rotation) {
-    Vec2 handle;
+    Vec2 handle = [&]() {
+      switch (rotation) {
+        case Rotation::LEFT_TO_RIGHT:
+          return Vec2{coordinate.x() + 1, coordinate.y() - 1};
+        case Rotation::UP_TO_DOWN:
+          return Vec2{coordinate.x(), coordinate.y() + 1};
+        case Rotation::RIGHT_TO_LEFT:
+          return Vec2{coordinate.x() - 2, coordinate.y()};
+        case Rotation::DOWN_TO_UP:
+          return Vec2{coordinate.x() - 1, coordinate.y() - 2};
+      }
+    }();
+    return Mine{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr Vec2 egress() const {
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
-        handle = {coordinate.x() + 1, coordinate.y() - 1};
-        break;
+        return handle + Vec2{2, 1};
       case Rotation::UP_TO_DOWN:
-        handle = {coordinate.x(), coordinate.y() + 1};
-        break;
+        return handle + Vec2{0, 2};
       case Rotation::RIGHT_TO_LEFT:
-        handle = {coordinate.x() - 2, coordinate.y()};
-        break;
+        return handle + Vec2{-1, 0};
       case Rotation::DOWN_TO_UP:
-        handle = {coordinate.x() - 1, coordinate.y() - 2};
-        break;
-      default:
-        FAIL("Unhandled rotation");
+        return handle + Vec2{1, -1};
     }
-    return Mine{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
+    Vec2 up = egress() + {0, -1};
+    Vec2 right = egress() + {1, 0};
+    Vec2 down = egress() + {0, 1};
+    Vec2 left = egress() + {-1, 0};
+
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return {up, right, down};
+      case Rotation::UP_TO_DOWN:
+        return {left, right, down};
+      case Rotation::RIGHT_TO_LEFT:
+        return {up, left, down};
+      case Rotation::DOWN_TO_UP:
+        return {up, left, right};
+    }
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return {handle + Vec2{0, 0}, handle + Vec2{1, 0}, handle + Vec2{-1, 1},
+                handle + Vec2{0, 1}, handle + Vec2{1, 1}, handle + Vec2{2, 1}};
+      case Rotation::UP_TO_DOWN:
+        return {handle + Vec2{0, -1}, handle + Vec2{0, 0}, handle + Vec2{1, 0},
+                handle + Vec2{0, 1},  handle + Vec2{1, 1}, handle + Vec2{0, 2}};
+      case Rotation::RIGHT_TO_LEFT:
+        return {handle + Vec2{-1, 0}, handle + Vec2{0, 0}, handle + Vec2{1, 0},
+                handle + Vec2{2, 0},  handle + Vec2{0, 1}, handle + Vec2{1, 1}};
+      case Rotation::DOWN_TO_UP:
+        return {handle + Vec2{1, -1}, handle + Vec2{0, 0}, handle + Vec2{1, 0},
+                handle + Vec2{0, 1},  handle + Vec2{1, 1}, handle + Vec2{1, 2}};
+    }
   }
 };
 
