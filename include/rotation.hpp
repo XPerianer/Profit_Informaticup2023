@@ -11,6 +11,6 @@ enum class Rotation {
   DOWN_TO_UP = 3,
 };
 
-constexpr auto rotations = {Rotation::DOWN_TO_UP, Rotation::LEFT_TO_RIGHT, Rotation::UP_TO_DOWN,
-                            Rotation::RIGHT_TO_LEFT};
+extern constexpr inline auto ROTATIONS = {Rotation::DOWN_TO_UP, Rotation::LEFT_TO_RIGHT,
+                                          Rotation::UP_TO_DOWN, Rotation::RIGHT_TO_LEFT};
 }  // namespace profit

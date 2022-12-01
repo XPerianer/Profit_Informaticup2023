@@ -149,7 +149,7 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
 
   for (Vec2 egress : left_border(deposit_rect)) {
     // Check left side
-    for (auto rotation : rotations) {
+    for (auto rotation : ROTATIONS) {
       // Check if mine can be placed
       auto mine = Mine::with_ingress(egress - Vec2{1, 0}, static_cast<Rotation>(rotation));
       if (collides(mine, occupancies)) {
