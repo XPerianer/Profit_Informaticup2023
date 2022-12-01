@@ -91,20 +91,20 @@ struct Mine {
   }
 
   [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
-    Vec2 up = egress() + {0, -1};
-    Vec2 right = egress() + {1, 0};
-    Vec2 down = egress() + {0, 1};
-    Vec2 left = egress() + {-1, 0};
+    Vec2 top = egress() + Vec2{0, -1};
+    Vec2 right = egress() + Vec2{1, 0};
+    Vec2 down = egress() + Vec2{0, 1};
+    Vec2 left = egress() + Vec2{-1, 0};
 
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
-        return {up, right, down};
+        return {top, right, down};
       case Rotation::UP_TO_DOWN:
         return {left, right, down};
       case Rotation::RIGHT_TO_LEFT:
-        return {up, left, down};
+        return {top, left, down};
       case Rotation::DOWN_TO_UP:
-        return {up, left, right};
+        return {top, left, right};
     }
   }
 

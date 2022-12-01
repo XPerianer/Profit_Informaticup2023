@@ -83,18 +83,19 @@ constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
 
 /* Cells that are connected a border cell of the rectangle */
 constexpr std::vector<Vec2> outer_connected_border_cells(const Rectangle& rect) {
-  std::vector<Vec2> result(2 * rect.dimensions().width() + 2 * rect.dimensions.height());
+  std::vector<Vec2> result(2 * static_cast<int>(rect.dimensions().width()) +
+                           2 * static_cast<int>(rect.dimensions().height()));
 
   auto it = result.begin();
 
-  for (size_t offset = 0; offset < rect.dimensions.width(); ++offset) {
-    *it++ = rect.handle() + {offset, -1};
-    *it++ = rect.handle() + {offset, rect.dimensions().height() + 1};
+  for (Coordinate offset = 0; offset < rect.dimensions().width(); ++offset) {
+    *it++ = rect.top_left() + Vec2{offset, -1};
+    *it++ = rect.top_left() + Vec2{offset, rect.dimensions().height() + 1};
   }
 
-  for (size_t offset = 0; offset < rect.dimensions.height(); ++offset) {
-    *it++ = rect.handle() + {-1, offset};
-    *it++ = rect.handle() + {rect.dimensions().width() + 1, offset};
+  for (Coordinate offset = 0; offset < rect.dimensions().height(); ++offset) {
+    *it++ = rect.top_left() + Vec2{-1, offset};
+    *it++ = rect.top_left() + Vec2{rect.dimensions().width() + 1, offset};
   }
 
   return result;

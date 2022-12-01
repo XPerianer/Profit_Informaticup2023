@@ -99,8 +99,7 @@ enum class CellOccupancy {
   BLOCKED,
   CONVEYOR_CROSSING,
   INGRESS,
-  RAW_EGRESS,
-  MINED_EGRESS,
+  EGRESS,
 };
 
 using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy::EMPTY>;
@@ -112,7 +111,7 @@ inline OccupancyMap create_occupancy_map(const parsing::Input& input) {
                                    const auto rect = as_rectangle(deposit);
                                    for (Vec2 coordinate : rect) {
                                      if (is_on_border(rect, coordinate)) {
-                                       occupancy_map.set(coordinate, CellOccupancy::RAW_EGRESS);
+                                       occupancy_map.set(coordinate, CellOccupancy::EGRESS);
                                      } else {
                                        occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
                                      }
@@ -148,19 +147,34 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
   // (Feld-Wert) Schritten, und hier dürfen Inputs für Conveyors/Combiners hin
   std::queue<Vec2> reached_ingress_fields;
 
+  auto cell_reachable = [&](const Vec2 cell, DistanceT distance) {
+    if(distances.at(cell) == NOT_REACHABLE) {
+      reached_ingress_fields.emplace(cell);
+      distances.set(cell, distance);
+    }
+  };
+
   for (Vec2 possible_ingress_location : outer_connected_border_cells(as_rectangle(deposit))) {
     for (auto rotation : ROTATIONS) {
       auto mine = Mine::with_ingress(possible_ingress_location, rotation);
       if (!collides(mine, occupancies)) {
         for (const Vec2 downstream_ingress_cell : mine.downstream_ingress_cells()) {
-          // TODO: Check if ingress field is connected to another egress on the map
-          reached_ingress_fields.emplace(downstream_ingress_cell);
+          if (occupancies.at(downstream_ingress_cell) != CellOccupancy::EMPTY) {
+            continue;
+          }
+          if (any_neighbor_is(occupancies, downstream_ingress_cell, CellOccupancy::EGRESS)) {
+            continue;
+          }
+
+          cell_reachable(downstream_ingress_cell, 1);
         }
       }
     }
   }
 
   // TODO
+  // Conveyor * 2 längen * 4 rotationen
+  // Combiner * 3 positionierungen * 4 rotationen
 
   return distances;
 }

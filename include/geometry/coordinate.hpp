@@ -12,22 +12,20 @@ struct Coordinate {
 
   constexpr Coordinate() = default;
 
-  template <std::integral T>
   // NOLINTNEXTLINE(google-explicit-constructor): We want implicit construction for arithmetic
-  constexpr Coordinate(T value) : value_{static_cast<UnderlyingT>(value)} {
+  constexpr Coordinate(int value) : value_{static_cast<UnderlyingT>(value)} {
     DEBUG_ASSERT(value >= std::numeric_limits<Coordinate::UnderlyingT>::min(),
                  "Coordinate overflow");
     DEBUG_ASSERT(value <= std::numeric_limits<Coordinate::UnderlyingT>::max(),
                  "Coordinate overflow");
   }
 
+  constexpr auto operator<=>(const Coordinate& other) const = default;
+
   template <std::integral T>
-  // NOLINTNEXTLINE(google-explicit-constructor): We want implicit conversions for arithmetic
-  constexpr operator T() const {
+  explicit constexpr operator T() const {
     return value_;
   }
-
-  constexpr auto operator<=>(const Coordinate& other) const = default;
 
   constexpr Coordinate& operator++() {
     ++value_;
@@ -43,6 +41,7 @@ struct Coordinate {
   UnderlyingT value_ = 0;
 };
 
+
 constexpr Coordinate operator+(Coordinate lhs, Coordinate rhs) {
   return Coordinate{static_cast<Coordinate::UnderlyingT>(lhs) +
                     static_cast<Coordinate::UnderlyingT>(rhs)};
@@ -52,5 +51,4 @@ constexpr Coordinate operator-(Coordinate lhs, Coordinate rhs) {
   return Coordinate{static_cast<Coordinate::UnderlyingT>(lhs) -
                     static_cast<Coordinate::UnderlyingT>(rhs)};
 }
-
 }  // namespace geometry
