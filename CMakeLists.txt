@@ -28,9 +28,19 @@ include_directories(SYSTEM dependencies)
 include_directories(include)
 
 
-##### EXECUTABLES #####
+##### COMPILER WARNINGS #####
+set(COMPILER_WARNING_FLAGS "-Wall" "-Wextra" "-Werror" "-Wpedantic" "-Wextra-semi" "-Wnon-virtual-dtor" "-Wunused")
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Additional checks not supported by GCC -- some are supported on GCC, but not ignorable / not filterable
+  list(APPEND COMPILER_WARNING_FLAGS "-Wdocumentation" "-Wconditional-uninitialized" "-Wmissing-prototypes" "-Wundef"
+    "-Wunused-exception-parameter" "-Wunused-member-function" "-Wshadow-all")
+  list(APPEND COMPILER_WARNING_FLAGS "-Wno-gnu-zero-variadic-macro-arguments") # legal in c++20
+endif()
 
+
+##### EXECUTABLES #####
 add_executable(main src/main.cpp)
+target_compile_options(main PRIVATE ${COMPILER_WARNING_FLAGS})
 
 enable_testing()
 

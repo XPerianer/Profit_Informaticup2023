@@ -130,4 +130,4 @@ inline nlohmann::json serialize_detailed(const Output& output) {
   return out;
 }
 
-};  // namespace serialization
+}  // namespace serialization

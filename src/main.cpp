@@ -68,14 +68,15 @@ namespace production_realization {
 //    Überlegung: Kürzester Weg könnte kritisches Feld belagern, was uns später nicht erlaubt,
 //    weitere Pipelines zu bauen Evtl explizite Kreuzungen setzen?
 
-bool attempt_realize(const std::vector<Deposit>& /*deposits*/, FactoryType /*factory_type*/) {
+inline bool attempt_realize(const std::vector<Deposit>& /*deposits*/,
+                            FactoryType /*factory_type*/) {
   // minen platzieren
   // fabrik platzieren
   // verbinden
   return false;
 }
 
-void select_deposits_and_products(const parsing::Input& input) {
+inline void select_deposits_and_products(const parsing::Input& input) {
   // Simplest algorithm: Try all products one by one
   for (const auto& product : input.products) {
     const auto& requirements = product.requirements;
@@ -100,7 +101,7 @@ enum class CellOccupancy {
 
 using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy::EMPTY>;
 
-OccupancyMap createOccupancyMap(const parsing::Input& input) {
+inline OccupancyMap createOccupancyMap(const parsing::Input& input) {
   OccupancyMap occupancyMap(input.dimensions);
   for (const auto& object : input.objects) {
     std::visit(utils::overloaded{[&](const Deposit& deposit) {
@@ -124,7 +125,7 @@ OccupancyMap createOccupancyMap(const parsing::Input& input) {
   return occupancyMap;
 }
 
-bool collides(const Mine& /*mine*/, const OccupancyMap& /*occupancies*/) {
+inline bool collides(const Mine& /*mine*/, const OccupancyMap& /*occupancies*/) {
   // TODO
   return false;
 }
@@ -134,7 +135,7 @@ constexpr DistanceT NOT_REACHABLE = -1;
 
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
 
-DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancies) {
+inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancies) {
   DistanceMap distances(occupancies.dimensions());
 
   // Invariante: Für Felder, die in der queue sind, gilt: Dieses Feld haben wir erreicht, in
@@ -159,9 +160,9 @@ DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupanci
   return distances;
 }
 
-std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
-                                                    Vec2 /*ingress_target_field*/,
-                                                    const OccupancyMap& /*occupancies*/) {
+inline std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
+                                                           Vec2 /*ingress_target_field*/,
+                                                           const OccupancyMap& /*occupancies*/) {
   // Breitensuche, von Start, immer mit allen 4 (Conveyor3) + 4 (Conveyor4) + 4 (Combiner)
   // Bewegungsmöglichkeiten
   return std::nullopt;
@@ -178,6 +179,8 @@ std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
   while (!reached_ingestion_fields.empty()) {
     Vec2 reached_field = reached_ingestion_fields.front();
     reached_ingestion_fields.pop();
+
+    (void)reached_field;
 
     // TODO: Ausprobieren
     // 3-unit conveyor

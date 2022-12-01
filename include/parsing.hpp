@@ -32,7 +32,7 @@ inline std::vector<Deposit> get_deposits(const Input& input) {
   std::vector<Deposit> deposits;
   for (auto const& object : input.objects) {
     std::visit(utils::overloaded{[&](const Deposit& deposit) { deposits.push_back(deposit); },
-                                 [](const Obstacle& obstacle) {}},
+                                 [](const Obstacle& /*obstacle*/) {}},
                object);
   }
   return deposits;
@@ -76,4 +76,4 @@ inline Input parse(std::istream& stream) {
 
   return input;
 }
-};  // namespace parsing
+}  // namespace parsing
