@@ -9,7 +9,7 @@
 namespace serialization {
 
 struct Output {
-  Vector dimensions;
+  Vec2 dimensions;
   int32_t turns;
   int32_t time;
   std::vector<Product> products;

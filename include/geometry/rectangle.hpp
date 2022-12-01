@@ -1,14 +1,14 @@
 #pragma once
 #include <concepts>
 
-#include "geometry/vector.hpp"
+#include "geometry/vec2.hpp"
 
 namespace geometry {
 
 template <typename T>
 concept ThingWithHandleAndDimensions = requires(T thing) {
-  { thing.handle } -> std::convertible_to<Vector>;
-  { thing.dimensions } -> std::convertible_to<Vector>;
+  { thing.handle } -> std::convertible_to<Vec2>;
+  { thing.dimensions } -> std::convertible_to<Vec2>;
 };
 
 class Rectangle {
@@ -17,9 +17,9 @@ class Rectangle {
    public:
     using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
-    using value_type = Vector;
-    using pointer = const Vector*;
-    using reference = const Vector&;
+    using value_type = Vec2;
+    using pointer = const Vec2*;
+    using reference = const Vec2&;
 
     Iterator() = default;
     explicit Iterator(const Rectangle& rectangle) : rectangle_{&rectangle} {}
@@ -50,32 +50,32 @@ class Rectangle {
     auto operator<=>(const Iterator& other) const = default;
 
    private:
-    Vector current_value_{};
+    Vec2 current_value_{};
     const Rectangle* rectangle_ = nullptr;
   };
 
-  [[nodiscard]] Vector top_left() const { return top_left_; }
-  [[nodiscard]] Vector bottom_right() const { return bottom_right_; }
-  [[nodiscard]] Vector dimensions() const { return dimensions_; }
+  [[nodiscard]] Vec2 top_left() const { return top_left_; }
+  [[nodiscard]] Vec2 bottom_right() const { return bottom_right_; }
+  [[nodiscard]] Vec2 dimensions() const { return dimensions_; }
 
-  static Rectangle from_top_left_and_dimensions(Vector top_left, Vector dimensions) {
+  static Rectangle from_top_left_and_dimensions(Vec2 top_left, Vec2 dimensions) {
     return {top_left, dimensions};
   }
 
-  static Rectangle from_top_left_and_bottom_right(Vector top_left, Vector bottom_right) {
+  static Rectangle from_top_left_and_bottom_right(Vec2 top_left, Vec2 bottom_right) {
     return {top_left, bottom_right - top_left};
   }
 
  private:
-  Rectangle(Vector top_left, Vector dimensions)
+  Rectangle(Vec2 top_left, Vec2 dimensions)
       : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {}
 
-  Vector top_left_;
-  Vector bottom_right_;
-  Vector dimensions_;
+  Vec2 top_left_;
+  Vec2 bottom_right_;
+  Vec2 dimensions_;
 };
 
-inline bool is_on_border(const Rectangle& rect, Vector coordinate) {
+inline bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
   return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.bottom_right().x() - 1 ||
          coordinate.y() == rect.top_left().y() || coordinate.y() == rect.bottom_right().y() - 1;
 }

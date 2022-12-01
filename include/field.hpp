@@ -1,7 +1,7 @@
 #pragma once
 
 #include "geometry/two_dimensional_vector.hpp"
-#include "geometry/vector.hpp"
+#include "geometry/vec2.hpp"
 #include "utils.hpp"
 
 /*
@@ -12,9 +12,9 @@
 template <typename CellT, CellT OutOfBoundsValue, CellT InitialValue = CellT{}>
 class Field {
  public:
-  explicit Field(geometry::Vector dimensions) : dimensions_{dimensions}, map_(dimensions) {}
+  explicit Field(geometry::Vec2 dimensions) : dimensions_{dimensions}, map_(dimensions) {}
 
-  [[nodiscard]] CellT at(geometry::Vector coordinates) const {
+  [[nodiscard]] CellT at(geometry::Vec2 coordinates) const {
     if (coordinates.x() < 0 || coordinates.y() < 0 || coordinates.x() >= dimensions_.width() ||
         coordinates.y() >= dimensions_.height()) {
       return OutOfBoundsValue;
@@ -22,7 +22,7 @@ class Field {
     return map_[coordinates];
   }
 
-  void set(geometry::Vector coordinates, CellT value) {
+  void set(geometry::Vec2 coordinates, CellT value) {
     DEBUG_ASSERT(coordinates.x() >= 0 && coordinates.y() >= 0 &&
                      coordinates.x() < dimensions_.width() &&
                      coordinates.y() < dimensions_.height(),
@@ -30,9 +30,9 @@ class Field {
     map_[coordinates] = value;
   }
 
-  [[nodiscard]] geometry::Vector dimensions() const { return dimensions_; }
+  [[nodiscard]] geometry::Vec2 dimensions() const { return dimensions_; }
 
  private:
-  geometry::Vector dimensions_;
+  geometry::Vec2 dimensions_;
   geometry::TwoDimensionalVector<CellT, InitialValue> map_;
 };

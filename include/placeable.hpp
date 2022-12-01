@@ -4,37 +4,37 @@
 
 #include "assert.hpp"
 #include "geometry/rectangle.hpp"
-#include "geometry/vector.hpp"
+#include "geometry/vec2.hpp"
 #include "rotation.hpp"
 #include "subtype.hpp"
 #include "utils.hpp"
 
 using geometry::Rectangle;
-using geometry::Vector;
+using geometry::Vec2;
 
 using FactoryType = Subtype;
 constexpr size_t FACTORY_TYPE_COUNT = SUBTYPE_COUNT;
 
 struct Combiner {
-  Vector handle;
+  Vec2 handle;
   Rotation rotation{};
   bool operator==(const Combiner& other) const = default;
 };
 
 struct Conveyor3 {
-  Vector handle;
+  Vec2 handle;
   Rotation rotation{};
   bool operator==(const Conveyor3& other) const = default;
 };
 
 struct Conveyor4 {
-  Vector handle;
+  Vec2 handle;
   Rotation rotation{};
   bool operator==(const Conveyor4& other) const = default;
 };
 
 struct Factory {
-  Vector handle;
+  Vec2 handle;
   FactoryType type{};
   bool operator==(const Factory& other) const = default;
 };
@@ -51,12 +51,12 @@ inline Rectangle as_rectangle(const Conveyor3& conveyor) {
 */
 
 struct Mine {
-  Vector handle;
+  Vec2 handle;
   Rotation rotation{};
   bool operator==(const Mine& other) const = default;
 
-  static Mine with_ingress(Vector coordinate, Rotation rotation) {
-    Vector handle;
+  static Mine with_ingress(Vec2 coordinate, Rotation rotation) {
+    Vec2 handle;
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
         handle = {coordinate.x() + 1, coordinate.y() - 1};

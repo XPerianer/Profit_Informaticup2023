@@ -14,7 +14,7 @@
 namespace parsing {
 
 struct Input {
-  Vector dimensions;
+  Vec2 dimensions;
   int32_t turns = 0;
   int32_t time = 0;
   std::vector<Product> products;
@@ -40,8 +40,8 @@ inline std::vector<Deposit> get_deposits(const Input& input) {
 
 inline LandscapeObject parse_object(const nlohmann::json& input) {
   std::string type = input["type"];
-  Vector coordinate = {static_cast<int>(input["x"]), static_cast<int>(input["y"])};
-  Vector dimensions = {static_cast<int>(input["width"]), static_cast<int>(input["height"])};
+  Vec2 coordinate = {static_cast<int>(input["x"]), static_cast<int>(input["y"])};
+  Vec2 dimensions = {static_cast<int>(input["width"]), static_cast<int>(input["height"])};
 
   if (type == "deposit") {
     return Deposit{coordinate, dimensions, input["subtype"]};
@@ -59,7 +59,7 @@ inline Input parse(std::istream& stream) {
 
   Input input;
   input.dimensions =
-      Vector{static_cast<int>(json_input["width"]), static_cast<int>(json_input["height"])};
+      Vec2{static_cast<int>(json_input["width"]), static_cast<int>(json_input["height"])};
   input.turns = json_input["turns"];
 
   for (const auto& product_json : json_input["products"]) {

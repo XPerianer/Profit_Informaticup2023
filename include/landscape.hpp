@@ -3,24 +3,24 @@
 #include <variant>
 
 #include "geometry/rectangle.hpp"
-#include "geometry/vector.hpp"
+#include "geometry/vec2.hpp"
 #include "resource_type.hpp"
 #include "utils.hpp"
 
 using geometry::Rectangle;
-using geometry::Vector;
+using geometry::Vec2;
 
 struct Deposit {
-  Vector handle;
-  Vector dimensions;
+  Vec2 handle;
+  Vec2 dimensions;
 
   ResourceType type{};
   bool operator==(const Deposit& other) const = default;
 };
 
 struct Obstacle {
-  Vector handle;
-  Vector dimensions;
+  Vec2 handle;
+  Vec2 dimensions;
   bool operator==(const Obstacle& other) const = default;
 };
 

@@ -104,8 +104,8 @@ OccupancyMap createOccupancyMap(const parsing::Input& input) {
   OccupancyMap occupancyMap(input.dimensions);
   for (const auto& object : input.objects) {
     std::visit(utils::overloaded{[&](const Deposit& deposit) {
-                                   const auto rect = Rectangle::from(deposit);
-                                   for (Vector coordinate : rect) {
+                                   const auto rect = as_rectangle(deposit);
+                                   for (Vec2 coordinate : rect) {
                                      if (is_on_border(rect, coordinate)) {
                                        occupancyMap.set(coordinate, CellOccupancy::OUTPUT);
                                      } else {
@@ -114,8 +114,8 @@ OccupancyMap createOccupancyMap(const parsing::Input& input) {
                                    }
                                  },
                                  [&](const Obstacle& obstacle) {
-                                   const auto rect = Rectangle::from(obstacle);
-                                   for (Vector coordinate : rect) {
+                                   const auto rect = as_rectangle(obstacle);
+                                   for (Vec2 coordinate : rect) {
                                      occupancyMap.set(coordinate, CellOccupancy::BLOCKED);
                                    }
                                  }},
@@ -139,15 +139,15 @@ DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupanci
 
   // Invariante: Für Felder, die in der queue sind, gilt: Dieses Feld haben wir erreicht, in
   // (Feld-Wert) Schritten, und hier dürfen Inputs für Conveyors/Combiners hin
-  std::queue<Vector> reached_ingestion_fields;
+  std::queue<Vec2> reached_ingestion_fields;
 
-  const auto deposit_rect = Rectangle::from(deposit);
+  const auto deposit_rect = as_rectangle(deposit);
 
-  for (Vector egress : left_border(deposit_rect)) {
+  for (Vec2 egress : left_border(deposit_rect)) {
     // Check left side
     for (auto rotation : rotations) {
       // Check if mine can be placed
-      auto mine = Mine::with_ingress(egress - Vector{1, 0}, static_cast<Rotation>(rotation));
+      auto mine = Mine::with_ingress(egress - Vec2{1, 0}, static_cast<Rotation>(rotation));
       if (collides(mine, occupancies)) {
         continue;
       }
@@ -159,8 +159,8 @@ DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupanci
   return distances;
 }
 
-std::optional<std::vector<PlaceableObject>> connect(Vector /*egress_start_field*/,
-                                                    Vector /*ingress_target_field*/,
+std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
+                                                    Vec2 /*ingress_target_field*/,
                                                     const OccupancyMap& /*occupancies*/) {
   // Breitensuche, von Start, immer mit allen 4 (Conveyor3) + 4 (Conveyor4) + 4 (Combiner)
   // Bewegungsmöglichkeiten
@@ -168,7 +168,7 @@ std::optional<std::vector<PlaceableObject>> connect(Vector /*egress_start_field*
 
   // Invariante: Für Felder, die in der queue sind, gilt: Hier dürfen Inputs hin, für den
   // gewünschten
-  std::queue<Vector> reached_ingestion_fields;
+  std::queue<Vec2> reached_ingestion_fields;
 
   // TODO: Alle benachbarten Felder von egress_start_field in die Queue pushen, wenn nicht auch mit
   // anderem Egress verbunden
@@ -176,7 +176,7 @@ std::optional<std::vector<PlaceableObject>> connect(Vector /*egress_start_field*
   // häufig passiert?) (Problem ist: +|.|+|) reached_ingestion_fields.push(start);
 
   while (!reached_ingestion_fields.empty()) {
-    Vector reached_field = reached_ingestion_fields.front();
+    Vec2 reached_field = reached_ingestion_fields.front();
     reached_ingestion_fields.pop();
 
     // TODO: Ausprobieren
