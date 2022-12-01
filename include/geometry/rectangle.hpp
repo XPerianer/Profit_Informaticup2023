@@ -21,13 +21,13 @@ class Rectangle {
     using pointer = const Vec2*;
     using reference = const Vec2&;
 
-    Iterator() = default;
-    explicit Iterator(const Rectangle& rectangle) : rectangle_{&rectangle} {}
+    constexpr Iterator() = default;
+    explicit constexpr Iterator(const Rectangle& rectangle) : rectangle_{&rectangle} {}
 
-    reference operator*() const { return current_value_; }
-    pointer operator->() const { return &current_value_; }
+    constexpr reference operator*() const { return current_value_; }
+    constexpr pointer operator->() const { return &current_value_; }
 
-    Iterator& operator++() {
+    constexpr Iterator& operator++() {
       current_value_ += {1, 0};
 
       if (current_value_.x() == rectangle_->bottom_right().x()) {
@@ -41,33 +41,33 @@ class Rectangle {
       return *this;
     }
 
-    Iterator operator++(int) {
+    constexpr Iterator operator++(int) {
       auto copy = *this;
       ++(*this);
       return copy;
     }
 
-    auto operator<=>(const Iterator& other) const = default;
+    constexpr auto operator<=>(const Iterator& other) const = default;
 
    private:
     Vec2 current_value_{};
     const Rectangle* rectangle_ = nullptr;
   };
 
-  [[nodiscard]] Vec2 top_left() const { return top_left_; }
-  [[nodiscard]] Vec2 bottom_right() const { return bottom_right_; }
-  [[nodiscard]] Vec2 dimensions() const { return dimensions_; }
+  [[nodiscard]] constexpr Vec2 top_left() const { return top_left_; }
+  [[nodiscard]] constexpr Vec2 bottom_right() const { return bottom_right_; }
+  [[nodiscard]] constexpr Vec2 dimensions() const { return dimensions_; }
 
-  static Rectangle from_top_left_and_dimensions(Vec2 top_left, Vec2 dimensions) {
+  constexpr static Rectangle from_top_left_and_dimensions(Vec2 top_left, Vec2 dimensions) {
     return {top_left, dimensions};
   }
 
-  static Rectangle from_top_left_and_bottom_right(Vec2 top_left, Vec2 bottom_right) {
+  constexpr static Rectangle from_top_left_and_bottom_right(Vec2 top_left, Vec2 bottom_right) {
     return {top_left, bottom_right - top_left};
   }
 
  private:
-  Rectangle(Vec2 top_left, Vec2 dimensions)
+  constexpr Rectangle(Vec2 top_left, Vec2 dimensions)
       : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {}
 
   Vec2 top_left_;
@@ -75,18 +75,18 @@ class Rectangle {
   Vec2 dimensions_;
 };
 
-inline bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
+constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
   return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.bottom_right().x() - 1 ||
          coordinate.y() == rect.top_left().y() || coordinate.y() == rect.bottom_right().y() - 1;
 }
 
-inline Rectangle left_border(const Rectangle& rect) {
+constexpr Rectangle left_border(const Rectangle& rect) {
   return Rectangle::from_top_left_and_dimensions(rect.top_left(), {1, rect.dimensions().height()});
 }
 
-[[nodiscard]] inline Rectangle::Iterator begin(const Rectangle& rect) {
+[[nodiscard]] constexpr Rectangle::Iterator begin(const Rectangle& rect) {
   return Rectangle::Iterator(rect);
 }
-[[nodiscard]] inline Rectangle::Iterator end(const Rectangle& /*rect*/) { return {}; }
+[[nodiscard]] constexpr Rectangle::Iterator end(const Rectangle& /*rect*/) { return {}; }
 
 }  // namespace geometry

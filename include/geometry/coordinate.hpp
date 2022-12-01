@@ -42,12 +42,12 @@ struct Coordinate {
   UnderlyingT value_ = 0;
 };
 
-inline Coordinate operator+(Coordinate lhs, Coordinate rhs) {
+constexpr Coordinate operator+(Coordinate lhs, Coordinate rhs) {
   return Coordinate{static_cast<Coordinate::UnderlyingT>(lhs) +
                     static_cast<Coordinate::UnderlyingT>(rhs)};
 }
 
-inline Coordinate operator-(Coordinate lhs, Coordinate rhs) {
+constexpr Coordinate operator-(Coordinate lhs, Coordinate rhs) {
   return Coordinate{static_cast<Coordinate::UnderlyingT>(lhs) -
                     static_cast<Coordinate::UnderlyingT>(rhs)};
 }
