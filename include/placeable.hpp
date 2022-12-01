@@ -36,13 +36,14 @@ struct Conveyor4 {
 };
 
 struct Factory {
+  constexpr static Vec2 dimensions{5, 5};
   Vec2 handle;
   FactoryType type{};
   bool operator==(const Factory& other) const = default;
 };
 
 inline Rectangle as_rectangle(const Factory& factory) {
-  return Rectangle::from_top_left_and_dimensions(factory.handle, {5, 5});
+  return Rectangle::from_top_left_and_dimensions(factory.handle, Factory::dimensions);
 }
 
 // TODO when we need it
@@ -80,4 +81,4 @@ struct Mine {
 };
 
 using PlaceableObject = std::variant<Combiner, Conveyor3, Conveyor4, Factory, Mine>;
-}
+}  // namespace profit

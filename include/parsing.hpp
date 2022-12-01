@@ -11,9 +11,7 @@
 #include "placeable.hpp"
 #include "product.hpp"
 
-namespace profit {
-
-namespace parsing {
+namespace profit::parsing {
 
 struct Input {
   Vec2 dimensions;
@@ -78,5 +76,4 @@ inline Input parse(std::istream& stream) {
 
   return input;
 }
-}  // namespace parsing
-}  // namespace profit
+}  // namespace profit::parsing

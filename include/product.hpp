@@ -50,4 +50,4 @@ struct Product {
   int32_t points{};
   bool operator==(const Product& other) const = default;
 };
-}
+}  // namespace profit

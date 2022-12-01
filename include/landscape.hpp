@@ -35,4 +35,4 @@ inline Rectangle as_rectangle(const Deposit& deposit) {
 inline Rectangle as_rectangle(const Obstacle& obstacle) {
   return Rectangle::from_top_left_and_dimensions(obstacle.handle, obstacle.dimensions);
 }
-}
+}  // namespace profit

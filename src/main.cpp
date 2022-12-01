@@ -12,8 +12,10 @@
 #include "serialization.hpp"
 #include "utils.hpp"
 
+// NOLINTBEGIN(google-build-using-namespace): In main, we allow using these
 using namespace profit;
 using namespace geometry;
+// NOLINTEND(google-build-using-namespace)
 
 // For now, we allow exception escape (causing std::terminate -> error shown)
 int main() {  // NOLINT(bugprone-exception-escape)

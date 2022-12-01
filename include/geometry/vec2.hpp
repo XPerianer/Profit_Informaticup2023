@@ -6,25 +6,25 @@ namespace geometry {
 // TODO: Naming: Collides with std::vector (especially when considering `TwoDimensionalVector`)
 class Vec2 {
  public:
-  Vec2() = default;
+  constexpr Vec2() = default;
   // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): Order for x and y is pretty clear
-  Vec2(Coordinate arg1, Coordinate arg2) : x_{arg1}, y_{arg2} {}
+  constexpr Vec2(Coordinate arg1, Coordinate arg2) : x_{arg1}, y_{arg2} {}
 
-  [[nodiscard]] Coordinate x() const { return x_; }
-  [[nodiscard]] Coordinate y() const { return y_; }
+  [[nodiscard]] constexpr Coordinate x() const { return x_; }
+  [[nodiscard]] constexpr Coordinate y() const { return y_; }
 
-  [[nodiscard]] Coordinate width() const { return x_; }
-  [[nodiscard]] Coordinate height() const { return y_; }
+  [[nodiscard]] constexpr Coordinate width() const { return x_; }
+  [[nodiscard]] constexpr Coordinate height() const { return y_; }
 
   auto operator<=>(const Vec2& other) const = default;
 
-  Vec2& operator+=(const Vec2& other) {
+  constexpr Vec2& operator+=(const Vec2& other) {
     x_ = x_ + other.x_;
     y_ = y_ + other.y_;
     return *this;
   }
 
-  Vec2& operator-=(const Vec2& other) {
+  constexpr Vec2& operator-=(const Vec2& other) {
     x_ = x_ - other.x_;
     y_ = y_ - other.y_;
     return *this;
@@ -35,13 +35,13 @@ class Vec2 {
   Coordinate y_;
 };
 
-inline Vec2 operator+(const Vec2& lhs, const Vec2& rhs) {
+inline constexpr Vec2 operator+(const Vec2& lhs, const Vec2& rhs) {
   Vec2 result{lhs};
   result += rhs;
   return result;
 }
 
-inline Vec2 operator-(const Vec2& lhs, const Vec2& rhs) {
+inline constexpr Vec2 operator-(const Vec2& lhs, const Vec2& rhs) {
   Vec2 result{lhs};
   result -= rhs;
   return result;

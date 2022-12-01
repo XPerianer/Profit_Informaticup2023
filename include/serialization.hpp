@@ -6,9 +6,7 @@
 #include "placeable.hpp"
 #include "utils.hpp"
 
-namespace profit {
-
-namespace serialization {
+namespace profit::serialization {
 
 struct Output {
   Vec2 dimensions;
@@ -132,5 +130,4 @@ inline nlohmann::json serialize_detailed(const Output& output) {
   return out;
 }
 
-}  // namespace serialization
-}//
+}  // namespace profit::serialization

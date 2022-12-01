@@ -15,4 +15,4 @@ enum class Subtype {
 };
 
 constexpr size_t SUBTYPE_COUNT = 8;
-}
+}  // namespace profit

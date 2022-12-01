@@ -10,12 +10,11 @@ namespace geometry {
 struct Coordinate {
   using UnderlyingT = int8_t;
 
-  Coordinate() = default;
+  constexpr Coordinate() = default;
 
   template <std::integral T>
-  Coordinate(T value)  // NOLINT(google-explicit-constructor): We want instances to be implicitly
-                       // constructible to allow arithmetic with integer literals.
-      : value_{static_cast<UnderlyingT>(value)} {
+  // NOLINTNEXTLINE(google-explicit-constructor): We want implicit construction for arithmetic
+  constexpr Coordinate(T value) : value_{static_cast<UnderlyingT>(value)} {
     DEBUG_ASSERT(value >= std::numeric_limits<Coordinate::UnderlyingT>::min(),
                  "Coordinate overflow");
     DEBUG_ASSERT(value <= std::numeric_limits<Coordinate::UnderlyingT>::max(),
@@ -23,18 +22,18 @@ struct Coordinate {
   }
 
   template <std::integral T>
-  explicit operator T() const {
+  constexpr explicit operator T() const {
     return value_;
   }
 
-  auto operator<=>(const Coordinate& other) const = default;
+  constexpr auto operator<=>(const Coordinate& other) const = default;
 
-  Coordinate& operator++() {
+  constexpr Coordinate& operator++() {
     ++value_;
     return *this;
   }
 
-  Coordinate& operator--() {
+  constexpr Coordinate& operator--() {
     --value_;
     return *this;
   }
