@@ -1,13 +1,24 @@
+#include <algorithm>
 #include <iostream>
+#include <variant>
 #include <vector>
 
+#include "field.hpp"
+#include "geometry/rectangle.hpp"
+#include "landscape.hpp"
 #include "parsing.hpp"
 #include "placeable.hpp"
+#include "rotation.hpp"
 #include "serialization.hpp"
-#include "two_dimensional_vector.hpp"
 #include "utils.hpp"
 
-int main() {
+// NOLINTBEGIN(google-build-using-namespace): In main, we allow using these
+using namespace profit;
+using namespace geometry;
+// NOLINTEND(google-build-using-namespace)
+
+// For now, we allow exception escape (causing std::terminate -> error shown)
+int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
 
   // TODO: lots of calculations with input
@@ -50,6 +61,7 @@ int main() {
 #include <queue>
 
 namespace production_realization {
+
 // Idee: Immer erstmal nur eine Produktionspipeline (-> genau eine Fabrik) bauen
 // Mehrere Fabriken dienen nur der Latenzoptimierung
 // Latenzoptimierung machen wir im zweiten Schritt
@@ -59,11 +71,30 @@ namespace production_realization {
 //    Überlegung: Kürzester Weg könnte kritisches Feld belagern, was uns später nicht erlaubt,
 //    weitere Pipelines zu bauen Evtl explizite Kreuzungen setzen?
 
-bool attempt_realize(const std::vector<Deposit>& /*deposits*/, Factory::TypeT /*factory_type*/) {
+inline bool attempt_realize(const std::vector<Deposit>& /*deposits*/,
+                            FactoryType /*factory_type*/) {
+  // minen platzieren
+  // fabrik platzieren
+  // verbinden
   return false;
 }
 
-enum FieldOccupancy {
+inline void select_deposits_and_products(const parsing::Input& input) {
+  // Simplest algorithm: Try all products one by one
+  for (const auto& product : input.products) {
+    const auto& requirements = product.requirements;
+    const std::vector<Deposit> input_deposits = get_deposits(input);
+
+    std::vector<Deposit> useful_deposits;
+    std::copy_if(input_deposits.begin(), input_deposits.end(), std::back_inserter(useful_deposits),
+                 [&](const Deposit& deposit) { return requirements[deposit.type] != 0; });
+
+    // Now try if we can make this work
+    attempt_realize(useful_deposits, product.type);
+  }
+}
+
+enum class CellOccupancy {
   EMPTY,
   BLOCKED,
   CONVEYOR_CROSSING,
@@ -71,11 +102,70 @@ enum FieldOccupancy {
   OUTPUT,
 };
 
-using OccupancyMap = TwoDimensionalVector<FieldOccupancy>;
+using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy::EMPTY>;
 
-std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
-                                                    Vec2 /*ingress_target_field*/,
-                                                    const OccupancyMap& /*occupancies*/) {
+inline OccupancyMap create_occupancy_map(const parsing::Input& input) {
+  OccupancyMap occupancy_map(input.dimensions);
+  for (const auto& object : input.objects) {
+    std::visit(utils::Overloaded{[&](const Deposit& deposit) {
+                                   const auto rect = as_rectangle(deposit);
+                                   for (Vec2 coordinate : rect) {
+                                     if (is_on_border(rect, coordinate)) {
+                                       occupancy_map.set(coordinate, CellOccupancy::OUTPUT);
+                                     } else {
+                                       occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
+                                     }
+                                   }
+                                 },
+                                 [&](const Obstacle& obstacle) {
+                                   const auto rect = as_rectangle(obstacle);
+                                   for (Vec2 coordinate : rect) {
+                                     occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
+                                   }
+                                 }},
+               object);
+  }
+  return occupancy_map;
+}
+
+inline bool collides(const Mine& /*mine*/, const OccupancyMap& /*occupancies*/) {
+  // TODO
+  return false;
+}
+
+using DistanceT = int16_t;
+constexpr DistanceT NOT_REACHABLE = -1;
+
+using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
+
+inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancies) {
+  DistanceMap distances(occupancies.dimensions());
+
+  // Invariante: Für Felder, die in der queue sind, gilt: Dieses Feld haben wir erreicht, in
+  // (Feld-Wert) Schritten, und hier dürfen Inputs für Conveyors/Combiners hin
+  std::queue<Vec2> reached_ingestion_fields;
+
+  const auto deposit_rect = as_rectangle(deposit);
+
+  for (Vec2 egress : left_border(deposit_rect)) {
+    // Check left side
+    for (auto rotation : ROTATIONS) {
+      // Check if mine can be placed
+      auto mine = Mine::with_ingress(egress - Vec2{1, 0}, static_cast<Rotation>(rotation));
+      if (collides(mine, occupancies)) {
+        continue;
+      }
+    }
+  }
+
+  // TODO
+
+  return distances;
+}
+
+inline std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
+                                                           Vec2 /*ingress_target_field*/,
+                                                           const OccupancyMap& /*occupancies*/) {
   // Breitensuche, von Start, immer mit allen 4 (Conveyor3) + 4 (Conveyor4) + 4 (Combiner)
   // Bewegungsmöglichkeiten
   return std::nullopt;
@@ -92,6 +182,8 @@ std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
   while (!reached_ingestion_fields.empty()) {
     Vec2 reached_field = reached_ingestion_fields.front();
     reached_ingestion_fields.pop();
+
+    (void)reached_field;
 
     // TODO: Ausprobieren
     // 3-unit conveyor

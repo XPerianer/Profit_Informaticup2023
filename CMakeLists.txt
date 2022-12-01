@@ -28,9 +28,19 @@ include_directories(SYSTEM dependencies)
 include_directories(include)
 
 
-##### EXECUTABLES #####
+##### COMPILER WARNINGS #####
+set(COMPILER_WARNING_FLAGS "-Wall" "-Wextra" "-Werror" "-Wpedantic" "-Wextra-semi" "-Wnon-virtual-dtor" "-Wunused")
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  # Additional checks not supported by GCC -- some are supported on GCC, but not ignorable / not filterable
+  list(APPEND COMPILER_WARNING_FLAGS "-Wdocumentation" "-Wconditional-uninitialized" "-Wmissing-prototypes" "-Wundef"
+    "-Wunused-exception-parameter" "-Wunused-member-function" "-Wshadow-all")
+  list(APPEND COMPILER_WARNING_FLAGS "-Wno-gnu-zero-variadic-macro-arguments") # legal in c++20
+endif()
 
+
+##### EXECUTABLES #####
 add_executable(main src/main.cpp)
+target_compile_options(main PRIVATE ${COMPILER_WARNING_FLAGS})
 
 enable_testing()
 
@@ -38,12 +48,12 @@ add_subdirectory(tests)
 
 
 ##### FORMATTING AND LINTING ####
-file(GLOB_RECURSE ALL_HEADER_FILES include/*.hpp)
+file(GLOB_RECURSE ALL_HEADER_FILES include/*.hpp tests/*.hpp)
 file(GLOB_RECURSE ALL_CPP_FILES src/*.cpp tests/*.cpp)
 list(APPEND ALL_SOURCE_FILES ${ALL_HEADER_FILES} ${ALL_CPP_FILES})
 
-add_custom_target(clang-format COMMAND clang-format -style=file -i${INCLUDE_DIRECTORIES} ${ALL_SOURCE_FILES})
-add_custom_target(clang-format-check COMMAND clang-format -style=file -i${INCLUDE_DIRECTORIES} ${ALL_SOURCE_FILES} --dry-run -Werror)
+add_custom_target(clang-format COMMAND clang-format -style=file -i ${ALL_SOURCE_FILES})
+add_custom_target(clang-format-check COMMAND clang-format -style=file --dry-run --Werror ${ALL_SOURCE_FILES})
 
 add_custom_target(clang-tidy COMMAND run-clang-tidy -quiet ${ALL_CPP_FILES})
 

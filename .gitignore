@@ -45,3 +45,6 @@ compile_commands.json
 
 # Temporary results
 results/
+
+# Allow creating a local .ignore file
+.ignore

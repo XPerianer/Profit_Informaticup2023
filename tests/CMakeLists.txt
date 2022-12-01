@@ -5,6 +5,11 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
+# We have a custom FAIL macro. Use GTEST_FAIL to refer to the google macro
+add_definitions(-DGTEST_DONT_DEFINE_FAIL)
+
+add_compile_options(${COMPILER_WARNING_FLAGS})
+
 add_executable(
   unit_test
   serialization_test.cpp

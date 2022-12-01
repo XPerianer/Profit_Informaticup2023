@@ -1,11 +1,12 @@
 #include <nlohmann/json.hpp>
+#include <vector>
 
 #include "landscape.hpp"
 #include "parsing.hpp"
 #include "placeable.hpp"
 #include "utils.hpp"
 
-namespace serialization {
+namespace profit::serialization {
 
 struct Output {
   Vec2 dimensions;
@@ -25,65 +26,58 @@ struct Output {
   }
 };
 
-template <class... Ts>
-struct overloaded : Ts... {  // NOLINT(fuchsia-multiple-inheritance)
-  using Ts::operator()...;
-};
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
 inline nlohmann::json serialize_object(const PlaceableObject& object) {
-  return std::visit(overloaded{
+  return std::visit(utils::Overloaded{
                         [&](const Combiner& combiner) -> nlohmann::json {
                           return {{"type", "combiner"},
-                                  {"x", combiner.handle.x()},
-                                  {"y", combiner.handle.y()},
-                                  {"subtype", combiner.rotation}};
+                                  {"x", static_cast<int>(combiner.handle.x())},
+                                  {"y", static_cast<int>(combiner.handle.y())},
+                                  {"subtype", static_cast<int>(combiner.rotation)}};
                         },
                         [&](const Conveyor3& conveyor3) -> nlohmann::json {
                           return {{"type", "conveyor"},
-                                  {"x", conveyor3.handle.x()},
-                                  {"y", conveyor3.handle.y()},
-                                  {"subtype", conveyor3.rotation}};
+                                  {"x", static_cast<int>(conveyor3.handle.x())},
+                                  {"y", static_cast<int>(conveyor3.handle.y())},
+                                  {"subtype", static_cast<int>(conveyor3.rotation)}};
                         },
                         [&](const Conveyor4& conveyor4) -> nlohmann::json {
                           return {{"type", "conveyor"},
-                                  {"x", conveyor4.handle.x()},
-                                  {"y", conveyor4.handle.y()},
-                                  {"subtype", conveyor4.rotation + 4}};
+                                  {"x", static_cast<int>(conveyor4.handle.x())},
+                                  {"y", static_cast<int>(conveyor4.handle.y())},
+                                  {"subtype", static_cast<int>(conveyor4.rotation) + 4}};
                         },
                         [&](const Factory& factory) -> nlohmann::json {
                           return {{"type", "factory"},
-                                  {"x", factory.handle.x()},
-                                  {"y", factory.handle.y()},
-                                  {"subtype", factory.subtype}};
+                                  {"x", static_cast<int>(factory.handle.x())},
+                                  {"y", static_cast<int>(factory.handle.y())},
+                                  {"subtype", static_cast<int>(factory.type)}};
                         },
                         [&](const Mine& mine) -> nlohmann::json {
                           return {{"type", "mine"},
-                                  {"x", mine.handle.x()},
-                                  {"y", mine.handle.y()},
-                                  {"subtype", mine.rotation}};
+                                  {"x", static_cast<int>(mine.handle.x())},
+                                  {"y", static_cast<int>(mine.handle.y())},
+                                  {"subtype", static_cast<int>(mine.rotation)}};
                         },
                     },
                     object);
 }
 
 inline nlohmann::json serialize_object(const LandscapeObject& object) {
-  return std::visit(overloaded{
+  return std::visit(utils::Overloaded{
                         [&](const Deposit& deposit) -> nlohmann::json {
                           return {{"type", "deposit"},
-                                  {"x", deposit.handle.x()},
-                                  {"y", deposit.handle.y()},
-                                  {"width", deposit.dimensions.x()},
-                                  {"height", deposit.dimensions.y()},
-                                  {"subtype", deposit.subtype}};
+                                  {"x", static_cast<int>(deposit.handle.x())},
+                                  {"y", static_cast<int>(deposit.handle.y())},
+                                  {"width", static_cast<int>(deposit.dimensions.width())},
+                                  {"height", static_cast<int>(deposit.dimensions.height())},
+                                  {"subtype", static_cast<int>(deposit.type)}};
                         },
                         [&](const Obstacle& obstacle) -> nlohmann::json {
                           return {{"type", "obstacle"},
-                                  {"x", obstacle.handle.x()},
-                                  {"y", obstacle.handle.y()},
-                                  {"width", obstacle.dimensions.x()},
-                                  {"height", obstacle.dimensions.y()}};
+                                  {"x", static_cast<int>(obstacle.handle.x())},
+                                  {"y", static_cast<int>(obstacle.handle.y())},
+                                  {"width", static_cast<int>(obstacle.dimensions.x())},
+                                  {"height", static_cast<int>(obstacle.dimensions.y())}};
                         },
                     },
                     object);
@@ -91,8 +85,8 @@ inline nlohmann::json serialize_object(const LandscapeObject& object) {
 
 inline nlohmann::json serialize_product(const Product& product) {
   return {{"type", "product"},
-          {"subtype", product.subtype},
-          {"resources", product.requirements},
+          {"subtype", static_cast<int>(product.type)},
+          {"resources", product.requirements.as_array()},
           {"points", product.points}};
 }
 
@@ -106,8 +100,8 @@ inline nlohmann::json serialize(const std::vector<PlaceableObject>& objects) {
 
 inline nlohmann::json serialize_detailed(const Output& output) {
   nlohmann::json out;
-  out["width"] = output.dimensions.x();
-  out["height"] = output.dimensions.y();
+  out["width"] = static_cast<int>(output.dimensions.x());
+  out["height"] = static_cast<int>(output.dimensions.y());
 
   nlohmann::json objects = nlohmann::json::array();
   for (const auto& object : output.landscape_objects) {
@@ -129,4 +123,4 @@ inline nlohmann::json serialize_detailed(const Output& output) {
   return out;
 }
 
-};  // namespace serialization
+}  // namespace profit::serialization

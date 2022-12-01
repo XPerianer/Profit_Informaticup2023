@@ -1,5 +1,8 @@
 #pragma once
+
 #include <stdexcept>
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage): Need to use macros for source code location
 
 #define FAIL_MESSAGE(msg)                                              \
   ("ERROR at " __FILE__ ":" + std::to_string(__LINE__) + " " + (msg) + \
@@ -18,3 +21,5 @@
 #else
 #define DEBUG_ASSERT(expr, msg) ASSERT((expr), (msg))
 #endif
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
