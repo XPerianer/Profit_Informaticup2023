@@ -43,6 +43,7 @@ Checks: >
     -cppcoreguidelines-explicit-virtual-functions,
     -cppcoreguidelines-macro-to-enum,
     -cppcoreguidelines-non-private-member-variables-in-classes,
+    -bugprone-easily-swappable-parameters,
     -modernize-use-trailing-return-type,
     -misc-non-private-member-variables-in-classes,
     -google-readability-todo,
@@ -80,6 +81,7 @@ Checks: >
 # cppcoreguidelines-non-private-member-variables-in-classes    alias to misc-non-private-member-variables-in-classes
 
 ## Actually disabled checks
+# bugprone-easily-swappable-parameters                  We work a lot with vectors that cause this diagnostic. We'll have to live with that.
 # modernize-use-trailing-return-type                    we allow traditional return type syntax
 # llvm-header-guard                                     we use #pragma once
 # misc-non-private-member-variables-in-classes          we follow CppCoreGuideline C.2 and use structs with public members if there are no invariants

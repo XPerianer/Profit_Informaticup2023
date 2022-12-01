@@ -54,10 +54,6 @@ class Rectangle {
     const Rectangle* rectangle_ = nullptr;
   };
 
-  // NOLINTNEXTLINE(bugprone-easily-swappable-parameters): We'll have to live with that
-  Rectangle(Vector top_left, Vector dimensions)
-      : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {}
-
   template <ThingWithHandleAndDimensions ThingT>
   static Rectangle from(ThingT thing) {
     // TODO: This is a bit wrong: handle might not be top-left (e.g. mine). Maybe use more
@@ -69,7 +65,18 @@ class Rectangle {
   [[nodiscard]] Vector bottom_right() const { return bottom_right_; }
   [[nodiscard]] Vector dimensions() const { return dimensions_; }
 
+  static Rectangle from_top_left_and_dimensions(Vector top_left, Vector dimensions) {
+    return {top_left, dimensions};
+  }
+
+  static Rectangle from_top_left_and_bottom_right(Vector top_left, Vector bottom_right) {
+    return {top_left, bottom_right - top_left};
+  }
+
  private:
+  Rectangle(Vector top_left, Vector dimensions)
+      : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {}
+
   Vector top_left_;
   Vector bottom_right_;
   Vector dimensions_;
@@ -81,7 +88,7 @@ inline bool is_on_border(const Rectangle& rect, Vector coordinate) {
 }
 
 inline Rectangle left_border(const Rectangle& rect) {
-  return Rectangle{rect.top_left(), {1, rect.dimensions().height()}};
+  return Rectangle::from_top_left_and_dimensions(rect.top_left(), {1, rect.dimensions().height()});
 }
 
 [[nodiscard]] inline Rectangle::Iterator begin(const Rectangle& rect) {
