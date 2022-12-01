@@ -3,11 +3,13 @@
 #include <variant>
 
 #include "assert.hpp"
+#include "geometry/rectangle.hpp"
 #include "geometry/vector.hpp"
 #include "rotation.hpp"
 #include "subtype.hpp"
 #include "utils.hpp"
 
+using geometry::Rectangle;
 using geometry::Vector;
 
 using FactoryType = Subtype;
@@ -36,6 +38,17 @@ struct Factory {
   FactoryType type{};
   bool operator==(const Factory& other) const = default;
 };
+
+inline Rectangle as_rectangle(const Factory& factory) {
+  return Rectangle::from_top_left_and_dimensions(factory.handle, {5, 5});
+}
+
+// TODO when we need it
+/*
+inline Rectangle as_rectangle(const Conveyor3& conveyor) {
+  return Rectangle::from_top_left_and_dimensions(obstacle.handle, obstacle.dimensions);
+}
+*/
 
 struct Mine {
   Vector handle;

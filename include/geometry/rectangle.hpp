@@ -54,13 +54,6 @@ class Rectangle {
     const Rectangle* rectangle_ = nullptr;
   };
 
-  template <ThingWithHandleAndDimensions ThingT>
-  static Rectangle from(ThingT thing) {
-    // TODO: This is a bit wrong: handle might not be top-left (e.g. mine). Maybe use more
-    // expressive accessor here (e.g. `top_left()`)?
-    return Rectangle(thing.handle, thing.dimensions);
-  }
-
   [[nodiscard]] Vector top_left() const { return top_left_; }
   [[nodiscard]] Vector bottom_right() const { return bottom_right_; }
   [[nodiscard]] Vector dimensions() const { return dimensions_; }
