@@ -37,13 +37,14 @@ class Field {
   }
 
   [[nodiscard]] geometry::Vec2 dimensions() const { return dimensions_; }
+  [[nodiscard]] std::vector<CellT_> map() const { return map_.data(); }
 
  private:
   geometry::Vec2 dimensions_;
   geometry::TwoDimensionalVector<CellT, InitialValue> map_;
 };
 
-template<typename FieldT>
+template <typename FieldT>
 bool any_neighbor_is(const FieldT& field, Vec2 cell, const typename FieldT::CellT& cell_value) {
   bool any_is = false;
   any_is |= field.at(cell + Vec2{0, -1}) == cell_value;

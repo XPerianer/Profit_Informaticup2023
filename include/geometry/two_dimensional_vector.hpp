@@ -16,6 +16,8 @@ class TwoDimensionalVector {
 
   [[nodiscard]] Vec2 dimensions() const { return dimensions_; }
 
+  [[nodiscard]] std::vector<T> data() const { return data_; }
+
   T& operator[](Vec2 index) { return data_[scalar_index(index)]; }
 
   const T& operator[](Vec2 index) const { return data_[scalar_index(index)]; }
