@@ -14,6 +14,7 @@ add_executable(
   unit_test
   serialization_test.cpp
   parsing_test.cpp
+  geometry_test.cpp
 )
 
 target_link_libraries(

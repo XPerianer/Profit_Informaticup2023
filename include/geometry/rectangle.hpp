@@ -6,12 +6,16 @@
 
 namespace geometry {
 
-template <typename T>
-concept ThingWithHandleAndDimensions = requires(T thing) {
-  { thing.handle } -> std::convertible_to<Vec2>;
-  { thing.dimensions } -> std::convertible_to<Vec2>;
-};
-
+/**
+ * Many objects like Deposits, Factories and Obstacles have a rectangular shape which all share
+ * a common iteration in the form of:
+ * for ({x,y} in object.top_left to object.bottom_right).
+ * Rectangle is a helper class to ease these iterations, further border accesses.
+ * Intervals are defined in a half-opened manner [top_left, bottom_right[, following
+ * https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html.
+ * Use max_coord instead of bottom_right for a closed-interval.
+ *
+ */
 class Rectangle {
  public:
   class Iterator {
@@ -23,7 +27,8 @@ class Rectangle {
     using reference = const Vec2&;
 
     constexpr Iterator() = default;
-    explicit constexpr Iterator(const Rectangle& rectangle) : rectangle_{&rectangle} {}
+    explicit constexpr Iterator(const Rectangle& rectangle)
+        : current_value_(rectangle.top_left()), rectangle_{&rectangle} {}
 
     constexpr reference operator*() const { return current_value_; }
     constexpr pointer operator->() const { return &current_value_; }
@@ -57,6 +62,10 @@ class Rectangle {
 
   [[nodiscard]] constexpr Vec2 top_left() const { return top_left_; }
   [[nodiscard]] constexpr Vec2 bottom_right() const { return bottom_right_; }
+  [[nodiscard]] constexpr Vec2 min_coord() const { return top_left_; }
+  [[nodiscard]] constexpr Vec2 max_coord() const {
+    return std::max(top_left_, bottom_right_ - Vec2{1, 1});
+  }
   [[nodiscard]] constexpr Vec2 dimensions() const { return dimensions_; }
 
   constexpr static Rectangle from_top_left_and_dimensions(Vec2 top_left, Vec2 dimensions) {
@@ -77,8 +86,8 @@ class Rectangle {
 };
 
 constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
-  return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.bottom_right().x() - 1 ||
-         coordinate.y() == rect.top_left().y() || coordinate.y() == rect.bottom_right().y() - 1;
+  return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.max_coord().x() ||
+         coordinate.y() == rect.top_left().y() || coordinate.y() == rect.max_coord().y();
 }
 
 /* Cells that are connected a border cell of the rectangle */
@@ -90,12 +99,12 @@ constexpr std::vector<Vec2> outer_connected_border_cells(const Rectangle& rect) 
 
   for (Coordinate offset = 0; offset < rect.dimensions().width(); ++offset) {
     *it++ = rect.top_left() + Vec2{offset, -1};
-    *it++ = rect.top_left() + Vec2{offset, rect.dimensions().height() + 1};
+    *it++ = rect.top_left() + Vec2{offset, rect.dimensions().height()};
   }
 
   for (Coordinate offset = 0; offset < rect.dimensions().height(); ++offset) {
     *it++ = rect.top_left() + Vec2{-1, offset};
-    *it++ = rect.top_left() + Vec2{rect.dimensions().width() + 1, offset};
+    *it++ = rect.top_left() + Vec2{rect.dimensions().width(), offset};
   }
 
   return result;

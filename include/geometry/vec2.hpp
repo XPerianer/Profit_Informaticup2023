@@ -3,7 +3,6 @@
 
 namespace geometry {
 
-// TODO: Naming: Collides with std::vector (especially when considering `TwoDimensionalVector`)
 class Vec2 {
  public:
   constexpr Vec2() = default;
