@@ -23,7 +23,7 @@ class TwoDimensionalVector {
  private:
   [[nodiscard]] size_t scalar_index(Vec2 index) const {
     return static_cast<size_t>(index.y()) * static_cast<size_t>(dimensions_.width()) +
-           static_cast<size_t>(index.y());
+           static_cast<size_t>(index.x());
   }
 
   std::vector<T> data_;
