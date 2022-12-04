@@ -3,6 +3,7 @@
 #include <variant>
 #include <vector>
 
+#include "fields/distance_map.hpp"
 #include "fields/field.hpp"
 #include "fields/occupancy_map.hpp"
 #include "geometry/rectangle.hpp"
@@ -18,6 +19,23 @@ using namespace profit;
 using namespace geometry;
 // NOLINTEND(google-build-using-namespace)
 
+// For now, we allow exception escape (causing std::terminate -> error shown)
+int main() {  // NOLINT(bugprone-exception-escape)
+  parsing::Input input = parsing::parse(std::cin);
+
+  // TODO: lots of calculations with input
+  std::vector<PlaceableObject> result = {};
+
+#ifdef NDEBUG
+  std::cout << serialization::serialize(result);
+#else
+  // Extented output for profit website
+  serialization::Output output = serialization::Output{input.dimensions, input.turns,   input.time,
+                                                       input.products,   input.objects, result};
+  std::cout << serialization::serialize_detailed(output);
+#endif
+  return 0;
+}
 /*
  * Überlegungen / Ideen:
  * Zerlegung in Teilprobleme: Tricky, weil nach Zerlegung potenziell nicht mehr rechteckig
@@ -78,88 +96,6 @@ inline void select_deposits_and_products(const parsing::Input& input) {
   }
 }
 
-using DistanceT = int16_t;
-constexpr DistanceT NOT_REACHABLE = -1;
-
-using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
-
-/* Returns an approximation */
-inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancies) {
-  DistanceMap distances(occupancies.dimensions());
-
-  // Invariante: Für Felder, die in der queue sind, gilt: Dieses Feld haben wir erreicht, in
-  // (Feld-Wert) Schritten, und hier dürfen Inputs für Conveyors/Combiners hin
-  std::queue<Vec2> reached_ingress_fields;
-
-  auto cell_reachable = [&](const Vec2 cell, DistanceT distance) {
-    if (distances.at(cell) == NOT_REACHABLE) {
-      reached_ingress_fields.emplace(cell);
-      distances.set(cell, distance);
-    }
-  };
-
-  auto place = [&](auto placeable, DistanceT distance) -> void {
-    if (!collides<>(placeable, occupancies)) {
-      for (const Vec2 downstream_ingress_cell : placeable.downstream_ingress_cells()) {
-        if (occupancies.at(downstream_ingress_cell) != CellOccupancy::EMPTY) {
-          continue;
-        }
-        if (any_neighbor_is(occupancies, downstream_ingress_cell, CellOccupancy::EGRESS)) {
-          continue;
-        }
-
-        cell_reachable(downstream_ingress_cell, distance);
-      }
-    }
-  };
-
-  for (Vec2 possible_ingress_location : outer_connected_border_cells(as_rectangle(deposit))) {
-    for (auto rotation : ROTATIONS) {
-      auto mine = Mine::with_ingress(possible_ingress_location, rotation);
-      place(mine, 1);
-    }
-  }
-
-  // TODO
-  // Conveyor * 2 längen * 4 rotationen
-  // Combiner *  2 positionierungen (links, rechts die äußersten eingänge) * 4 rotationen
-
-  // Für eine Cell in downstream_ingress_cell:
-  // Für Conveyor 3
-  // Gehe alle Rotationen durch
-  // Schaue, ob collided
-  // Wenn nicht collided, schreibe in distance map und füge neighbor_ingresses in die queue
-  while (!reached_ingress_fields.empty()) {
-    Vec2 reached_ingress = reached_ingress_fields.front();
-    reached_ingress_fields.pop();
-
-    for (auto rotation : ROTATIONS) {
-      // 3 conveyor
-      auto conveyor_3 = Conveyor3::with_ingress(reached_ingress, rotation);
-      place(conveyor_3, static_cast<DistanceT>(distances.at(reached_ingress) + 1));
-
-      // 4 conveyor
-      auto conveyor_4 = Conveyor4::with_ingress(reached_ingress, rotation);
-      place(conveyor_4, static_cast<DistanceT>(distances.at(reached_ingress) + 1));
-
-      // Combiner
-      auto possible_combiners = {Combiner::with_left_ingress(reached_ingress, rotation),
-                                 Combiner::with_right_ingress(reached_ingress, rotation)};
-      for (auto possible_combiner : possible_combiners) {
-        if (std::ranges::any_of(possible_combiner.ingresses(), [&](const Vec2 ingress) {
-              return any_neighbor_is(occupancies, ingress, CellOccupancy::EGRESS);
-            })) {
-          continue;
-        }
-        place(possible_combiner, static_cast<DistanceT>(distances.at(reached_ingress) + 1));
-      }
-    };
-    // check if fields of other ingresses are free
-  }
-
-  return distances;
-}
-
 inline std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
                                                            Vec2 /*ingress_target_field*/,
                                                            const OccupancyMap& /*occupancies*/) {
@@ -193,60 +129,3 @@ inline std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_f
 }
 
 }  // namespace production_realization
-
-using namespace production_realization;
-
-// For now, we allow exception escape (causing std::terminate -> error shown)
-int main() {  // NOLINT(bugprone-exception-escape)
-  parsing::Input input = parsing::parse(std::cin);
-
-  // TODO: lots of calculations with input
-  std::vector<PlaceableObject> result = {};
-  OccupancyMap occupancy_map = create_from(input);
-
-  for (const auto& product : input.products) {
-    const auto& requirements = product.requirements;
-    const std::vector<Deposit> input_deposits = get_deposits(input);
-
-    std::vector<Deposit> useful_deposits;
-    std::copy_if(input_deposits.begin(), input_deposits.end(), std::back_inserter(useful_deposits),
-                 [&](const Deposit& deposit) { return requirements[deposit.type] != 0; });
-
-    // Now try if we can make this work
-    for (auto useful_deposit : useful_deposits) {
-      DistanceMap distances = distances_from(useful_deposit, occupancy_map);
-      for (Coordinate y = 0; y < input.dimensions.y(); ++y) {
-        for (Coordinate x = 0; x < input.dimensions.x(); ++x) {
-          int current = static_cast<int>(distances.at({x, y}));
-          if (current > 0 && current < 10) {
-            std::cout << "0" << current;
-          } else if (current < 0) {
-            std::cout << "xx";
-          } else {
-            std::cout << current;
-          }
-        }
-        std::cout << std::endl;
-      }
-      std::cout << std::endl;
-      std::cout << std::endl;
-    }
-  }
-
-  /*for (Coordinate y = 0; y < input.dimensions.y(); ++y) {
-    for (Coordinate x = 0; x < input.dimensions.x(); ++x) {
-      std::cout << static_cast<int>(occupancy_map.at({x, y}));
-    }
-    std::cout << std::endl;
-  }*/
-
-#ifdef NDEBUG
-  std::cout << serialization::serialize(result);
-#else
-  // Extented output for profit website
-  serialization::Output output = serialization::Output{input.dimensions, input.turns,   input.time,
-                                                       input.products,   input.objects, result};
-  std::cout << serialization::serialize_detailed(output);
-#endif
-  return 0;
-}

@@ -49,6 +49,13 @@ TEST(Rectangle, OuterCells) {
   EXPECT_TRUE(std::is_permutation(actual.begin(), actual.end(), expected.begin()));
 }
 
+TEST(Rectangle, 1x1OuterCells) {
+  auto rect = Rectangle::from_top_left_and_dimensions(Vec2{1, 1}, Vec2{1, 1});
+  auto actual = outer_connected_border_cells(rect);
+  auto expected = {Vec2{1, 0}, Vec2{0, 1}, Vec2{2, 1}, Vec2{1, 2}};
+  EXPECT_TRUE(std::is_permutation(actual.begin(), actual.end(), expected.begin()));
+}
+
 TEST(Rectangle, IsOnBorder) {
   auto rect = Rectangle::from_top_left_and_dimensions(Vec2{1, 1}, Vec2{5, 5});
   auto border_cells = {Vec2{1, 1}, Vec2{2, 1}, Vec2{3, 1}, Vec2{4, 1}, Vec2{5, 1}, Vec2{1, 1},

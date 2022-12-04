@@ -37,8 +37,7 @@ struct Combiner {
         case Rotation::DOWN_TO_UP:
           return Vec2{coordinate.x() + 1, coordinate.y() - 1};
         default:
-          FAIL(
-              "Invalid rotation");  // https://stackoverflow.com/questions/33607284/control-reaches-end-of-non-void-function-with-fully-handled-case-switch-over-a
+          FAIL("Unexpected control flow.");
       }
     }();
     return Combiner{handle, rotation};
@@ -117,16 +116,20 @@ struct Combiner {
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
         return {handle + Vec2{-1, -1}, handle + Vec2{0, -1}, handle + Vec2{-1, 0},
-                handle + Vec2{0, 0},   handle + Vec2{1, 0},  handle + Vec2{-1, 1} + Vec2{0, 1}};
+                handle + Vec2{0, 0},   handle + Vec2{1, 0},  handle + Vec2{-1, 1},
+                handle + Vec2{0, 1}};
       case Rotation::UP_TO_DOWN:
         return {handle + Vec2{-1, -1}, handle + Vec2{0, -1}, handle + Vec2{1, -1},
-                handle + Vec2{-1, 0},  handle + Vec2{0, 0},  handle + Vec2{1, 0} + Vec2{0, 1}};
+                handle + Vec2{-1, 0},  handle + Vec2{0, 0},  handle + Vec2{1, 0},
+                handle + Vec2{0, 1}};
       case Rotation::RIGHT_TO_LEFT:
         return {handle + Vec2{0, -1}, handle + Vec2{1, -1}, handle + Vec2{-1, 0},
-                handle + Vec2{0, 0},  handle + Vec2{1, 0},  handle + Vec2{0, 1} + Vec2{1, 1}};
+                handle + Vec2{0, 0},  handle + Vec2{1, 0},  handle + Vec2{0, 1},
+                handle + Vec2{1, 1}};
       case Rotation::DOWN_TO_UP:
         return {handle + Vec2{0, -1}, handle + Vec2{-1, 0}, handle + Vec2{0, 0},
-                handle + Vec2{1, 0},  handle + Vec2{-1, 1}, handle + Vec2{0, 1} + Vec2{1, 1}};
+                handle + Vec2{1, 0},  handle + Vec2{-1, 1}, handle + Vec2{0, 1},
+                handle + Vec2{1, 1}};
       default:
         FAIL("Unexpected control flow.");
     }
