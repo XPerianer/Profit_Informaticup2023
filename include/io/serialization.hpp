@@ -6,7 +6,6 @@
 #include "placeable.hpp"
 #include "utils.hpp"
 
-
 namespace profit::serialization {
 
 struct Output {
