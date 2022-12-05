@@ -18,6 +18,27 @@ using geometry::Vec2;
 using FactoryType = Subtype;
 constexpr size_t FACTORY_TYPE_COUNT = SUBTYPE_COUNT;
 
+[[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells(Vec2 egress,
+                                                                     Rotation rotation) {
+  Vec2 top = egress + Vec2{0, -1};
+  Vec2 right = egress + Vec2{1, 0};
+  Vec2 down = egress + Vec2{0, 1};
+  Vec2 left = egress + Vec2{-1, 0};
+
+  switch (rotation) {
+    case Rotation::LEFT_TO_RIGHT:
+      return {top, right, down};
+    case Rotation::UP_TO_DOWN:
+      return {left, right, down};
+    case Rotation::RIGHT_TO_LEFT:
+      return {top, left, down};
+    case Rotation::DOWN_TO_UP:
+      return {top, left, right};
+    default:
+      FAIL("Unexpected control flow.");
+  }
+}
+
 struct Combiner {
   constexpr static size_t OCCUPIED_CELL_COUNT = 7;
   Vec2 handle;
@@ -91,25 +112,8 @@ struct Combiner {
     }
   }
 
-  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells()
-      const {  // todo: duplicate to mine
-    Vec2 top = egress() + Vec2{0, -1};
-    Vec2 right = egress() + Vec2{1, 0};
-    Vec2 down = egress() + Vec2{0, 1};
-    Vec2 left = egress() + Vec2{-1, 0};
-
-    switch (rotation) {
-      case Rotation::LEFT_TO_RIGHT:
-        return {top, right, down};
-      case Rotation::UP_TO_DOWN:
-        return {left, right, down};
-      case Rotation::RIGHT_TO_LEFT:
-        return {top, left, down};
-      case Rotation::DOWN_TO_UP:
-        return {top, left, right};
-      default:
-        FAIL("Unexpected control flow.");
-    }
+  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
+    return ::profit::downstream_ingress_cells(egress(), rotation);
   }
 
   [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
@@ -176,27 +180,6 @@ struct Conveyor3 {
     }
   }
 
-  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells()
-      const {  // todo: duplicate to mine
-    Vec2 top = egress() + Vec2{0, -1};
-    Vec2 right = egress() + Vec2{1, 0};
-    Vec2 down = egress() + Vec2{0, 1};
-    Vec2 left = egress() + Vec2{-1, 0};
-
-    switch (rotation) {
-      case Rotation::LEFT_TO_RIGHT:
-        return {top, right, down};
-      case Rotation::UP_TO_DOWN:
-        return {left, right, down};
-      case Rotation::RIGHT_TO_LEFT:
-        return {top, left, down};
-      case Rotation::DOWN_TO_UP:
-        return {top, left, right};
-      default:
-        FAIL("Unexpected control flow.");
-    }
-  }
-
   [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
@@ -252,25 +235,8 @@ struct Conveyor4 {
     }
   }
 
-  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells()
-      const {  // todo: duplicate to mine
-    Vec2 top = egress() + Vec2{0, -1};
-    Vec2 right = egress() + Vec2{1, 0};
-    Vec2 down = egress() + Vec2{0, 1};
-    Vec2 left = egress() + Vec2{-1, 0};
-
-    switch (rotation) {
-      case Rotation::LEFT_TO_RIGHT:
-        return {top, right, down};
-      case Rotation::UP_TO_DOWN:
-        return {left, right, down};
-      case Rotation::RIGHT_TO_LEFT:
-        return {top, left, down};
-      case Rotation::DOWN_TO_UP:
-        return {top, left, right};
-      default:
-        FAIL("Unexpected control flow.");
-    }
+  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
+    return ::profit::downstream_ingress_cells(egress(), rotation);
   }
 
   [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
@@ -348,23 +314,7 @@ struct Mine {
   }
 
   [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
-    Vec2 top = egress() + Vec2{0, -1};
-    Vec2 right = egress() + Vec2{1, 0};
-    Vec2 down = egress() + Vec2{0, 1};
-    Vec2 left = egress() + Vec2{-1, 0};
-
-    switch (rotation) {
-      case Rotation::LEFT_TO_RIGHT:
-        return {top, right, down};
-      case Rotation::UP_TO_DOWN:
-        return {left, right, down};
-      case Rotation::RIGHT_TO_LEFT:
-        return {top, left, down};
-      case Rotation::DOWN_TO_UP:
-        return {top, left, right};
-      default:
-        FAIL("Unexpected control flow.");
-    }
+    return ::profit::downstream_ingress_cells(egress(), rotation);
   }
 
   [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
