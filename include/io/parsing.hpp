@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <ranges>
 #include <string>
 #include <variant>
 #include <vector>
@@ -10,6 +11,7 @@
 #include "landscape.hpp"
 #include "placeable.hpp"
 #include "product.hpp"
+
 
 namespace profit::parsing {
 
@@ -23,8 +25,8 @@ struct Input {
   static constexpr int32_t DEFAULT_TIME = 300;
   bool operator==(const Input& other) const {
     return dimensions == other.dimensions && turns == other.turns && time == other.time &&
-           std::is_permutation(products.begin(), products.end(), other.products.begin()) &&
-           std::is_permutation(objects.begin(), objects.end(), other.objects.begin());
+           std::ranges::is_permutation(products, other.products) &&
+           std::ranges::is_permutation(objects, other.objects);
   }
 };
 

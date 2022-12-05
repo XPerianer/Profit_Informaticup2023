@@ -250,9 +250,7 @@ TEST(DistanceMap, FixedMinePlacement) {
                                                NOT_REACHABLE,
                                                NOT_REACHABLE};
   EXPECT_EQ(distance_map.map(), expected_distances);
-  EXPECT_TRUE(std::is_permutation(expected_reached_ingresses.begin(),
-                                  expected_reached_ingresses.end(),
-                                  actual_reached_ingresses.begin()));
+  EXPECT_TRUE(std::ranges::is_permutation(expected_reached_ingresses, actual_reached_ingresses));
 }
 
 /**
@@ -307,9 +305,7 @@ TEST(DistanceMap, MinePlacements) {
                                                NOT_REACHABLE,
                                                NOT_REACHABLE};
   EXPECT_EQ(distance_map.map(), expected_distances);
-  EXPECT_TRUE(std::is_permutation(expected_reached_ingresses.begin(),
-                                  expected_reached_ingresses.end(),
-                                  actual_reached_ingresses.begin()));
+  EXPECT_TRUE(std::ranges::is_permutation(expected_reached_ingresses, actual_reached_ingresses));
 }
 
 /**
@@ -361,7 +357,5 @@ TEST(DistanceMap, MoveByOne) {
                                                2,
                                                2};
   EXPECT_EQ(distance_map.map(), expected_distances);
-  EXPECT_TRUE(std::is_permutation(expected_reached_ingresses.begin(),
-                                  expected_reached_ingresses.end(),
-                                  actual_reached_ingresses.begin()));
+  EXPECT_TRUE(std::ranges::is_permutation(expected_reached_ingresses, actual_reached_ingresses));
 }
