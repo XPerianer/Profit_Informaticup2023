@@ -97,7 +97,7 @@ struct Combiner {
     }
   }
 
-  [[nodiscard]] constexpr std::vector<Vec2> ingresses() const {
+  [[nodiscard]] constexpr std::array<Vec2, 3> ingresses() const {
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
         return {handle + Vec2{-1, -1}, handle + Vec2{-1, 0}, handle + Vec2{-1, 1}};
@@ -180,12 +180,15 @@ struct Conveyor3 {
     }
   }
 
+  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
+    return ::profit::downstream_ingress_cells(egress(), rotation);
+  }
+
   [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
       case Rotation::RIGHT_TO_LEFT:
-        return {handle + Vec2{-1, 0}, handle + Vec2{0, 0},
-                handle + Vec2{1, 0}};  // would Rectangle be a better choice here?
+        return {handle + Vec2{-1, 0}, handle + Vec2{0, 0}, handle + Vec2{1, 0}};
       case Rotation::UP_TO_DOWN:
       case Rotation::DOWN_TO_UP:
         return {handle + Vec2{0, -1}, handle + Vec2{0, 0}, handle + Vec2{0, 1}};

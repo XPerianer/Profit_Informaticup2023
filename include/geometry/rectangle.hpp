@@ -2,6 +2,7 @@
 #include <concepts>
 #include <vector>
 
+#include "assert.hpp"
 #include "geometry/vec2.hpp"
 
 namespace geometry {
@@ -63,9 +64,7 @@ class Rectangle {
   [[nodiscard]] constexpr Vec2 top_left() const { return top_left_; }
   [[nodiscard]] constexpr Vec2 bottom_right() const { return bottom_right_; }
   [[nodiscard]] constexpr Vec2 min_coord() const { return top_left_; }
-  [[nodiscard]] constexpr Vec2 max_coord() const {
-    return std::max(top_left_, bottom_right_ - Vec2{1, 1});
-  }
+  [[nodiscard]] constexpr Vec2 max_coord() const { return bottom_right_ - Vec2{1, 1}; }
   [[nodiscard]] constexpr Vec2 dimensions() const { return dimensions_; }
 
   constexpr static Rectangle from_top_left_and_dimensions(Vec2 top_left, Vec2 dimensions) {
@@ -78,7 +77,10 @@ class Rectangle {
 
  private:
   constexpr Rectangle(Vec2 top_left, Vec2 dimensions)
-      : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {}
+      : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {
+    DEBUG_ASSERT(bottom_right_.x() > top_left_.x() && bottom_right_.y() > top_left_.x(),
+                 "Invalid Rectangle");
+  }
 
   Vec2 top_left_;
   Vec2 bottom_right_;
@@ -90,7 +92,7 @@ constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
          coordinate.y() == rect.top_left().y() || coordinate.y() == rect.max_coord().y();
 }
 
-/* Cells that are connected a border cell of the rectangle */
+/* Cells that are connected to a border cell of the rectangle */
 constexpr std::vector<Vec2> outer_connected_border_cells(const Rectangle& rect) {
   std::vector<Vec2> result(2 * static_cast<int>(rect.dimensions().width()) +
                            2 * static_cast<int>(rect.dimensions().height()));

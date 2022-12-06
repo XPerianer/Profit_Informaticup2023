@@ -39,7 +39,7 @@ inline bool set_ingress(DistanceMap& distances, const OccupancyMap& occupancy_ma
  * Tries to place objects in distances and adds new reacheable cells to reached_ingresses.
  * Post conditions:
  * - adds next ingresses to reached_ingresses
- * - for each viables new ingress, distances[ingress] = distance
+ * - for each viable new ingress, distances[ingress] = distance
  */
 inline void place_objects(DistanceMap& distances, const OccupancyMap& occupancy_map,
                           const std::vector<PlaceableObject>& objects, DistanceT distance,

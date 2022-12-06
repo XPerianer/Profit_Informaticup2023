@@ -59,11 +59,18 @@ TEST(Rectangle, 1x1OuterCells) {
 
 TEST(Rectangle, IsOnBorder) {
   auto rect = Rectangle::from_top_left_and_dimensions(Vec2{1, 1}, Vec2{5, 5});
-  auto border_cells = {Vec2{1, 1}, Vec2{2, 1}, Vec2{3, 1}, Vec2{4, 1}, Vec2{5, 1}, Vec2{1, 1},
-                       Vec2{5, 1}, Vec2{1, 2}, Vec2{5, 2}, Vec2{1, 3}, Vec2{5, 3}, Vec2{1, 4},
-                       Vec2{5, 4}, Vec2{1, 5}, Vec2{2, 5}, Vec2{3, 5}, Vec2{4, 5}, Vec2{5, 5}};
+  auto border_cells = {Vec2{1, 1}, Vec2{2, 1}, Vec2{3, 1}, Vec2{4, 1}, Vec2{5, 1}, Vec2{5, 1},
+                       Vec2{1, 2}, Vec2{5, 2}, Vec2{1, 3}, Vec2{5, 3}, Vec2{1, 4}, Vec2{5, 4},
+                       Vec2{1, 5}, Vec2{2, 5}, Vec2{3, 5}, Vec2{4, 5}, Vec2{5, 5}};
+  auto inner_cells = {
+      Vec2{2, 2}, Vec2{3, 2}, Vec2{4, 2}, Vec2{2, 3}, Vec2{3, 3},
+      Vec2{4, 3}, Vec2{2, 4}, Vec2{3, 4}, Vec2{4, 4},
+  };
+
   EXPECT_TRUE(
       std::ranges::all_of(border_cells, [&](auto cell) { return is_on_border(rect, cell); }));
+  EXPECT_TRUE(
+      std::ranges::none_of(inner_cells, [&](auto cell) { return is_on_border(rect, cell); }));
 }
 
 TEST(Rectangle, ZeroSized) {

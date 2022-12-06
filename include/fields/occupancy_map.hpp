@@ -34,8 +34,7 @@ inline OccupancyMap occupancies_from(const parsing::Input& input) {
                                    }
                                  },
                                  [&](const Obstacle& obstacle) {
-                                   const auto rect = as_rectangle(obstacle);
-                                   for (Vec2 coordinate : rect) {
+                                   for (Vec2 coordinate : as_rectangle(obstacle)) {
                                      occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
                                    }
                                  }},
@@ -45,12 +44,16 @@ inline OccupancyMap occupancies_from(const parsing::Input& input) {
 }
 
 template <typename Placeable>
-inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map,
-                     bool allow_conveyor_crossings = false) {
+inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map) {
+  return std::ranges::any_of(object.occupied_cells(), [&](const Vec2 cell) {
+    return occupancy_map.at(cell) != CellOccupancy::EMPTY;
+  });
+}
+
+inline bool collides(const Combiner& object, const OccupancyMap& occupancy_map) {
   return std::ranges::any_of(object.occupied_cells(), [&](const Vec2 cell) {
     auto occupancy = occupancy_map.at(cell);
-    return (occupancy != CellOccupancy::EMPTY && occupancy != CellOccupancy::CONVEYOR_CROSSING) ||
-           (occupancy != CellOccupancy::EMPTY && !allow_conveyor_crossings);
+    return occupancy != CellOccupancy::EMPTY && occupancy != CellOccupancy::CONVEYOR_CROSSING;
   });
 }
 
