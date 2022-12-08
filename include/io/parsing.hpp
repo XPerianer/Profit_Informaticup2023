@@ -12,7 +12,6 @@
 #include "placeable.hpp"
 #include "product.hpp"
 
-
 namespace profit::parsing {
 
 struct Input {

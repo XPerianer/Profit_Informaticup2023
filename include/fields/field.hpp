@@ -1,5 +1,7 @@
 #pragma once
 
+#include <span>
+
 #include "geometry/two_dimensional_vector.hpp"
 #include "geometry/vec2.hpp"
 #include "utils.hpp"
@@ -37,7 +39,7 @@ class Field {
   }
 
   [[nodiscard]] geometry::Vec2 dimensions() const { return dimensions_; }
-  [[nodiscard]] std::vector<CellT_> map() const { return map_.data(); }
+  [[nodiscard]] std::span<const CellT> map() { return map_.span(); }
 
  private:
   geometry::Vec2 dimensions_;

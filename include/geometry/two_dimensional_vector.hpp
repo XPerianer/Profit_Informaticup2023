@@ -1,4 +1,6 @@
 #pragma once
+#include <cstddef>
+#include <span>
 #include <vector>
 
 #include "geometry/vec2.hpp"
@@ -16,7 +18,7 @@ class TwoDimensionalVector {
 
   [[nodiscard]] Vec2 dimensions() const { return dimensions_; }
 
-  [[nodiscard]] std::vector<T> data() const { return data_; }
+  [[nodiscard]] std::span<T> span() { return std::span{data_}; }
 
   T& operator[](Vec2 index) { return data_[scalar_index(index)]; }
 

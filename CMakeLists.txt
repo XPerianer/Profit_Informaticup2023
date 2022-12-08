@@ -36,6 +36,9 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     "-Wunused-exception-parameter" "-Wunused-member-function" "-Wshadow-all")
   list(APPEND COMPILER_WARNING_FLAGS "-Wno-gnu-zero-variadic-macro-arguments") # legal in c++20
 endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  list(APPEND COMPILER_WARNING_FLAGS "-Wno-return-type") # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=87950
+endif()
 
 
 ##### EXECUTABLES #####

@@ -14,7 +14,7 @@ namespace geometry {
  * Rectangle is a helper class to ease these iterations, further border accesses.
  * Intervals are defined in a half-opened manner [top_left, bottom_right[, following
  * https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html.
- * Use max_coord instead of bottom_right for a closed-interval.
+ * Use inner_bottom_right instead of bottom_right for a closed-interval.
  *
  */
 class Rectangle {
@@ -63,8 +63,8 @@ class Rectangle {
 
   [[nodiscard]] constexpr Vec2 top_left() const { return top_left_; }
   [[nodiscard]] constexpr Vec2 bottom_right() const { return bottom_right_; }
-  [[nodiscard]] constexpr Vec2 min_coord() const { return top_left_; }
-  [[nodiscard]] constexpr Vec2 max_coord() const { return bottom_right_ - Vec2{1, 1}; }
+  [[nodiscard]] constexpr Vec2 inner_top_left() const { return top_left_; }
+  [[nodiscard]] constexpr Vec2 inner_bottom_right() const { return bottom_right_ - Vec2{1, 1}; }
   [[nodiscard]] constexpr Vec2 dimensions() const { return dimensions_; }
 
   constexpr static Rectangle from_top_left_and_dimensions(Vec2 top_left, Vec2 dimensions) {
@@ -78,8 +78,8 @@ class Rectangle {
  private:
   constexpr Rectangle(Vec2 top_left, Vec2 dimensions)
       : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {
-    DEBUG_ASSERT(bottom_right_.x() > top_left_.x() && bottom_right_.y() > top_left_.x(),
-                 "Invalid Rectangle");
+    DEBUG_ASSERT(bottom_right_.x() > top_left_.x() && bottom_right_.y() > top_left_.y(),
+                 "Zero area rectangle not allowed.");
   }
 
   Vec2 top_left_;
@@ -88,8 +88,8 @@ class Rectangle {
 };
 
 constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
-  return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.max_coord().x() ||
-         coordinate.y() == rect.top_left().y() || coordinate.y() == rect.max_coord().y();
+  return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.inner_bottom_right().x() ||
+         coordinate.y() == rect.top_left().y() || coordinate.y() == rect.inner_bottom_right().y();
 }
 
 /* Cells that are connected to a border cell of the rectangle */

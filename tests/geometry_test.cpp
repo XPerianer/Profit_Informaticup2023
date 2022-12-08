@@ -14,7 +14,7 @@ TEST(Rectangle, FromDimensions) {
   auto expected_bottom_right = Vec2{6, 6};
   auto expected_max_coord = Vec2{5, 5};
   EXPECT_EQ(actual.bottom_right(), expected_bottom_right);
-  EXPECT_EQ(actual.max_coord(), expected_max_coord);
+  EXPECT_EQ(actual.inner_bottom_right(), expected_max_coord);
 }
 
 TEST(Rectangle, FromBottomRight) {
@@ -22,7 +22,7 @@ TEST(Rectangle, FromBottomRight) {
   auto expected_dimensions = Vec2{5, 5};
   auto expected_max_coord = Vec2{5, 5};
   EXPECT_EQ(actual.dimensions(), expected_dimensions);
-  EXPECT_EQ(actual.max_coord(), expected_max_coord);
+  EXPECT_EQ(actual.inner_bottom_right(), expected_max_coord);
 }
 
 TEST(Rectangle, IterationRange) {
@@ -71,11 +71,4 @@ TEST(Rectangle, IsOnBorder) {
       std::ranges::all_of(border_cells, [&](auto cell) { return is_on_border(rect, cell); }));
   EXPECT_TRUE(
       std::ranges::none_of(inner_cells, [&](auto cell) { return is_on_border(rect, cell); }));
-}
-
-TEST(Rectangle, ZeroSized) {
-  auto rect = Rectangle::from_top_left_and_dimensions(Vec2{1, 1}, Vec2{0, 0});
-  auto expected_min = Vec2{1, 1};
-  EXPECT_EQ(rect.min_coord(), expected_min);
-  EXPECT_EQ(rect.max_coord(), expected_min);
 }
