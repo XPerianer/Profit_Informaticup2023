@@ -1,8 +1,9 @@
 #include <nlohmann/json.hpp>
+#include <ranges>
 #include <vector>
 
+#include "io/parsing.hpp"
 #include "landscape.hpp"
-#include "parsing.hpp"
 #include "placeable.hpp"
 #include "utils.hpp"
 
@@ -18,11 +19,9 @@ struct Output {
 
   bool operator==(const Output& other) const {
     return dimensions == other.dimensions && turns == other.turns && time == other.time &&
-           std::is_permutation(products.begin(), products.end(), other.products.begin()) &&
-           std::is_permutation(landscape_objects.begin(), landscape_objects.end(),
-                               other.landscape_objects.begin()) &&
-           std::is_permutation(placeable_objects.begin(), placeable_objects.end(),
-                               other.placeable_objects.begin());
+           std::ranges::is_permutation(products, other.products) &&
+           std::ranges::is_permutation(landscape_objects, other.landscape_objects) &&
+           std::ranges::is_permutation(placeable_objects, other.placeable_objects);
   }
 };
 

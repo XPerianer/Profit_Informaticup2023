@@ -14,11 +14,14 @@ add_executable(
   unit_test
   serialization_test.cpp
   parsing_test.cpp
+  geometry_test.cpp
+  fields_test.cpp
 )
 
 target_link_libraries(
   unit_test
   GTest::gtest_main
+  gmock
 )
 
 include(GoogleTest)

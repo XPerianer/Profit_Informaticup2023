@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <variant>
 
 #include "assert.hpp"
@@ -17,22 +18,233 @@ using geometry::Vec2;
 using FactoryType = Subtype;
 constexpr size_t FACTORY_TYPE_COUNT = SUBTYPE_COUNT;
 
+[[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells(Vec2 egress,
+                                                                     Rotation rotation) {
+  Vec2 top = egress + Vec2{0, -1};
+  Vec2 right = egress + Vec2{1, 0};
+  Vec2 down = egress + Vec2{0, 1};
+  Vec2 left = egress + Vec2{-1, 0};
+
+  switch (rotation) {
+    case Rotation::LEFT_TO_RIGHT:
+      return {top, right, down};
+    case Rotation::UP_TO_DOWN:
+      return {left, right, down};
+    case Rotation::RIGHT_TO_LEFT:
+      return {top, left, down};
+    case Rotation::DOWN_TO_UP:
+      return {top, left, right};
+  }
+}
+
 struct Combiner {
+  constexpr static size_t OCCUPIED_CELL_COUNT = 7;
   Vec2 handle;
   Rotation rotation{};
+
   bool operator==(const Combiner& other) const = default;
+
+  static Combiner with_left_ingress(Vec2 coordinate, Rotation rotation) {
+    Vec2 handle = [&]() {
+      switch (rotation) {
+        case Rotation::LEFT_TO_RIGHT:
+          return coordinate + Vec2{1, 1};
+        case Rotation::UP_TO_DOWN:
+          return coordinate + Vec2{-1, 1};
+        case Rotation::RIGHT_TO_LEFT:
+          return coordinate + Vec2{-1, -1};
+        case Rotation::DOWN_TO_UP:
+          return coordinate + Vec2{1, -1};
+      }
+    }();
+    return Combiner{handle, rotation};
+  }
+
+  static Combiner with_right_ingress(Vec2 coordinate, Rotation rotation) {
+    Vec2 handle = [&]() {
+      switch (rotation) {
+        case Rotation::LEFT_TO_RIGHT:
+          return coordinate + Vec2{1, -1};
+        case Rotation::UP_TO_DOWN:
+          return coordinate + Vec2{1, 1};
+        case Rotation::RIGHT_TO_LEFT:
+          return coordinate + Vec2{-1, 1};
+        case Rotation::DOWN_TO_UP:
+          return coordinate + Vec2{-1, -1};
+      }
+    }();
+    return Combiner{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr Vec2 egress() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return handle + Vec2{1, 0};
+      case Rotation::UP_TO_DOWN:
+        return handle + Vec2{0, 1};
+      case Rotation::RIGHT_TO_LEFT:
+        return handle + Vec2{-1, 0};
+      case Rotation::DOWN_TO_UP:
+        return handle + Vec2{0, -1};
+    }
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, 3> ingresses() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return {handle + Vec2{-1, -1}, handle + Vec2{-1, 0}, handle + Vec2{-1, 1}};
+      case Rotation::UP_TO_DOWN:
+        return {handle + Vec2{-1, -1}, handle + Vec2{0, -1}, handle + Vec2{1, -1}};
+      case Rotation::RIGHT_TO_LEFT:
+        return {handle + Vec2{1, -1}, handle + Vec2{1, 0}, handle + Vec2{1, 1}};
+      case Rotation::DOWN_TO_UP:
+        return {handle + Vec2{-1, 1}, handle + Vec2{0, 1}, handle + Vec2{1, 1}};
+    }
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
+    return ::profit::downstream_ingress_cells(egress(), rotation);
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return {handle + Vec2{-1, -1}, handle + Vec2{0, -1}, handle + Vec2{-1, 0},
+                handle + Vec2{0, 0},   handle + Vec2{1, 0},  handle + Vec2{-1, 1},
+                handle + Vec2{0, 1}};
+      case Rotation::UP_TO_DOWN:
+        return {handle + Vec2{-1, -1}, handle + Vec2{0, -1}, handle + Vec2{1, -1},
+                handle + Vec2{-1, 0},  handle + Vec2{0, 0},  handle + Vec2{1, 0},
+                handle + Vec2{0, 1}};
+      case Rotation::RIGHT_TO_LEFT:
+        return {handle + Vec2{0, -1}, handle + Vec2{1, -1}, handle + Vec2{-1, 0},
+                handle + Vec2{0, 0},  handle + Vec2{1, 0},  handle + Vec2{0, 1},
+                handle + Vec2{1, 1}};
+      case Rotation::DOWN_TO_UP:
+        return {handle + Vec2{0, -1}, handle + Vec2{-1, 0}, handle + Vec2{0, 0},
+                handle + Vec2{1, 0},  handle + Vec2{-1, 1}, handle + Vec2{0, 1},
+                handle + Vec2{1, 1}};
+    }
+  }
 };
 
 struct Conveyor3 {
+  constexpr static size_t OCCUPIED_CELL_COUNT = 3;
   Vec2 handle;
   Rotation rotation{};
+
   bool operator==(const Conveyor3& other) const = default;
+
+  static Conveyor3 with_ingress(Vec2 coordinate, Rotation rotation) {
+    Vec2 handle = [&]() {
+      switch (rotation) {
+        case Rotation::LEFT_TO_RIGHT:
+          return coordinate + Vec2{1, 0};
+        case Rotation::UP_TO_DOWN:
+          return coordinate + Vec2{0, 1};
+        case Rotation::RIGHT_TO_LEFT:
+          return coordinate + Vec2{-1, 0};
+        case Rotation::DOWN_TO_UP:
+          return coordinate + Vec2{0, -1};
+      }
+    }();
+    return Conveyor3{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr bool can_overlap_at(const Vec2 cell) const { return cell == handle; }
+
+  [[nodiscard]] constexpr Vec2 egress() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return handle + Vec2{1, 0};
+      case Rotation::UP_TO_DOWN:
+        return handle + Vec2{0, 1};
+      case Rotation::RIGHT_TO_LEFT:
+        return handle + Vec2{-1, 0};
+      case Rotation::DOWN_TO_UP:
+        return handle + Vec2{0, -1};
+    }
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
+    return ::profit::downstream_ingress_cells(egress(), rotation);
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+      case Rotation::RIGHT_TO_LEFT:
+        return {handle + Vec2{-1, 0}, handle + Vec2{0, 0}, handle + Vec2{1, 0}};
+      case Rotation::UP_TO_DOWN:
+      case Rotation::DOWN_TO_UP:
+        return {handle + Vec2{0, -1}, handle + Vec2{0, 0}, handle + Vec2{0, 1}};
+    }
+  }
 };
 
 struct Conveyor4 {
+  constexpr static size_t OCCUPIED_CELL_COUNT = 4;
   Vec2 handle;
   Rotation rotation{};
+
   bool operator==(const Conveyor4& other) const = default;
+
+  static Conveyor4 with_ingress(Vec2 coordinate, Rotation rotation) {
+    Vec2 handle = [&]() {
+      switch (rotation) {
+        case Rotation::LEFT_TO_RIGHT:
+          return coordinate + Vec2{1, 0};
+        case Rotation::UP_TO_DOWN:
+          return coordinate + Vec2{0, 1};
+        case Rotation::RIGHT_TO_LEFT:
+          return coordinate + Vec2{-2, 0};
+        case Rotation::DOWN_TO_UP:
+          return coordinate + Vec2{0, -2};
+      }
+    }();
+    return Conveyor4{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr Vec2 egress() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return handle + Vec2{2, 0};
+      case Rotation::UP_TO_DOWN:
+        return handle + Vec2{0, 2};
+      case Rotation::RIGHT_TO_LEFT:
+        return handle + Vec2{-1, 0};
+      case Rotation::DOWN_TO_UP:
+        return handle + Vec2{0, -1};
+    }
+  }
+
+  [[nodiscard]] constexpr bool can_overlap_at(const Vec2 cell) const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+      case Rotation::RIGHT_TO_LEFT:
+        return cell == handle || cell == handle + Vec2{1, 0};
+      case Rotation::UP_TO_DOWN:
+      case Rotation::DOWN_TO_UP:
+        return cell == handle || cell == handle + Vec2{0, 1};
+    }
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
+    return ::profit::downstream_ingress_cells(egress(), rotation);
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+      case Rotation::RIGHT_TO_LEFT:
+        return {handle + Vec2{-1, 0}, handle + Vec2{0, 0}, handle + Vec2{1, 0},
+                handle + Vec2{2, 0}};
+      case Rotation::UP_TO_DOWN:
+      case Rotation::DOWN_TO_UP:
+        return {handle + Vec2{0, -1}, handle + Vec2{0, 0}, handle + Vec2{0, 1},
+                handle + Vec2{0, 2}};
+    }
+  }
 };
 
 struct Factory {
@@ -54,29 +266,60 @@ inline Rectangle as_rectangle(const Conveyor3& conveyor) {
 */
 
 struct Mine {
+  constexpr static size_t OCCUPIED_CELL_COUNT = 6;
   Vec2 handle;
   Rotation rotation{};
+
   bool operator==(const Mine& other) const = default;
 
   static Mine with_ingress(Vec2 coordinate, Rotation rotation) {
-    Vec2 handle;
+    Vec2 handle = [&]() {
+      switch (rotation) {
+        case Rotation::LEFT_TO_RIGHT:
+          return coordinate + Vec2{1, -1};
+        case Rotation::UP_TO_DOWN:
+          return coordinate + Vec2{0, 1};
+        case Rotation::RIGHT_TO_LEFT:
+          return coordinate + Vec2{-2, 0};
+        case Rotation::DOWN_TO_UP:
+          return coordinate + Vec2{-1, -2};
+      }
+    }();
+    return Mine{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr Vec2 egress() const {
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
-        handle = {coordinate.x() + 1, coordinate.y() - 1};
-        break;
+        return handle + Vec2{2, 1};
       case Rotation::UP_TO_DOWN:
-        handle = {coordinate.x(), coordinate.y() + 1};
-        break;
+        return handle + Vec2{0, 2};
       case Rotation::RIGHT_TO_LEFT:
-        handle = {coordinate.x() - 2, coordinate.y()};
-        break;
+        return handle + Vec2{-1, 0};
       case Rotation::DOWN_TO_UP:
-        handle = {coordinate.x() - 1, coordinate.y() - 2};
-        break;
-      default:
-        FAIL("Unhandled rotation");
+        return handle + Vec2{1, -1};
     }
-    return Mine{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, 3> downstream_ingress_cells() const {
+    return ::profit::downstream_ingress_cells(egress(), rotation);
+  }
+
+  [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return {handle + Vec2{0, 0}, handle + Vec2{1, 0}, handle + Vec2{-1, 1},
+                handle + Vec2{0, 1}, handle + Vec2{1, 1}, handle + Vec2{2, 1}};
+      case Rotation::UP_TO_DOWN:
+        return {handle + Vec2{0, -1}, handle + Vec2{0, 0}, handle + Vec2{1, 0},
+                handle + Vec2{0, 1},  handle + Vec2{1, 1}, handle + Vec2{0, 2}};
+      case Rotation::RIGHT_TO_LEFT:
+        return {handle + Vec2{-1, 0}, handle + Vec2{0, 0}, handle + Vec2{1, 0},
+                handle + Vec2{2, 0},  handle + Vec2{0, 1}, handle + Vec2{1, 1}};
+      case Rotation::DOWN_TO_UP:
+        return {handle + Vec2{1, -1}, handle + Vec2{0, 0}, handle + Vec2{1, 0},
+                handle + Vec2{0, 1},  handle + Vec2{1, 1}, handle + Vec2{1, 2}};
+    }
   }
 };
 

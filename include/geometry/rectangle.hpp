@@ -1,15 +1,11 @@
 #pragma once
 #include <concepts>
+#include <vector>
 
+#include "assert.hpp"
 #include "geometry/vec2.hpp"
 
 namespace geometry {
-
-template <typename T>
-concept ThingWithHandleAndDimensions = requires(T thing) {
-  { thing.handle } -> std::convertible_to<Vec2>;
-  { thing.dimensions } -> std::convertible_to<Vec2>;
-};
 
 class Rectangle {
  public:
@@ -22,7 +18,8 @@ class Rectangle {
     using reference = const Vec2&;
 
     constexpr Iterator() = default;
-    explicit constexpr Iterator(const Rectangle& rectangle) : rectangle_{&rectangle} {}
+    explicit constexpr Iterator(const Rectangle& rectangle)
+        : current_value_(rectangle.top_left()), rectangle_{&rectangle} {}
 
     constexpr reference operator*() const { return current_value_; }
     constexpr pointer operator->() const { return &current_value_; }
@@ -55,7 +52,14 @@ class Rectangle {
   };
 
   [[nodiscard]] constexpr Vec2 top_left() const { return top_left_; }
+  /**
+   * Extents are defined in a half-open manner [top_left, bottom_right[, following
+   * https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html.
+   * Use inner_bottom_right instead of bottom_right for a closed-interval.
+   */
   [[nodiscard]] constexpr Vec2 bottom_right() const { return bottom_right_; }
+  [[nodiscard]] constexpr Vec2 inner_top_left() const { return top_left_; }
+  [[nodiscard]] constexpr Vec2 inner_bottom_right() const { return bottom_right_ - Vec2{1, 1}; }
   [[nodiscard]] constexpr Vec2 dimensions() const { return dimensions_; }
 
   constexpr static Rectangle from_top_left_and_dimensions(Vec2 top_left, Vec2 dimensions) {
@@ -68,7 +72,10 @@ class Rectangle {
 
  private:
   constexpr Rectangle(Vec2 top_left, Vec2 dimensions)
-      : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {}
+      : top_left_{top_left}, bottom_right_{top_left + dimensions}, dimensions_{dimensions} {
+    DEBUG_ASSERT(bottom_right_.x() > top_left_.x() && bottom_right_.y() > top_left_.y(),
+                 "Zero area rectangle not allowed.");
+  }
 
   Vec2 top_left_;
   Vec2 bottom_right_;
@@ -76,12 +83,28 @@ class Rectangle {
 };
 
 constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
-  return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.bottom_right().x() - 1 ||
-         coordinate.y() == rect.top_left().y() || coordinate.y() == rect.bottom_right().y() - 1;
+  return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.inner_bottom_right().x() ||
+         coordinate.y() == rect.top_left().y() || coordinate.y() == rect.inner_bottom_right().y();
 }
 
-constexpr Rectangle left_border(const Rectangle& rect) {
-  return Rectangle::from_top_left_and_dimensions(rect.top_left(), {1, rect.dimensions().height()});
+/* Cells that are connected to a border cell of the rectangle */
+constexpr std::vector<Vec2> outer_connected_border_cells(const Rectangle& rect) {
+  std::vector<Vec2> result(2 * static_cast<int>(rect.dimensions().width()) +
+                           2 * static_cast<int>(rect.dimensions().height()));
+
+  auto it = result.begin();
+
+  for (Coordinate offset = 0; offset < rect.dimensions().width(); ++offset) {
+    *it++ = rect.top_left() + Vec2{offset, -1};
+    *it++ = rect.top_left() + Vec2{offset, rect.dimensions().height()};
+  }
+
+  for (Coordinate offset = 0; offset < rect.dimensions().height(); ++offset) {
+    *it++ = rect.top_left() + Vec2{-1, offset};
+    *it++ = rect.top_left() + Vec2{rect.dimensions().width(), offset};
+  }
+
+  return result;
 }
 
 [[nodiscard]] constexpr Rectangle::Iterator begin(const Rectangle& rect) {

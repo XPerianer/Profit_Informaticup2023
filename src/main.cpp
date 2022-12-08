@@ -3,13 +3,15 @@
 #include <variant>
 #include <vector>
 
-#include "field.hpp"
+#include "fields/distance_map.hpp"
+#include "fields/field.hpp"
+#include "fields/occupancy_map.hpp"
 #include "geometry/rectangle.hpp"
+#include "io/parsing.hpp"
+#include "io/serialization.hpp"
 #include "landscape.hpp"
-#include "parsing.hpp"
 #include "placeable.hpp"
 #include "rotation.hpp"
-#include "serialization.hpp"
 #include "utils.hpp"
 
 // NOLINTBEGIN(google-build-using-namespace): In main, we allow using these
@@ -34,7 +36,6 @@ int main() {  // NOLINT(bugprone-exception-escape)
 #endif
   return 0;
 }
-
 /*
  * Überlegungen / Ideen:
  * Zerlegung in Teilprobleme: Tricky, weil nach Zerlegung potenziell nicht mehr rechteckig
@@ -74,6 +75,7 @@ namespace production_realization {
 inline bool attempt_realize(const std::vector<Deposit>& /*deposits*/,
                             FactoryType /*factory_type*/) {
   // minen platzieren
+
   // fabrik platzieren
   // verbinden
   return false;
@@ -92,75 +94,6 @@ inline void select_deposits_and_products(const parsing::Input& input) {
     // Now try if we can make this work
     attempt_realize(useful_deposits, product.type);
   }
-}
-
-enum class CellOccupancy {
-  EMPTY,
-  BLOCKED,
-  CONVEYOR_CROSSING,
-  INPUT,
-  OUTPUT,
-};
-
-using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy::EMPTY>;
-
-inline OccupancyMap create_occupancy_map(const parsing::Input& input) {
-  OccupancyMap occupancy_map(input.dimensions);
-  for (const auto& object : input.objects) {
-    std::visit(utils::Overloaded{[&](const Deposit& deposit) {
-                                   const auto rect = as_rectangle(deposit);
-                                   for (Vec2 coordinate : rect) {
-                                     if (is_on_border(rect, coordinate)) {
-                                       occupancy_map.set(coordinate, CellOccupancy::OUTPUT);
-                                     } else {
-                                       occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
-                                     }
-                                   }
-                                 },
-                                 [&](const Obstacle& obstacle) {
-                                   const auto rect = as_rectangle(obstacle);
-                                   for (Vec2 coordinate : rect) {
-                                     occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
-                                   }
-                                 }},
-               object);
-  }
-  return occupancy_map;
-}
-
-inline bool collides(const Mine& /*mine*/, const OccupancyMap& /*occupancies*/) {
-  // TODO
-  return false;
-}
-
-using DistanceT = int16_t;
-constexpr DistanceT NOT_REACHABLE = -1;
-
-using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
-
-inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancies) {
-  DistanceMap distances(occupancies.dimensions());
-
-  // Invariante: Für Felder, die in der queue sind, gilt: Dieses Feld haben wir erreicht, in
-  // (Feld-Wert) Schritten, und hier dürfen Inputs für Conveyors/Combiners hin
-  std::queue<Vec2> reached_ingestion_fields;
-
-  const auto deposit_rect = as_rectangle(deposit);
-
-  for (Vec2 egress : left_border(deposit_rect)) {
-    // Check left side
-    for (auto rotation : ROTATIONS) {
-      // Check if mine can be placed
-      auto mine = Mine::with_ingress(egress - Vec2{1, 0}, static_cast<Rotation>(rotation));
-      if (collides(mine, occupancies)) {
-        continue;
-      }
-    }
-  }
-
-  // TODO
-
-  return distances;
 }
 
 inline std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
@@ -194,4 +127,5 @@ inline std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_f
     // combinern
   }
 }
+
 }  // namespace production_realization
