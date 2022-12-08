@@ -119,8 +119,9 @@ TEST(DistanceMap, FixedMinePlacement) {
   OccupancyMap occupancy_map(Vec2{5, 5});
   occupancy_map.set(Vec2{0, 0}, e);
   std::queue<Vec2> reached_ingresses;
-  place_object(distance_map, occupancy_map, Mine::with_ingress(Vec2{0, 1}, Rotation::LEFT_TO_RIGHT),
-               1, reached_ingresses);
+  update_reachability_if_placeable(distance_map, occupancy_map,
+                                   Mine::with_ingress(Vec2{0, 1}, Rotation::LEFT_TO_RIGHT), 1,
+                                   reached_ingresses);
   std::vector<Vec2> expected_reached_ingresses = {Vec2{3, 0}, Vec2{4, 1}, Vec2{3, 2}};
   std::vector<Vec2> actual_reached_ingresses = queue_to_vector(std::move(reached_ingresses));
   // clang-format off
@@ -141,8 +142,9 @@ TEST(DistanceMap, MinePlacements) {
   std::queue<Vec2> reached_ingresses;
   for (Vec2 possible_ingress_location : {Vec2{0, 1}, Vec2{1, 0}}) {
     for (auto rotation : ROTATIONS) {
-      place_object(distance_map, occupancy_map,
-                   Mine::with_ingress(possible_ingress_location, rotation), 1, reached_ingresses);
+      update_reachability_if_placeable(distance_map, occupancy_map,
+                                       Mine::with_ingress(possible_ingress_location, rotation), 1,
+                                       reached_ingresses);
     }
   }
   std::vector<Vec2> expected_reached_ingresses = {Vec2{3, 0}, Vec2{4, 1}, Vec2{3, 2},
@@ -159,25 +161,19 @@ TEST(DistanceMap, MinePlacements) {
   EXPECT_TRUE(std::ranges::is_permutation(expected_reached_ingresses, actual_reached_ingresses));
 }
 
-TEST(DistanceMap, MoveByOne) {
-  DistanceMap distance_map(Vec2{5, 5});
+TEST(DistanceMap, Initialization) {
   OccupancyMap occupancy_map(Vec2{5, 5});
+  Deposit deposit{.handle = Vec2{0, 0}, .dimensions = Vec2{1, 1}};
   occupancy_map.set(Vec2{0, 0}, CellOccupancy::EGRESS);
-  std::queue<Vec2> reached_ingresses;
-  distance_map.set(Vec2{1, 4}, 1);
-  move_by_one(distance_map, occupancy_map, Vec2{1, 4}, reached_ingresses);
+  DistanceMap distance_map = distances_from(deposit, occupancy_map);
 
-  std::vector<Vec2> expected_reached_ingresses = {Vec2{1, 1}, Vec2{2, 1}, Vec2{0, 2}, Vec2{1, 2},
-                                                  Vec2{2, 2}, Vec2{3, 2}, Vec2{3, 3}, Vec2{4, 3},
-                                                  Vec2{3, 4}, Vec2{4, 4}};
-  std::vector<Vec2> actual_reached_ingresses = queue_to_vector(std::move(reached_ingresses));
   // clang-format off
-  std::vector<DistanceT> expected_distances = {n, n, n, n, n,
-                                               n, 2, 2, n, n,
-                                               2, 2, 2, 2, n,
-                                               n, n, n, 2, 2,
-                                               n, 1, n, 2, 2};
+  std::vector<DistanceT> expected_distances = {n, n, 2, 1, 2,
+                                               n, 2, 2, 2, 1,
+                                               2, 2, 2, 1, 2,
+                                               1, 2, 1, 2, 2,
+                                               2, 1, 2, 2, 2};
   // clang-format on
+  EXPECT_EQ(distance_map.map().size(), 25);
   EXPECT_THAT(distance_map.map(), testing::ElementsAreArray(expected_distances));
-  EXPECT_TRUE(std::ranges::is_permutation(expected_reached_ingresses, actual_reached_ingresses));
 }

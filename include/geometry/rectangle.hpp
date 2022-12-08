@@ -7,16 +7,6 @@
 
 namespace geometry {
 
-/**
- * Many objects like Deposits, Factories and Obstacles have a rectangular shape which all share
- * a common iteration in the form of:
- * for ({x,y} in object.top_left to object.bottom_right).
- * Rectangle is a helper class to ease these iterations, further border accesses.
- * Intervals are defined in a half-opened manner [top_left, bottom_right[, following
- * https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html.
- * Use inner_bottom_right instead of bottom_right for a closed-interval.
- *
- */
 class Rectangle {
  public:
   class Iterator {
@@ -62,6 +52,11 @@ class Rectangle {
   };
 
   [[nodiscard]] constexpr Vec2 top_left() const { return top_left_; }
+  /**
+   * Extents are defined in a half-open manner [top_left, bottom_right[, following
+   * https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html.
+   * Use inner_bottom_right instead of bottom_right for a closed-interval.
+   */
   [[nodiscard]] constexpr Vec2 bottom_right() const { return bottom_right_; }
   [[nodiscard]] constexpr Vec2 inner_top_left() const { return top_left_; }
   [[nodiscard]] constexpr Vec2 inner_bottom_right() const { return bottom_right_ - Vec2{1, 1}; }
