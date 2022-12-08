@@ -48,13 +48,13 @@ struct Combiner {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
-          return Vec2{coordinate.x() + 1, coordinate.y() + 1};
+          return coordinate + Vec2{1, 1};
         case Rotation::UP_TO_DOWN:
-          return Vec2{coordinate.x() - 1, coordinate.y() + 1};
+          return coordinate + Vec2{-1, 1};
         case Rotation::RIGHT_TO_LEFT:
-          return Vec2{coordinate.x() - 1, coordinate.y() - 1};
+          return coordinate + Vec2{-1, -1};
         case Rotation::DOWN_TO_UP:
-          return Vec2{coordinate.x() + 1, coordinate.y() - 1};
+          return coordinate + Vec2{1, -1};
       }
     }();
     return Combiner{handle, rotation};
@@ -64,13 +64,13 @@ struct Combiner {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
-          return Vec2{coordinate.x() + 1, coordinate.y() - 1};
+          return coordinate + Vec2{1, -1};
         case Rotation::UP_TO_DOWN:
-          return Vec2{coordinate.x() + 1, coordinate.y() + 1};
+          return coordinate + Vec2{1, 1};
         case Rotation::RIGHT_TO_LEFT:
-          return Vec2{coordinate.x() - 1, coordinate.y() + 1};
+          return coordinate + Vec2{-1, 1};
         case Rotation::DOWN_TO_UP:
-          return Vec2{coordinate.x() - 1, coordinate.y() - 1};
+          return coordinate + Vec2{-1, -1};
       }
     }();
     return Combiner{handle, rotation};
@@ -139,13 +139,13 @@ struct Conveyor3 {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
-          return Vec2{coordinate.x() + 1, coordinate.y()};
+          return coordinate + Vec2{1, 0};
         case Rotation::UP_TO_DOWN:
-          return Vec2{coordinate.x(), coordinate.y() + 1};
+          return coordinate + Vec2{0, 1};
         case Rotation::RIGHT_TO_LEFT:
-          return Vec2{coordinate.x() - 1, coordinate.y()};
+          return coordinate + Vec2{-1, 0};
         case Rotation::DOWN_TO_UP:
-          return Vec2{coordinate.x(), coordinate.y() - 1};
+          return coordinate + Vec2{0, -1};
       }
     }();
     return Conveyor3{handle, rotation};
@@ -193,13 +193,13 @@ struct Conveyor4 {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
-          return Vec2{coordinate.x() + 1, coordinate.y()};
+          return coordinate + Vec2{1, 0};
         case Rotation::UP_TO_DOWN:
-          return Vec2{coordinate.x(), coordinate.y() + 1};
+          return coordinate + Vec2{0, 1};
         case Rotation::RIGHT_TO_LEFT:
-          return Vec2{coordinate.x() - 2, coordinate.y()};
+          return coordinate + Vec2{-2, 0};
         case Rotation::DOWN_TO_UP:
-          return Vec2{coordinate.x(), coordinate.y() - 2};
+          return coordinate + Vec2{0, -2};
       }
     }();
     return Conveyor4{handle, rotation};
@@ -238,7 +238,7 @@ struct Conveyor4 {
       case Rotation::LEFT_TO_RIGHT:
       case Rotation::RIGHT_TO_LEFT:
         return {handle + Vec2{-1, 0}, handle + Vec2{0, 0}, handle + Vec2{1, 0},
-                handle + Vec2{2, 0}};  // would Rectangle be a better choice here?
+                handle + Vec2{2, 0}};
       case Rotation::UP_TO_DOWN:
       case Rotation::DOWN_TO_UP:
         return {handle + Vec2{0, -1}, handle + Vec2{0, 0}, handle + Vec2{0, 1},
@@ -276,13 +276,13 @@ struct Mine {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
-          return Vec2{coordinate.x() + 1, coordinate.y() - 1};
+          return coordinate + Vec2{1, -1};
         case Rotation::UP_TO_DOWN:
-          return Vec2{coordinate.x(), coordinate.y() + 1};
+          return coordinate + Vec2{0, 1};
         case Rotation::RIGHT_TO_LEFT:
-          return Vec2{coordinate.x() - 2, coordinate.y()};
+          return coordinate + Vec2{-2, 0};
         case Rotation::DOWN_TO_UP:
-          return Vec2{coordinate.x() - 1, coordinate.y() - 2};
+          return coordinate + Vec2{-1, -2};
       }
     }();
     return Mine{handle, rotation};
