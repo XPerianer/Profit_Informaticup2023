@@ -11,18 +11,14 @@ using namespace geometry;
 
 TEST(Rectangle, FromDimensions) {
   auto actual = Rectangle::from_top_left_and_dimensions(Vec2{1, 1}, Vec2{5, 5});
-  auto expected_bottom_right = Vec2{6, 6};
-  auto expected_max_coord = Vec2{5, 5};
-  EXPECT_EQ(actual.bottom_right(), expected_bottom_right);
-  EXPECT_EQ(actual.inner_bottom_right(), expected_max_coord);
+  EXPECT_EQ(actual.bottom_right(), Vec2(6, 6));
+  EXPECT_EQ(actual.inner_bottom_right(), Vec2(5, 5));
 }
 
 TEST(Rectangle, FromBottomRight) {
   auto actual = Rectangle::from_top_left_and_bottom_right(Vec2{1, 1}, Vec2{6, 6});
-  auto expected_dimensions = Vec2{5, 5};
-  auto expected_max_coord = Vec2{5, 5};
-  EXPECT_EQ(actual.dimensions(), expected_dimensions);
-  EXPECT_EQ(actual.inner_bottom_right(), expected_max_coord);
+  EXPECT_EQ(actual.dimensions(), Vec2(5, 5));
+  EXPECT_EQ(actual.inner_bottom_right(), Vec2(5, 5));
 }
 
 TEST(Rectangle, IterationRange) {
@@ -47,13 +43,6 @@ TEST(Rectangle, OuterCells) {
                                 Vec2{0, 1}, Vec2{6, 1}, Vec2{0, 2}, Vec2{6, 2}, Vec2{0, 3},
                                 Vec2{6, 3}, Vec2{0, 4}, Vec2{6, 4}, Vec2{0, 5}, Vec2{6, 5},
                                 Vec2{1, 6}, Vec2{2, 6}, Vec2{3, 6}, Vec2{4, 6}, Vec2{5, 6}};
-  EXPECT_TRUE(std::ranges::is_permutation(actual, expected));
-}
-
-TEST(Rectangle, 1x1OuterCells) {
-  auto rect = Rectangle::from_top_left_and_dimensions(Vec2{1, 1}, Vec2{1, 1});
-  auto actual = outer_connected_border_cells(rect);
-  auto expected = {Vec2{1, 0}, Vec2{0, 1}, Vec2{2, 1}, Vec2{1, 2}};
   EXPECT_TRUE(std::ranges::is_permutation(actual, expected));
 }
 
