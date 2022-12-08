@@ -28,8 +28,6 @@ std::vector<Vec2> queue_to_vector(std::queue<Vec2>&& queue) {
 // NOLINTBEGIN(readability-identifier-length): Keep Visualization of expected fields comprehensible
 const CellOccupancy o = CellOccupancy::EMPTY;
 const CellOccupancy x = CellOccupancy::BLOCKED;
-const CellOccupancy c = CellOccupancy::CONVEYOR_CROSSING;
-const CellOccupancy i = CellOccupancy::INGRESS;
 const CellOccupancy e = CellOccupancy::EGRESS;
 const int n = static_cast<int>(NOT_REACHABLE);
 // NOLINTEND(readability-identifier-length)
