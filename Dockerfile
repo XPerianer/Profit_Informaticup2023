@@ -1,4 +1,4 @@
-FROM ubuntu:22.10
+FROM ubuntu:22.04
 
 RUN apt update && apt install cmake g++-12 -y
 ENV CXX g++-12
