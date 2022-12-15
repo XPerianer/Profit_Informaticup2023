@@ -12,6 +12,8 @@ namespace profit {
 using geometry::Rectangle;
 using geometry::Vec2;
 
+using StoredResourceCount = int32_t;
+
 struct Deposit {
   Vec2 handle;
   Vec2 dimensions;
@@ -34,5 +36,12 @@ inline Rectangle as_rectangle(const Deposit& deposit) {
 
 inline Rectangle as_rectangle(const Obstacle& obstacle) {
   return Rectangle::from_top_left_and_dimensions(obstacle.handle, obstacle.dimensions);
+}
+
+inline StoredResourceCount initial_resource_count(const Deposit& deposit) {
+  constexpr StoredResourceCount STORED_RESOURCES_PER_CELL = 5;
+
+  return static_cast<StoredResourceCount>(deposit.dimensions.width()) *
+         static_cast<StoredResourceCount>(deposit.dimensions.height()) * STORED_RESOURCES_PER_CELL;
 }
 }  // namespace profit

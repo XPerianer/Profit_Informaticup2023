@@ -16,12 +16,14 @@ namespace profit::parsing {
 
 struct Input {
   Vec2 dimensions;
-  int32_t turns = 0;
-  int32_t time = 0;
+  uint64_t turns = 0;
+  uint64_t time = 0;
   std::vector<Product> products;
   std::vector<LandscapeObject> objects;
 
-  static constexpr int32_t DEFAULT_TIME = 300;
+  [[nodiscard]] const std::vector<Deposit>& deposits() const;
+
+  static constexpr uint64_t DEFAULT_TIME = 300;
   bool operator==(const Input& other) const {
     return dimensions == other.dimensions && turns == other.turns && time == other.time &&
            std::ranges::is_permutation(products, other.products) &&
@@ -66,7 +68,10 @@ inline Input parse(std::istream& stream) {
   for (const auto& product_json : json_input["products"]) {
     auto type = static_cast<ProductType>(static_cast<int>(product_json["subtype"]));
     Requirements requirements(static_cast<std::vector<int>>(product_json["resources"]));
-    input.products.push_back({type, requirements, product_json["points"]});
+    Product product{type, requirements, product_json["points"]};
+    if(product.points != 0) {
+      input.products.push_back(product);
+    }
   }
 
   for (const auto& object_json : json_input["objects"]) {
