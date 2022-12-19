@@ -61,3 +61,17 @@ TEST(Rectangle, IsOnBorder) {
   EXPECT_TRUE(
       std::ranges::none_of(inner_cells, [&](auto cell) { return is_on_border(rect, cell); }));
 }
+
+TEST(Rectangle, SameYCoordinateNotOnBorder) {
+  auto rect = Rectangle::from_top_left_and_dimensions(Vec2{8, 2}, Vec2{3, 3});
+  Vec2 cell(30, 2);
+
+  EXPECT_FALSE(is_on_border(rect, cell));
+}
+
+TEST(Rectangle, SameXCoordinateNotOnBorder) {
+  auto rect = Rectangle::from_top_left_and_dimensions(Vec2{8, 2}, Vec2{3, 3});
+  Vec2 cell(8, 30);
+
+  EXPECT_FALSE(is_on_border(rect, cell));
+}
