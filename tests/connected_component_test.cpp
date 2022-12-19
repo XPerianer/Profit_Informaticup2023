@@ -16,16 +16,15 @@ using namespace profit;
 class ConnectedComponentTest : public testing::Test {
  public:
   static void with_example(std::string_view example,
-                           const std::vector<ConnectedComponent>&& expected) {
+                           const std::vector<ConnectedComponent>& expected) {
     std::istringstream stream{std::string{example}};
     auto input = parsing::parse(stream);
 
     OccupancyMap occupancy_map = occupancies_from(input);
     auto deposits = get_deposits(input);
 
-    std::vector<std::vector<Vec2>> reached_egresses = {};
+    std::vector<std::vector<Vec2>> reached_egresses(deposits.size());
     for (size_t i = 0; i < deposits.size(); i++) {
-      reached_egresses.emplace_back();
       distances_from(deposits[i], occupancy_map, reached_egresses[i]);
     }
 

@@ -28,15 +28,15 @@ const int n = static_cast<int>(NOT_REACHABLE);
 
 class OccupancyMapTest : public testing::Test {
  public:
-  static void with_example(std::string_view example, std::vector<CellOccupancy>&& expected) {
+  static void with_example(std::string_view example, const std::vector<CellOccupancy>& expected) {
     std::istringstream stream{std::string{example}};
     auto input = parsing::parse(stream);
     OccupancyMap occupancy_map = occupancies_from(input);
     EXPECT_THAT(occupancy_map.map(), testing::ElementsAreArray(expected));
   }
 
-  static void with_objects(Vec2 dimensions, const std::vector<LandscapeObject>&& objects,
-                           std::vector<CellOccupancy>&& expected) {
+  static void with_objects(Vec2 dimensions, const std::vector<LandscapeObject>& objects,
+                           const std::vector<CellOccupancy>& expected) {
     auto input =
         Input{.dimensions = dimensions, .turns = 0, .time = 0, .products = {}, .objects = objects};
     OccupancyMap occupancy_map = occupancies_from(input);
@@ -227,15 +227,14 @@ TEST(OccupancyMap, CollisionWithConveyor) {
 class DistanceMapTest : public testing::Test {
  public:
   static void with_example(std::string_view example,
-                           std::vector<std::vector<DistanceT>>&& expected_distances) {
+                           const std::vector<std::vector<DistanceT>>& expected_distances) {
     std::istringstream stream{std::string{example}};
     auto input = parsing::parse(stream);
     OccupancyMap occupancy_map = occupancies_from(input);
     std::vector<Deposit> deposits = get_deposits(input);
-    std::vector<std::vector<Vec2>> reached_egresses = {};
+    std::vector<std::vector<Vec2>> reached_egresses(deposits.size());
 
     for (size_t i = 0; i < deposits.size(); i++) {
-      reached_egresses.emplace_back();
       DistanceMap distance_map = distances_from(deposits[i], occupancy_map, reached_egresses[i]);
       EXPECT_THAT(distance_map.map(), testing::ElementsAreArray(expected_distances[i]));
     }
