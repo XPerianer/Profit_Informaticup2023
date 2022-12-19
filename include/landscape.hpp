@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <numeric>
-#include <set>
 #include <variant>
+#include <vector>
 
 #include "geometry/rectangle.hpp"
 #include "geometry/vec2.hpp"
@@ -43,7 +43,7 @@ inline Rectangle as_rectangle(const Obstacle& obstacle) {
 }
 
 inline std::vector<ConnectedComponent> connected_components_from(
-    const std::vector<Deposit>& deposits, const std::vector<std::set<Vec2>>& reached_egresses) {
+    const std::vector<Deposit>& deposits, const std::vector<std::vector<Vec2>>& reached_egresses) {
   ConnectedComponent uncategorized(deposits.size());
   std::iota(uncategorized.begin(), uncategorized.end(), 0);
   std::vector<ConnectedComponent> connected_components;

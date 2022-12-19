@@ -23,7 +23,7 @@ class ConnectedComponentTest : public testing::Test {
     OccupancyMap occupancy_map = occupancies_from(input);
     auto deposits = get_deposits(input);
 
-    std::vector<std::set<Vec2>> reached_egresses = {};
+    std::vector<std::vector<Vec2>> reached_egresses = {};
     for (size_t i = 0; i < deposits.size(); i++) {
       reached_egresses.emplace_back();
       distances_from(deposits[i], occupancy_map, reached_egresses[i]);

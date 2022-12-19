@@ -2,7 +2,6 @@
 
 #include <queue>
 #include <ranges>
-#include <set>
 #include <variant>
 
 #include "fields/field.hpp"
@@ -24,7 +23,7 @@ inline void update_reachability_if_placeable(DistanceMap& distances,
                                              const OccupancyMap& occupancy_map,
                                              const PlaceableT object, DistanceT distance,
                                              std::queue<Vec2>& reached_ingresses,
-                                             std::set<Vec2>& reached_egresses) {
+                                             std::vector<Vec2>& reached_egresses) {
   if (collides(object, occupancy_map)) {
     return;
   }
@@ -35,7 +34,7 @@ inline void update_reachability_if_placeable(DistanceMap& distances,
     bool neighbored_to_egress =
         any_neighbor_is(occupancy_map, downstream_ingress_cell, CellOccupancy::EGRESS);
     if (is_egress) {
-      reached_egresses.emplace(downstream_ingress_cell);
+      reached_egresses.emplace_back(downstream_ingress_cell);
     }
     if (is_occupied || was_reached_before || neighbored_to_egress) {
       continue;
@@ -47,7 +46,7 @@ inline void update_reachability_if_placeable(DistanceMap& distances,
 
 /* Returns an approximation */
 inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancy_map,
-                                  std::set<Vec2>& reached_egresses) {
+                                  std::vector<Vec2>& reached_egresses) {
   DistanceMap distances(occupancy_map.dimensions());
   // Invariant: For each cell in the queue: We've reached this cell in (distance) steps.
   // We can place objects with an ingress there.
