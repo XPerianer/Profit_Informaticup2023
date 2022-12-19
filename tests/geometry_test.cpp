@@ -64,14 +64,12 @@ TEST(Rectangle, IsOnBorder) {
 
 TEST(Rectangle, SameYCoordinateNotOnBorder) {
   auto rect = Rectangle::from_top_left_and_dimensions(Vec2{8, 2}, Vec2{3, 3});
-  Vec2 cell(30, 2);
 
-  EXPECT_FALSE(is_on_border(rect, cell));
+  EXPECT_FALSE(is_on_border(rect, Vec2(30, 2)));
 }
 
 TEST(Rectangle, SameXCoordinateNotOnBorder) {
   auto rect = Rectangle::from_top_left_and_dimensions(Vec2{8, 2}, Vec2{3, 3});
-  Vec2 cell(8, 30);
 
-  EXPECT_FALSE(is_on_border(rect, cell));
+  EXPECT_FALSE(is_on_border(rect, Vec2(8, 30)));
 }
