@@ -16,6 +16,7 @@ add_executable(
   parsing_test.cpp
   geometry_test.cpp
   fields_test.cpp
+  connected_component_test.cpp
 )
 
 target_link_libraries(
