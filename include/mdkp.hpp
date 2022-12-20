@@ -2,13 +2,19 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <limits>
 #include <ratio>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
+#include "fields/distance_map.hpp"
+#include "fields/occupancy_map.hpp"
 #include "io/parsing.hpp"
 #include "landscape.hpp"
+#include "placeable.hpp"
+#include "product.hpp"
 #include "resource_type.hpp"
 #include "subtype.hpp"
 
@@ -107,11 +113,16 @@ inline void drive(const parsing::Input& input, const std::vector<ConnectedCompon
       std::vector<ProductCount> to_realize =
           pech(remaining_resources_by_component[component_id], products_that_can_be_tried);
 
-      if(std::accumulate(to_realize.begin(), to_realize.end(), 0) == 0) {
-        break; // TODO(DomJ): Nochmal ganz stark nachdenken.
+      if (std::accumulate(to_realize.begin(), to_realize.end(), 0) == 0) {
+        break;  // TODO(DomJ): Nochmal ganz stark nachdenken.
       }
 
       auto product_id_with_max_score = 0;
+      auto max_score = std::numeric_limits<ProductScore>::max();
+      for (auto& product : products_that_can_be_tried) {
+        auto index = &product - products_that_can_be_tried.data();
+        to_realize[]
+      }
 
       // Vereinfachung: Alle Ressourcen in einen Topf schmeißen. Hieraus entscheiden, welches
       // Produkt wir als nächstes produzieren wollen, und wie oft Dann versuchen zu realisieren. Das
@@ -124,6 +135,8 @@ inline void drive(const parsing::Input& input, const std::vector<ConnectedCompon
       // Damit sind Folgeiterationen nicht mehr "Gegeben diese verfügbaren Ressourcen, was sollte
       // ich bauen?" sondern "Wem kann ich was wegnehmen, um den Score zu verbessern".
       //
+      //
+      realize(/* Todo */);
     }
 
     // ausgeben, was als nächstes realisiert werden soll
@@ -131,6 +144,53 @@ inline void drive(const parsing::Input& input, const std::vector<ConnectedCompon
     // ob das funktioniert muss man halt verschieden darauf reagieren.
   }
   // irgendwas
+}
+
+using PipelineId = int16_t;
+using FactoryId = int16_t;
+
+struct Pipeline {
+  FactoryId factory;
+  std::vector<PlaceableObject> parts;
+};
+
+struct FieldState {
+  OccupancyMap occupancies;
+  // TODO: feld zu pipeline / factoryindex, damit nachgucken kann was einen gerade blockiert
+  std::unordered_map<PipelineId, Pipeline> pipelines;
+  std::unordered_map<FactoryId, Factory> factories;
+};
+
+constexpr FactoryId INVALID_FACTORY_ID = -1;
+constexpr PipelineId INVALID_PIPELINE_ID = -1;
+
+FactoryId place_factory(ProductType product, const std::vector<DistanceMap>& distance_maps, FieldState &state) {
+  return INVALID_FACTORY_ID;
+}
+
+// Todo: Pointer for state or C++ Pointer to make clear that this get's changed?
+bool realize(ProductType product, const std::vector<Deposit>& deposits, FieldState &state,
+             const std::vector<DistanceMap>& distance_maps) {
+  // Kriegt nur die relevanten (gefilterten) distancemaps rein
+  // Todo: Optimierung: sinnvoll mehrere Fabriken platzieren
+  auto factoryId = place_factory(product, distance_maps, state);
+
+  if (factoryId == INVALID_FACTORY_ID) {
+    return false;
+  }
+
+  auto factory = state.factories[factoryId];
+
+  // liste an pipelines die bis jetzt gebaut wurden, damit wir was wir gebaut haben im zweifel wieder removen können
+  for (const auto& deposit : deposits) {
+    auto pipelineID = connect(deposit, factory, state);
+    if(pipelineID == INVALID_PIPELINE_ID) {
+      // TODO: alle pipelines und die factory löschen
+      // oder: evtl. pipelines in ner anderen reihenfolge bauen und hoffen das es funktioniert
+      // oder: wigglen
+      return false;
+    }
+  }
 }
 
 }  // namespace profit
