@@ -8,7 +8,6 @@
 #include "fields/connected_component.hpp"
 #include "fields/field.hpp"
 #include "fields/occupancy_map.hpp"
-#include "geometry/coordinate.hpp"
 #include "geometry/rectangle.hpp"
 #include "geometry/vec2.hpp"
 #include "placeable.hpp"
@@ -20,9 +19,6 @@ using DistanceT = int16_t;
 constexpr DistanceT NOT_REACHABLE = -1;
 
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
-
-using DepositId = int16_t;
-using ConnectedComponent = std::vector<DepositId>;
 
 template <typename PlaceableT>
 inline void update_reachability_if_placeable(DistanceMap& distances,
