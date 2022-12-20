@@ -1,8 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <cstddef>
-#include <numeric>
 #include <variant>
 
 #include "geometry/rectangle.hpp"
