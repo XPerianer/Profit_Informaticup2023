@@ -22,28 +22,29 @@ class ConnectedComponentTest : public testing::Test {
 
     OccupancyMap occupancy_map = occupancies_from(input);
     auto deposits = get_deposits(input);
+    std::vector<DistanceMap> distances = {};
+    distances.reserve(deposits.size());
 
-    std::vector<std::vector<Vec2>> reached_egresses(deposits.size());
-    for (size_t i = 0; i < deposits.size(); i++) {
-      distances_from(deposits[i], occupancy_map, reached_egresses[i]);
+    for (auto& deposit : deposits) {
+      distances.emplace_back(distances_from(deposit, occupancy_map));
     }
 
-    std::vector<ConnectedComponent> actual = connected_components_from(deposits, reached_egresses);
+    std::vector<ConnectedComponent> actual = connected_components_from(deposits, distances);
 
     EXPECT_EQ(actual, expected);
   }
 };
 
 TEST(ConnectedComponent, Task1) {
-  ConnectedComponentTest::with_example(examples::TASK1, {{2, 1, 0}});
+  ConnectedComponentTest::with_example(examples::TASK1, {{0, 1, 2}});
 }
 
 TEST(ConnectedComponent, Task2) { ConnectedComponentTest::with_example(examples::TASK2, {{0}}); }
 
-TEST(ConnectedComponent, Task3) { ConnectedComponentTest::with_example(examples::TASK3, {{1, 0}}); }
+TEST(ConnectedComponent, Task3) { ConnectedComponentTest::with_example(examples::TASK3, {{0, 1}}); }
 
 TEST(ConnectedComponent, Task4) {
-  ConnectedComponentTest::with_example(examples::TASK4, {{3, 2, 1, 0}});
+  ConnectedComponentTest::with_example(examples::TASK4, {{0, 1, 2, 3}});
 }
 
 TEST(ConnectedComponent, TrickyConveyorConnection) {
@@ -55,10 +56,10 @@ TEST(ConnectedComponent, VeryStrongContained) {
 }
 
 TEST(ConnectedComponent, VerticallySplitMap) {
-  ConnectedComponentTest::with_example(examples::VERTICALLY_SPLIT_MAP, {{1}, {0}});
+  ConnectedComponentTest::with_example(examples::VERTICALLY_SPLIT_MAP, {{0}, {1}});
 }
 
 TEST(ConnectedComponent, MultipleConnectedComponents) {
   ConnectedComponentTest::with_example(examples::MULTIPLE_CONNECTED_COMPONENTS,
-                                       {{7, 6}, {5, 4}, {3, 2}, {1, 0}});
+                                       {{4, 5}, {0, 1}, {2, 3}, {6, 7}});
 }
