@@ -22,29 +22,28 @@ class ConnectedComponentTest : public testing::Test {
 
     OccupancyMap occupancy_map = occupancies_from(input);
     auto deposits = get_deposits(input);
-    std::vector<DistanceMap> distances = {};
-    distances.reserve(deposits.size());
-
-    for (auto& deposit : deposits) {
-      distances.emplace_back(distances_from(deposit, occupancy_map));
+    ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits.size()),
+                                     occupancy_map.dimensions());
+    for (size_t i = 0; i < deposits.size(); i++) {
+      distances_from(deposits[i], occupancy_map, cc_union, static_cast<DepositId>(i));
     }
 
-    std::vector<ConnectedComponent> actual = connected_components_from(deposits, distances);
+    std::vector<ConnectedComponent> actual = cc_union.extract();
 
     EXPECT_EQ(actual, expected);
   }
 };
 
 TEST(ConnectedComponent, Task1) {
-  ConnectedComponentTest::with_example(examples::TASK1, {{0, 1, 2}});
+  ConnectedComponentTest::with_example(examples::TASK1, {{2, 1, 0}});
 }
 
 TEST(ConnectedComponent, Task2) { ConnectedComponentTest::with_example(examples::TASK2, {{0}}); }
 
-TEST(ConnectedComponent, Task3) { ConnectedComponentTest::with_example(examples::TASK3, {{0, 1}}); }
+TEST(ConnectedComponent, Task3) { ConnectedComponentTest::with_example(examples::TASK3, {{1, 0}}); }
 
 TEST(ConnectedComponent, Task4) {
-  ConnectedComponentTest::with_example(examples::TASK4, {{0, 1, 2, 3}});
+  ConnectedComponentTest::with_example(examples::TASK4, {{3, 2, 1, 0}});
 }
 
 TEST(ConnectedComponent, TrickyConveyorConnection) {
@@ -61,5 +60,5 @@ TEST(ConnectedComponent, VerticallySplitMap) {
 
 TEST(ConnectedComponent, MultipleConnectedComponents) {
   ConnectedComponentTest::with_example(examples::MULTIPLE_CONNECTED_COMPONENTS,
-                                       {{4, 5}, {0, 1}, {2, 3}, {6, 7}});
+                                       {{1, 0}, {3, 2}, {5, 4}, {7, 6}});
 }

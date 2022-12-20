@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "example_tasks.hpp"
+#include "fields/connected_component.hpp"
 #include "fields/distance_map.hpp"
 #include "fields/occupancy_map.hpp"
 #include "geometry/vec2.hpp"
@@ -232,9 +233,12 @@ class DistanceMapTest : public testing::Test {
     auto input = parsing::parse(stream);
     OccupancyMap occupancy_map = occupancies_from(input);
     std::vector<Deposit> deposits = get_deposits(input);
+    ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits.size()),
+                                     occupancy_map.dimensions());
 
     for (size_t i = 0; i < deposits.size(); i++) {
-      DistanceMap distance_map = distances_from(deposits[i], occupancy_map);
+      DistanceMap distance_map =
+          distances_from(deposits[i], occupancy_map, cc_union, static_cast<DepositId>(i));
       EXPECT_THAT(distance_map.map(), testing::ElementsAreArray(expected_distances[i]));
     }
   }

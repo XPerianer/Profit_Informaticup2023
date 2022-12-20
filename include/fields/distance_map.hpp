@@ -5,6 +5,7 @@
 #include <ranges>
 #include <variant>
 
+#include "fields/connected_component.hpp"
 #include "fields/field.hpp"
 #include "fields/occupancy_map.hpp"
 #include "geometry/coordinate.hpp"
@@ -19,9 +20,6 @@ using DistanceT = int16_t;
 constexpr DistanceT NOT_REACHABLE = -1;
 
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
-
-using geometry::Coordinate;
-using geometry::Rectangle;
 
 using DepositId = int16_t;
 using ConnectedComponent = std::vector<DepositId>;
@@ -48,7 +46,9 @@ inline void update_reachability_if_placeable(DistanceMap& distances,
 }
 
 /* Returns an approximation */
-inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancy_map) {
+inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancy_map,
+                                  ConnectedComponentUnion& connected_components,
+                                  const DepositId deposit_id) {
   DistanceMap distances(occupancy_map.dimensions());
   // Invariant: For each cell in the queue: We've reached this cell in (distance) steps.
   // We can place objects with an ingress there.
@@ -65,6 +65,7 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
   while (!reached_ingresses.empty()) {
     Vec2 reached_ingress = reached_ingresses.front();
     reached_ingresses.pop();
+    connected_components.set_reachable(deposit_id, reached_ingress);
     auto next_distance = static_cast<DistanceT>(distances.at(reached_ingress) + 1);
 
     for (auto rotation : ROTATIONS) {
@@ -89,40 +90,6 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
   }
 
   return distances;
-}
-
-inline std::vector<ConnectedComponent> connected_components_from(
-    const std::vector<Deposit>& deposits, const std::vector<DistanceMap>& distances) {
-  std::vector<ConnectedComponent> connected_components;
-  std::map<Vec2, ConnectedComponent> reachable_to_cc;
-
-  const auto find_nearby_reachable = [&](const DistanceMap& map, Deposit deposit) {
-    const DistanceT radius = 5;
-    const Rectangle search_area = Rectangle::from_top_left_and_dimensions(
-        deposit.handle - Vec2{radius, radius}, deposit.dimensions + Vec2{radius * 2, radius * 2});
-    const auto reachable =
-        std::ranges::find_if(search_area, [&](Vec2 cell) { return map.at(cell) != NOT_REACHABLE; });
-    return reachable != geometry::end(search_area) ? *reachable : deposit.handle;
-  };
-
-  for (size_t i = 0; i < distances.size(); i++) {
-    const auto reacheable_cc = std::ranges::find_if(reachable_to_cc, [&](const auto& entry) {
-      return distances[i].at(entry.first) != NOT_REACHABLE;
-    });
-
-    if (reacheable_cc != reachable_to_cc.end()) {
-      reachable_to_cc[reacheable_cc->first].emplace_back(i);
-    } else {
-      reachable_to_cc[find_nearby_reachable(distances[i], deposits[i])].emplace_back(i);
-    }
-  }
-
-  connected_components.reserve(reachable_to_cc.size());
-  for (const auto& [key, value] : reachable_to_cc) {
-    connected_components.emplace_back(value);
-  }
-
-  return connected_components;
 }
 
 }  // namespace profit
