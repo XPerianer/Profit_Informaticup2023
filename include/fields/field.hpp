@@ -20,6 +20,48 @@ class Field {
  public:
   using CellT = CellT_;
 
+  class Iterator {
+   public:
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = Vec2;
+    using pointer = const Vec2*;
+    using reference = const Vec2&;
+    const Vec2 initial = Vec2{0, 0};
+
+    constexpr Iterator() = default;
+    explicit constexpr Iterator(const Field& field) : current_value_(initial), field_{&field} {}
+
+    constexpr reference operator*() const { return current_value_; }
+    constexpr pointer operator->() const { return &current_value_; }
+
+    constexpr Iterator& operator++() {
+      current_value_ += {1, 0};
+
+      if (current_value_.x() == field_->dimensions().x()) {
+        current_value_ = {initial.x(), current_value_.y() + 1};
+        if (current_value_.y() == field_->dimensions().y()) {
+          current_value_ = {};
+          field_ = nullptr;
+        }
+      }
+
+      return *this;
+    }
+
+    constexpr Iterator operator++(int) {
+      auto copy = *this;
+      ++(*this);
+      return copy;
+    }
+
+    constexpr auto operator<=>(const Iterator& other) const = default;
+
+   private:
+    Vec2 current_value_{};
+    const Field* field_ = nullptr;
+  };
+
   explicit Field(geometry::Vec2 dimensions) : dimensions_{dimensions}, map_(dimensions) {}
 
   [[nodiscard]] CellT at(geometry::Vec2 coordinates) const {
@@ -40,6 +82,9 @@ class Field {
 
   [[nodiscard]] geometry::Vec2 dimensions() const { return dimensions_; }
   [[nodiscard]] std::span<const CellT> map() { return map_.span(); }
+
+  [[nodiscard]] constexpr friend Iterator begin(const Field& field) { return Iterator(field); }
+  [[nodiscard]] constexpr friend Iterator end(const Field& /*field*/) { return {}; }
 
  private:
   geometry::Vec2 dimensions_;

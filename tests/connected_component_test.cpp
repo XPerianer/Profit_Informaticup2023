@@ -17,7 +17,7 @@ using namespace profit;
 
 class ConnectedComponentTest : public testing::Test {
  public:
-  static void with_example(std::string_view example,
+  static void with_example(const std::string_view& example,
                            const std::vector<ConnectedComponent>& expected) {
     std::istringstream stream{std::string{example}};
     auto input = parsing::parse(stream);

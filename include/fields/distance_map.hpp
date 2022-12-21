@@ -87,4 +87,20 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
   return distances;
 }
 
+inline DistanceMap merge(const std::vector<DistanceMap>& maps) {
+  DistanceMap result(maps[0].dimensions());
+  for (Vec2 coordinate : result) {
+    DistanceT shared_min_xy_distance = 0;
+    for (const auto& map : maps) {
+      if (map.at(coordinate) == NOT_REACHABLE) {
+        shared_min_xy_distance = NOT_REACHABLE;
+        break;
+      }
+      shared_min_xy_distance = std::max(shared_min_xy_distance, map.at(coordinate));
+    }
+    result.set(coordinate, shared_min_xy_distance);
+  }
+  return result;
+}
+
 }  // namespace profit
