@@ -4,7 +4,7 @@
 #include <ranges>
 #include <variant>
 
-#include "fields/connected_component.hpp"
+#include "connected_component.hpp"
 #include "fields/field.hpp"
 #include "fields/occupancy_map.hpp"
 #include "geometry/rectangle.hpp"

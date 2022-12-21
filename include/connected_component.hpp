@@ -5,15 +5,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include "fields/field.hpp"
+#include "fields/component_map.hpp"
 #include "geometry/vec2.hpp"
 #include "landscape.hpp"
 
 namespace profit {
-
-using DepositId = int16_t;
-constexpr DepositId NO_COMPONENT = -1;
-using ComponentMap = Field<DepositId, NO_COMPONENT, NO_COMPONENT>;
 
 using ConnectedComponent = std::vector<DepositId>;
 

@@ -1,3 +1,5 @@
+#include "connected_component.hpp"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 

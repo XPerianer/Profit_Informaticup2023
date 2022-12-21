@@ -15,7 +15,8 @@ add_executable(
   serialization_test.cpp
   parsing_test.cpp
   geometry_test.cpp
-  fields_test.cpp
+  distance_map_test.cpp
+  occupancy_map_test.cpp
   connected_component_test.cpp
 )
 
