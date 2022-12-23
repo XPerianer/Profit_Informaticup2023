@@ -65,15 +65,9 @@ inline Input parse(std::istream& stream) {
   }
 
   for (const auto& object_json : json_input["objects"]) {
-    std::visit(utils::Overloaded{
-      [&](Deposit deposit) {
-        input.deposits.push_back(deposit);
-      },
-      [&](Obstacle obstacle) {
-        input.obstacles.push_back(obstacle);
-      }
-    },
-      parse_object(object_json));
+    std::visit(utils::Overloaded{[&](Deposit deposit) { input.deposits.push_back(deposit); },
+                                 [&](Obstacle obstacle) { input.obstacles.push_back(obstacle); }},
+               parse_object(object_json));
   }
 
   input.time = json_input.value("time", Input::DEFAULT_TIME);
