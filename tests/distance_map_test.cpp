@@ -38,6 +38,7 @@ class DistanceMapTest : ::testing::TestWithParam<std::string_view> {
     }
   }
 
+  // todo: doppelter code
   static void merged_example(const std::string_view& example,
                              const std::vector<DistanceT>& expected) {
     std::istringstream stream{std::string{example}};
