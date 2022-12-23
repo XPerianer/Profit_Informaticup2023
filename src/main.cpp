@@ -37,9 +37,10 @@ int main() {  // NOLINT(bugprone-exception-escape)
         distances_from(deposits[i], field.occupancy_map, cc_union, static_cast<DepositId>(i)));
   }
 
-  FactoryId placed = place_factory(input.products[0].type, distance_maps, field);
-
-  result.emplace_back(field.factories.at(placed));
+  auto placed = place_factory(input.products[0].type, distance_maps, field);
+  if (placed) {
+    result.emplace_back(field.factories.at(*placed));
+  }
 
 #ifdef NDEBUG
   std::cout << serialization::serialize(result);
