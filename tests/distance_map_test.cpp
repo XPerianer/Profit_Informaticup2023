@@ -21,48 +21,49 @@ using namespace parsing;
 const int n = static_cast<int>(NOT_REACHABLE);
 // NOLINTEND(readability-identifier-length)
 
-class DistanceMapTest : ::testing::TestWithParam<std::string_view> {
- public:
-  static void with_example(const std::string_view& example,
-                           const std::vector<std::vector<DistanceT>>& expected_distances) {
+class DistanceMapTest : public testing::Test {
+ protected:
+  // we can't define a ctor with parameters, this is a workaround we have to call inside the tests
+  // https://stackoverflow.com/a/38218657
+  void set_up(const std::string_view& example) {
     std::istringstream stream{std::string{example}};
-    auto input = parsing::parse(stream);
-    OccupancyMap occupancy_map = occupancies_from(input);
-    std::vector<Deposit> deposits = get_deposits(input);
-    ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits.size()),
-                                     occupancy_map.dimensions());
+    input_ = parsing::parse(stream);
+    occupancy_map_ = occupancies_from(input_);
+    deposits_ = get_deposits(input_);
+  }
 
-    for (size_t i = 0; i < deposits.size(); i++) {
+  void test_distances(const std::vector<std::vector<DistanceT>>& expected_distances) {
+    ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits_.size()),
+                                     occupancy_map_.dimensions());
+    for (size_t i = 0; i < deposits_.size(); i++) {
       DistanceMap distance_map =
-          distances_from(deposits[i], occupancy_map, cc_union, static_cast<DepositId>(i));
+          distances_from(deposits_[i], occupancy_map_, cc_union, static_cast<DepositId>(i));
       EXPECT_THAT(distance_map.map(), testing::ElementsAreArray(expected_distances[i]));
     }
   }
 
-  // todo: doppelter code
-  static void merged_example(const std::string_view& example,
-                             const std::vector<DistanceT>& expected) {
-    std::istringstream stream{std::string{example}};
-    auto input = parsing::parse(stream);
-    OccupancyMap occupancy_map = occupancies_from(input);
-    std::vector<Deposit> deposits = get_deposits(input);
-    ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits.size()),
-                                     occupancy_map.dimensions());
+  void test_merged(const std::vector<DistanceT>& expected) {
+    ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits_.size()),
+                                     occupancy_map_.dimensions());
     std::vector<DistanceMap> distance_maps;
-    distance_maps.reserve(deposits.size());
+    distance_maps.reserve(deposits_.size());
 
-    for (size_t i = 0; i < deposits.size(); i++) {
+    for (size_t i = 0; i < deposits_.size(); i++) {
       distance_maps.emplace_back(
-          distances_from(deposits[i], occupancy_map, cc_union, static_cast<DepositId>(i)));
+          distances_from(deposits_[i], occupancy_map_, cc_union, static_cast<DepositId>(i)));
     }
 
     EXPECT_THAT(merge(distance_maps).map(), testing::ElementsAreArray(expected));
   }
+
+  Input input_;
+  OccupancyMap occupancy_map_{Vec2{0, 0}};
+  std::vector<Deposit> deposits_;
 };
 
-TEST(DistanceMap, Task1) {
-  DistanceMapTest::with_example(
-      examples::TASK1,
+TEST_F(DistanceMapTest, Task1) {
+  set_up(examples::TASK1);
+  test_distances(
       {{
            // clang-format off
            n,  n,  n,  n,  n,  n,  2,  2,  2,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  n,  n,  n,  n,  n,  n,  n,  n, 
@@ -137,23 +138,22 @@ TEST(DistanceMap, Task1) {
        }});
 }
 
-TEST(DistanceMap, Task2) {
-  DistanceMapTest::with_example(
-      examples::TASK2,
-      {{
-          // clang-format off
+TEST_F(DistanceMapTest, Task2) {
+  set_up(examples::TASK2);
+  test_distances({{
+      // clang-format off
             n, n, n, n, n, n, 2, 2, 1, 3, 3, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6,
             n, n, n, n, n, n, 2, 3, 3, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 
             n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, 5, 5, 5, 5, 6,
             n, n, n, n, n, n, 2, 2, 1, 3, 3, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6,
             n, n, n, n, n, n, 2, 3, 3, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
-          // clang-format on
-      }});
+      // clang-format on
+  }});
 }
 
-TEST(DistanceMap, Task3) {
-  DistanceMapTest::with_example(
-      examples::TASK3,
+TEST_F(DistanceMapTest, Task3) {
+  set_up(examples::TASK3);
+  test_distances(
       {{
            // clang-format off
            n,  n,  n,  n,  n,  n,  n,  n,  2,  2,  2,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8, 
@@ -244,9 +244,9 @@ TEST(DistanceMap, Task3) {
        }});
 }
 
-TEST(DistanceMap, Task4) {
-  DistanceMapTest::with_example(
-      examples::TASK4,
+TEST_F(DistanceMapTest, Task4) {
+  set_up(examples::TASK4);
+  test_distances(
       {{
            // clang-format off
            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
@@ -357,54 +357,51 @@ TEST(DistanceMap, Task4) {
        }});
 }
 
-TEST(DistanceMap, Task1Merged) {
-  DistanceMapTest::merged_example(
-      examples::TASK1,
-      {
-          // clang-format off
-                     n,  n,  n,  n,  n,  n,  4,  4,  4,  5,  5,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  4,  4,  4,  5,  n,  n,  6,  6,  6,  7,  7,  7,  7,  8,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  5,  4,  4,  4,  n,  n,  7,  7,  7,  7,  7,  7,  8,  8,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  5,  5,  4,  4,  n,  n,  7,  7,  7,  7,  7,  8,  8,  8,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  4,  n,  n,  7,  7,  7,  7,  8,  8,  8,  8,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  n,  n,  7,  7,  7,  8,  8,  8,  8,  9,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     8,  n,  n,  n,  n,  n,  6,  6,  5,  5,  5,  n,  n,  8,  8,  8,  8,  8,  8,  9,  9,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     8,  7,  7,  7,  7,  6,  6,  6,  6,  5,  5,  n,  n,  8,  8,  8,  8,  8,  9,  9,  9,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     8,  8,  7,  7,  7,  7,  6,  6,  6,  6,  5,  n,  n,  8,  8,  8,  8,  9,  9,  9,  9, 10,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     8,  8,  8,  7,  7,  7,  7,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     8,  8,  8,  8,  7,  7,  7,  7,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     9,  8,  8,  8,  8,  7,  7,  7,  7,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 
-                     9,  9,  8,  8,  8,  8,  7,  7,  7,  7,  6,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 
-                     9,  n,  n,  n,  n,  n,  8,  7,  7,  7,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 
-                     n,  n,  n,  n,  n,  n,  n,  8,  7,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 
-                     n,  n,  n,  n,  n,  n,  n,  8,  8,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 
-                     n,  n,  n,  n,  n,  n,  n,  8,  8,  8,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 
-                     n,  n,  n,  n,  n,  n,  n,  8,  8,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 
-                     n,  n,  n,  n,  n,  n,  n,  9,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 
-                     n,  n,  n,  n,  n,  n,  9,  9,  9,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13
-          // clang-format on
-      });
+TEST_F(DistanceMapTest, Task1Merged) {
+  set_up(examples::TASK1);
+  test_merged({
+      // clang-format off
+            n,  n,  n,  n,  n,  n,  4,  4,  4,  5,  5,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  4,  4,  4,  5,  n,  n,  6,  6,  6,  7,  7,  7,  7,  8,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  5,  4,  4,  4,  n,  n,  7,  7,  7,  7,  7,  7,  8,  8,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  5,  5,  4,  4,  n,  n,  7,  7,  7,  7,  7,  8,  8,  8,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  4,  n,  n,  7,  7,  7,  7,  8,  8,  8,  8,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  n,  n,  7,  7,  7,  8,  8,  8,  8,  9,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            8,  n,  n,  n,  n,  n,  6,  6,  5,  5,  5,  n,  n,  8,  8,  8,  8,  8,  8,  9,  9,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            8,  7,  7,  7,  7,  6,  6,  6,  6,  5,  5,  n,  n,  8,  8,  8,  8,  8,  9,  9,  9,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            8,  8,  7,  7,  7,  7,  6,  6,  6,  6,  5,  n,  n,  8,  8,  8,  8,  9,  9,  9,  9, 10,  n,  n,  n,  n,  n,  n,  n,  n, 
+            8,  8,  8,  7,  7,  7,  7,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            8,  8,  8,  8,  7,  7,  7,  7,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            9,  8,  8,  8,  8,  7,  7,  7,  7,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 
+            9,  9,  8,  8,  8,  8,  7,  7,  7,  7,  6,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 
+            9,  n,  n,  n,  n,  n,  8,  7,  7,  7,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 
+            n,  n,  n,  n,  n,  n,  n,  8,  7,  7,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 
+            n,  n,  n,  n,  n,  n,  n,  8,  8,  7,  7,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 
+            n,  n,  n,  n,  n,  n,  n,  8,  8,  8,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 
+            n,  n,  n,  n,  n,  n,  n,  8,  8,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 
+            n,  n,  n,  n,  n,  n,  n,  9,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 
+            n,  n,  n,  n,  n,  n,  9,  9,  9,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13
+      // clang-format on
+  });
 }
 
-TEST(DistanceMap, Task2Merged) {
-  DistanceMapTest::merged_example(
-      examples::TASK2,
-      {
-          // clang-format off
+TEST_F(DistanceMapTest, Task2Merged) {
+  set_up(examples::TASK2);
+  test_merged({
+      // clang-format off
        n,  n,  n,  n,  n,  n,  2,  2,  1,  3,  3,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  5,  6,
        n,  n,  n,  n,  n,  n,  2,  3,  3,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  5, 
        n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  6,
        n,  n,  n,  n,  n,  n,  2,  2,  1,  3,  3,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  5,  6,
        n,  n,  n,  n,  n,  n,  2,  3,  3,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5,  5,  5,
-          // clang-format on
-      });
+      // clang-format on
+  });
 }
 
-TEST(DistanceMap, Task3Merged) {
-  DistanceMapTest::merged_example(
-      examples::TASK3,
-      {
-          // clang-format off
+TEST_F(DistanceMapTest, Task3Merged) {
+  set_up(examples::TASK3);
+  test_merged({
+      // clang-format off
                      n,  n,  n,  n,  n,  n,  n,  n, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 11, 11, 11, 11, 10, 10, 10, 10,  9,  9,  9,  9,  9, 
                      n,  n,  n,  n,  n,  n,  n,  n,  n, 16, 15, 15, 15, 15, 14, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 11, 11, 11, 11, 10, 10, 10, 10,  9,  9,  9,  9,  9,  9, 
                      n,  n,  n,  n,  n,  n,  n,  n,  n, 15, 15, 15, 15, 14, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 11, 11, 11, 11, 10, 10, 10, 10,  9,  9,  9,  9,  9,  9,  9, 
@@ -444,9 +441,9 @@ TEST(DistanceMap, Task3Merged) {
                      9,  9,  9,  8,  8,  8,  8,  7,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14,  n,  n,  n,  n,  n, 
                      9,  9,  9,  8,  8,  8,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14,  n,  n,  n,  n,  n, 
                      9,  9,  9,  8,  8,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15,  n,  n,  n,  n,  n, 
-                     9,  9,  9,  9,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15,  n,  n,  n, 16
-          // clang-format on
-      });
+                     9,  9,  9,  9,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15,  n,  n,  n, 16,
+      // clang-format on
+  });
 }
 
 TEST(DistanceMap, bla) {
@@ -468,43 +465,41 @@ TEST(DistanceMap, bla) {
   PlacementMap placements_map = placements_for(Factory::DIMENSIONS, occupancy_map, merged);
 }
 
-TEST(DistanceMap, Task4Merged) {
-  DistanceMapTest::merged_example(
-      examples::TASK4,
-      {
-          // clang-format off
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  7,  6,  6,  6,  7,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  5,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  5,  5,  5,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  4,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  4,  4,  4,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     9,  8,  8,  8,  8,  7,  7,  7,  n,  n,  n,  n,  5,  5,  n,  5,  5,  n,  n,  n,  n,  7,  7,  7,  8,  8,  8,  8,  9, 
-                     8,  8,  8,  8,  7,  7,  7,  7,  6,  6,  6,  6,  5,  5,  n,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8, 
-                     9,  8,  8,  8,  8,  7,  7,  7,  n,  n,  n,  n,  5,  5,  n,  5,  5,  n,  n,  n,  n,  7,  7,  7,  8,  8,  8,  8,  9, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  4,  4,  4,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  4,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  5,  5,  5,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  5,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  7,  6,  6,  6,  7,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
-                     n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, n
-          // clang-format on
-      });
+TEST_F(DistanceMapTest, Task4Merged) {
+  set_up(examples::TASK4);
+  test_merged({
+      // clang-format off
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  7,  6,  6,  6,  7,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  5,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  5,  5,  5,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  4,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  4,  4,  4,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            9,  8,  8,  8,  8,  7,  7,  7,  n,  n,  n,  n,  5,  5,  n,  5,  5,  n,  n,  n,  n,  7,  7,  7,  8,  8,  8,  8,  9, 
+            8,  8,  8,  8,  7,  7,  7,  7,  6,  6,  6,  6,  5,  5,  n,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8, 
+            9,  8,  8,  8,  8,  7,  7,  7,  n,  n,  n,  n,  5,  5,  n,  5,  5,  n,  n,  n,  n,  7,  7,  7,  8,  8,  8,  8,  9, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  4,  4,  4,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  4,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  5,  5,  5,  5,  5,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  5,  5,  5,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  5,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  6,  6,  6,  6,  6,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  7,  6,  6,  6,  7,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n, 
+            n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,
+      // clang-format on
+  });
 }
 
-TEST(DistanceMap, MultipleConnectedComponentsMerged) {
-  DistanceMapTest::merged_example(
-      examples::MULTIPLE_CONNECTED_COMPONENTS,
-      {
-          // clang-format off
+TEST_F(DistanceMapTest, MultipleConnectedComponentsMerged) {
+  set_up(examples::MULTIPLE_CONNECTED_COMPONENTS);
+  test_merged({
+      // clang-format off
          n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,
          n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,
          n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,
@@ -525,6 +520,6 @@ TEST(DistanceMap, MultipleConnectedComponentsMerged) {
          n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,
          n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,
          n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,  n,
-          // clang-format on
-      });
+      // clang-format on
+  });
 }
