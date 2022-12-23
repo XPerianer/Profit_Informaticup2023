@@ -83,8 +83,12 @@ class Rectangle {
 };
 
 constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
-  return coordinate.x() == rect.top_left().x() || coordinate.x() == rect.inner_bottom_right().x() ||
-         coordinate.y() == rect.top_left().y() || coordinate.y() == rect.inner_bottom_right().y();
+  return ((coordinate.x() == rect.top_left().x() ||
+           coordinate.x() == rect.inner_bottom_right().x()) &&
+          coordinate.y() >= rect.top_left().y() && coordinate.y() < rect.bottom_right().y()) ||
+         ((coordinate.y() == rect.top_left().y() ||
+           coordinate.y() == rect.inner_bottom_right().y()) &&
+          coordinate.x() >= rect.top_left().x() && coordinate.x() < rect.bottom_right().x());
 }
 
 /* Cells that are connected to a border cell of the rectangle */

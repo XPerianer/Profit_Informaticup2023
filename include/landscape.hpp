@@ -44,4 +44,5 @@ inline StoredResourceCount initial_resource_count(const Deposit& deposit) {
   return static_cast<StoredResourceCount>(deposit.dimensions.width()) *
          static_cast<StoredResourceCount>(deposit.dimensions.height()) * STORED_RESOURCES_PER_CELL;
 }
+
 }  // namespace profit
