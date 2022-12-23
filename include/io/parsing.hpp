@@ -20,8 +20,8 @@ struct Input {
   uint64_t time = 0;
   std::vector<Product> products;
   std::vector<LandscapeObject> objects;
-
-  [[nodiscard]] const std::vector<Deposit> deposits() const;
+  std::vector<Deposit> deposits;
+  std::vector<Obstacle> obstacles;
 
   static constexpr uint64_t DEFAULT_TIME = 300;
   bool operator==(const Input& other) const {
@@ -30,16 +30,6 @@ struct Input {
            std::ranges::is_permutation(objects, other.objects);
   }
 };
-
-inline const std::vector<Deposit> Input::deposits() const {
-  std::vector<Deposit> deposits;
-  for (auto const& object : objects) {
-    std::visit(utils::Overloaded{[&](const Deposit& deposit) { deposits.push_back(deposit); },
-                                 [](const Obstacle& /*obstacle*/) {}},
-               object);
-  }
-  return deposits;
-}
 
 inline LandscapeObject parse_object(const nlohmann::json& input) {
   std::string type = input["type"];
@@ -75,7 +65,15 @@ inline Input parse(std::istream& stream) {
   }
 
   for (const auto& object_json : json_input["objects"]) {
-    input.objects.push_back(parse_object(object_json));
+    std::visit(utils::Overloaded{
+      [&](Deposit deposit) {
+        input.deposits.push_back(deposit);
+      },
+      [&](Obstacle obstacle) {
+        input.obstacles.push_back(obstacle);
+      }
+    },
+      parse_object(object_json));
   }
 
   input.time = json_input.value("time", Input::DEFAULT_TIME);

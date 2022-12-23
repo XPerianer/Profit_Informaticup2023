@@ -88,7 +88,7 @@ inline void select_deposits_and_products(const parsing::Input& input) {
   // Simplest algorithm: Try all products one by one
   for (const auto& product : input.products) {
     const auto& requirements = product.requirements;
-    const std::vector<Deposit>& input_deposits = input.deposits();
+    const std::vector<Deposit>& input_deposits = input.deposits;
 
     std::vector<Deposit> useful_deposits;
     std::copy_if(input_deposits.begin(), input_deposits.end(), std::back_inserter(useful_deposits),

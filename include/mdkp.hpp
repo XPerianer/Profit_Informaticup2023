@@ -83,8 +83,8 @@ using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
 }
 
 inline void drive(const parsing::Input& input, const std::vector<ConnectedComponent>& components) {
-  std::vector<StoredResourceCount> remaining_resources_by_deposit(input.deposits().size());
-  std::ranges::transform(input.deposits(), remaining_resources_by_deposit.begin(),
+  std::vector<StoredResourceCount> remaining_resources_by_deposit(input.deposits.size());
+  std::ranges::transform(input.deposits, remaining_resources_by_deposit.begin(),
                          initial_resource_count);
 
   std::vector<std::array<StoredResourceCount, SUBTYPE_COUNT>> remaining_resources_by_component(
@@ -94,7 +94,7 @@ inline void drive(const parsing::Input& input, const std::vector<ConnectedCompon
     size_t component_id = &component - components.data();
 
     for (const DepositId& deposit_id : component) {
-      const Deposit deposit = input.deposits()[deposit_id];
+      const Deposit deposit = input.deposits[deposit_id];
       remaining_resources_by_component[component_id][static_cast<size_t>(deposit.type)] +=
           initial_resource_count(deposit);
     }
