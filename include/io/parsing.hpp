@@ -21,7 +21,7 @@ struct Input {
   std::vector<Product> products;
   std::vector<LandscapeObject> objects;
 
-  [[nodiscard]] const std::vector<Deposit>& deposits() const;
+  [[nodiscard]] const std::vector<Deposit> deposits() const;
 
   static constexpr uint64_t DEFAULT_TIME = 300;
   bool operator==(const Input& other) const {
@@ -31,9 +31,9 @@ struct Input {
   }
 };
 
-inline std::vector<Deposit> get_deposits(const Input& input) {
+inline const std::vector<Deposit> Input::deposits() const {
   std::vector<Deposit> deposits;
-  for (auto const& object : input.objects) {
+  for (auto const& object : objects) {
     std::visit(utils::Overloaded{[&](const Deposit& deposit) { deposits.push_back(deposit); },
                                  [](const Obstacle& /*obstacle*/) {}},
                object);
