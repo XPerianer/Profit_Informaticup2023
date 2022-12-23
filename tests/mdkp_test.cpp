@@ -29,7 +29,7 @@ TEST(Pech, ChoosesProductWithHigherScore) {
   product_good.points = 10;
   product_good.requirements[ResourceType::TYPE0] = 2;
 
-  // Product is bad because it has lower points than product_good
+  // Product_bad is bad because it has lower points than product_good
   Product product_bad;
   product_bad.points = 5;
   product_bad.requirements[ResourceType::TYPE0] = 2;
