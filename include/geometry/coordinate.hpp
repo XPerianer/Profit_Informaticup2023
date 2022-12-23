@@ -2,6 +2,7 @@
 #include <concepts>
 #include <cstdint>
 #include <limits>
+#include <string>
 
 #include "assert.hpp"
 

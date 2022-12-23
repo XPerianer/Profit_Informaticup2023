@@ -11,8 +11,8 @@ namespace profit::serialization {
 
 struct Output {
   Vec2 dimensions;
-  int32_t turns;
-  int32_t time;
+  uint64_t turns;
+  uint64_t time;
   std::vector<Product> products;
   std::vector<LandscapeObject> landscape_objects;
   std::vector<PlaceableObject> placeable_objects;

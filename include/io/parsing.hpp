@@ -69,7 +69,7 @@ inline Input parse(std::istream& stream) {
     auto type = static_cast<ProductType>(static_cast<int>(product_json["subtype"]));
     Requirements requirements(static_cast<std::vector<int>>(product_json["resources"]));
     Product product{type, requirements, product_json["points"]};
-    if(product.points != 0) {
+    if (product.points != 0) {
       input.products.push_back(product);
     }
   }

@@ -10,6 +10,7 @@
 #include "io/parsing.hpp"
 #include "io/serialization.hpp"
 #include "landscape.hpp"
+#include "mdkp.hpp"
 #include "placeable.hpp"
 #include "rotation.hpp"
 #include "utils.hpp"
@@ -22,6 +23,8 @@ using namespace geometry;
 // For now, we allow exception escape (causing std::terminate -> error shown)
 int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
+
+  drive(input, {});
 
   // TODO: lots of calculations with input
   std::vector<PlaceableObject> result = {};
