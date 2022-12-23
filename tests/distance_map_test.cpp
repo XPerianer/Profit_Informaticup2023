@@ -27,7 +27,7 @@ class DistanceMapTest : public testing::Test {
     std::istringstream stream{std::string{example}};
     auto input = parsing::parse(stream);
     OccupancyMap occupancy_map = occupancies_from(input);
-    std::vector<Deposit> deposits = get_deposits(input);
+    std::vector<Deposit> deposits = input.deposits;
     ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits.size()),
                                      occupancy_map.dimensions());
 

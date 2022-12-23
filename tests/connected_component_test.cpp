@@ -23,7 +23,7 @@ class ConnectedComponentTest : public testing::Test {
     auto input = parsing::parse(stream);
 
     OccupancyMap occupancy_map = occupancies_from(input);
-    auto deposits = get_deposits(input);
+    auto deposits = input.deposits;
     ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits.size()),
                                      occupancy_map.dimensions());
     for (size_t i = 0; i < deposits.size(); i++) {
