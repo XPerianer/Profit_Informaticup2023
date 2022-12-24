@@ -1,5 +1,6 @@
 #include <bits/ranges_algo.h>
 
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -36,10 +37,21 @@ inline std::optional<FactoryId> place_factory(ProductType product,
   // ein bisschen rückeln wenn rütteln nicht klappt oder zu sehr entfernt, gehe weiter
   std::vector<Vec2> suitable_cells;
   DistanceMap merged_distances = merge(distance_maps);
-  PlacementMap possible_placements =
+  auto [possible_placements, possible_cells] =
       placements_for(Factory::DIMENSIONS, state.occupancy_map, merged_distances);
 
-  if (suitable_cells.empty()) {
+  for (Vec2 cell : possible_placements) {
+    if (cell.x() == 0) {
+      std::cout << std::endl;
+    }
+    if (possible_placements.at(cell) == INVALID) {
+      std::cout << "i, ";
+    } else {
+      std::cout << "v, ";
+    }
+  }
+
+  if (possible_cells.empty()) {
     return std::nullopt;
   }
 
@@ -47,7 +59,7 @@ inline std::optional<FactoryId> place_factory(ProductType product,
   // ränder am geringsten, ist der optimale platz, da so diese hot spots mit enttarnt werden ->
   // neeee, siehe task 4
   Vec2 handle = *std::min_element(
-      suitable_cells.begin(), suitable_cells.end(), [&](Vec2 cell_a, Vec2 cell_b) {
+      possible_cells.begin(), possible_cells.end(), [&](Vec2 cell_a, Vec2 cell_b) {
         return merged_distances.at(cell_a) < merged_distances.at(cell_b);
       });
 
