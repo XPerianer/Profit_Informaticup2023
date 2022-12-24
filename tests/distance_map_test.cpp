@@ -8,7 +8,6 @@
 #include "connected_component.hpp"
 #include "example_tasks.hpp"
 #include "fields/occupancy_map.hpp"
-#include "fields/placement_map.hpp"
 #include "geometry/vec2.hpp"
 #include "io/parsing.hpp"
 #include "placeable.hpp"
@@ -444,25 +443,6 @@ TEST_F(DistanceMapTest, Task3Merged) {
                      9,  9,  9,  9,  8,  8,  8,  8,  8,  9,  9,  9,  9, 10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15,  n,  n,  n, 16,
       // clang-format on
   });
-}
-
-TEST(DistanceMap, bla) {
-  std::istringstream stream{std::string{examples::TASK4}};
-  auto input = parsing::parse(stream);
-  OccupancyMap occupancy_map = occupancies_from(input);
-  std::vector<Deposit> deposits = get_deposits(input);
-  ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits.size()),
-                                   occupancy_map.dimensions());
-  std::vector<DistanceMap> distance_maps;
-  distance_maps.reserve(deposits.size());
-
-  for (size_t i = 0; i < deposits.size(); i++) {
-    distance_maps.emplace_back(
-        distances_from(deposits[i], occupancy_map, cc_union, static_cast<DepositId>(i)));
-  }
-
-  DistanceMap merged = merge(distance_maps);
-  PlacementMap placements_map = placements_for(Factory::DIMENSIONS, occupancy_map, merged);
 }
 
 TEST_F(DistanceMapTest, Task4Merged) {

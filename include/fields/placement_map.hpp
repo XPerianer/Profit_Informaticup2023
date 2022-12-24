@@ -1,5 +1,7 @@
 #pragma once
 
+#include <tuple>
+
 #include "fields/distance_map.hpp"
 #include "fields/field.hpp"
 #include "fields/occupancy_map.hpp"
@@ -9,17 +11,19 @@
 
 namespace profit {
 enum Placeability : bool {
-  IMPOSSIBLE,
-  POSSIBLE,
+  INVALID,
+  VALID,
 };
-using PlacementMap = Field<Placeability, IMPOSSIBLE, IMPOSSIBLE>;
+using PlacementMap = Field<Placeability, INVALID, INVALID>;
 
 using geometry::Coordinate;
 
 /* Assumens handle at top left */
-inline PlacementMap placements_for(const Vec2 object_dimensions, const OccupancyMap& occupancy_map,
-                                   const DistanceMap& distance_map) {
+inline std::tuple<PlacementMap, std::vector<Vec2>> placements_for(const Vec2 object_dimensions,
+                                                                  const OccupancyMap& occupancy_map,
+                                                                  const DistanceMap& distance_map) {
   PlacementMap placements(occupancy_map.dimensions());
+  std::vector<Vec2> possible_cells;
   Coordinate last_unsuitable = -1;
 
   for (auto y = 0; y < placements.dimensions().y(); ++y) {
@@ -30,7 +34,7 @@ inline PlacementMap placements_for(const Vec2 object_dimensions, const Occupancy
         last_unsuitable = j;
       }
       if (last_unsuitable < i) {
-        placements.set(Vec2{i, y}, POSSIBLE);
+        placements.set(Vec2{i, y}, VALID);
       }
     }
   }
@@ -38,27 +42,18 @@ inline PlacementMap placements_for(const Vec2 object_dimensions, const Occupancy
   for (auto x = 0; x < placements.dimensions().x(); ++x) {
     for (Coordinate i = 0 - object_dimensions.y(), j = -1; i < placements.dimensions().y();
          ++i, ++j) {
-      if (placements.at(Vec2{x, j}) == IMPOSSIBLE) {
+      if (placements.at(Vec2{x, j}) == INVALID) {
         last_unsuitable = j;
       }
       if (last_unsuitable >= i && i >= 0) {
-        placements.set(Vec2{x, i}, IMPOSSIBLE);
+        placements.set(Vec2{x, i}, INVALID);
         continue;
       }
+      possible_cells.emplace_back(x, i);
     }
   }
 
-  for (Vec2 cell : placements) {
-    if (cell.x() == 0) {
-      std::cout << std::endl;
-    }
-    if (placements.at(cell) == IMPOSSIBLE) {
-      std::cout << "n";
-    } else {
-      std::cout << "j";
-    }
-  }
-  return placements;
+  return std::make_tuple(placements, possible_cells);
 }
 
 }  // namespace profit
