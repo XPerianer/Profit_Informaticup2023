@@ -40,17 +40,6 @@ inline std::optional<FactoryId> place_factory(ProductType product,
   auto [possible_placements, possible_cells] =
       placements_for(Factory::DIMENSIONS, state.occupancy_map, merged_distances);
 
-  for (Vec2 cell : possible_placements) {
-    if (cell.x() == 0) {
-      std::cout << std::endl;
-    }
-    if (possible_placements.at(cell) == INVALID) {
-      std::cout << "i, ";
-    } else {
-      std::cout << "v, ";
-    }
-  }
-
   if (possible_cells.empty()) {
     return std::nullopt;
   }
