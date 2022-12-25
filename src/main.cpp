@@ -3,7 +3,6 @@
 #include <variant>
 #include <vector>
 
-#include "field_state.hpp"
 #include "fields/distance_map.hpp"
 #include "fields/field.hpp"
 #include "fields/occupancy_map.hpp"

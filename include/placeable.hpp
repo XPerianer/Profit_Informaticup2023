@@ -4,7 +4,6 @@
 #include <variant>
 
 #include "assert.hpp"
-#include "geometry/coordinate.hpp"
 #include "geometry/rectangle.hpp"
 #include "geometry/vec2.hpp"
 #include "rotation.hpp"

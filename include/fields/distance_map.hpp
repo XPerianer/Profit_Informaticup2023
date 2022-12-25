@@ -87,6 +87,7 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
   return distances;
 }
 
+/* Debug method for combined distance visualizations */
 inline DistanceMap merge(const std::vector<DistanceMap>& maps) {
   DistanceMap result(maps[0].dimensions());
   for (Vec2 coordinate : result) {
