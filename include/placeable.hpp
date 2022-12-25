@@ -256,15 +256,16 @@ struct Factory {
   FactoryType type{};
   bool operator==(const Factory& other) const = default;
 
-  // todo: kürzer
   [[nodiscard]] constexpr std::array<Vec2, OCCUPIED_CELL_COUNT> occupied_cells() const {
-    return {handle + Vec2{0, 0}, handle + Vec2{1, 0}, handle + Vec2{2, 0}, handle + Vec2{3, 0},
-            handle + Vec2{4, 0}, handle + Vec2{0, 1}, handle + Vec2{1, 1}, handle + Vec2{2, 1},
-            handle + Vec2{3, 1}, handle + Vec2{4, 1}, handle + Vec2{0, 2}, handle + Vec2{1, 2},
-            handle + Vec2{2, 2}, handle + Vec2{3, 2}, handle + Vec2{4, 2}, handle + Vec2{0, 3},
-            handle + Vec2{1, 3}, handle + Vec2{2, 3}, handle + Vec2{3, 3}, handle + Vec2{4, 3},
-            handle + Vec2{0, 4}, handle + Vec2{1, 4}, handle + Vec2{2, 4}, handle + Vec2{3, 4},
-            handle + Vec2{4, 4}};
+    return {
+        // clang-format off
+      handle + Vec2{0, 0}, handle + Vec2{1, 0}, handle + Vec2{2, 0}, handle + Vec2{3, 0}, handle + Vec2{4, 0},
+      handle + Vec2{0, 1}, handle + Vec2{1, 1}, handle + Vec2{2, 1}, handle + Vec2{3, 1}, handle + Vec2{4, 1},
+      handle + Vec2{0, 2}, handle + Vec2{1, 2}, handle + Vec2{2, 2}, handle + Vec2{3, 2}, handle + Vec2{4, 2},
+      handle + Vec2{0, 3}, handle + Vec2{1, 3}, handle + Vec2{2, 3}, handle + Vec2{3, 3}, handle + Vec2{4, 3},
+      handle + Vec2{0, 4}, handle + Vec2{1, 4}, handle + Vec2{2, 4}, handle + Vec2{3, 4}, handle + Vec2{4, 4},
+        // clang-format on 
+            };
   }
 };
 
