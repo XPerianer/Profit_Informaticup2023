@@ -7,7 +7,7 @@ namespace profit {
 
 using ResourceType = Subtype;
 
-constexpr auto RESOURCE_TYPES = {ResourceType::TYPE0, ResourceType::TYPE1, ResourceType::TYPE2,
+extern constexpr inline auto RESOURCE_TYPES = {ResourceType::TYPE0, ResourceType::TYPE1, ResourceType::TYPE2,
                                  ResourceType::TYPE3, ResourceType::TYPE4, ResourceType::TYPE5,
                                  ResourceType::TYPE6, ResourceType::TYPE7};
 
