@@ -1,5 +1,4 @@
-#include <bits/ranges_algo.h>
-
+#include <algorithm>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
@@ -33,38 +32,40 @@ struct FieldState {
 inline std::optional<FactoryId> place_factory(ProductType product,
                                               const std::vector<DistanceMap>& distance_maps,
                                               FieldState& state) {
-  // naiv: finde die location mit der niedrigsten distanz, schaue ob es da hin passt, eventuell mit
-  // ein bisschen rückeln wenn rütteln nicht klappt oder zu sehr entfernt, gehe weiter
-  std::vector<Vec2> suitable_cells;
-  DistanceMap merged_distances = merge(distance_maps);
   auto [possible_placements, possible_cells] =
-      placements_for(Factory::DIMENSIONS, state.occupancy_map, merged_distances);
+      placements_for(Factory::DIMENSIONS, state.occupancy_map, distance_maps[0]);
 
   if (possible_cells.empty()) {
     return std::nullopt;
   }
 
-  // besser wäre, sich die ränder einer potenziellen fabrik anzusehen und da, wo summe aller
-  // ränder am geringsten, ist der optimale platz, da so diese hot spots mit enttarnt werden ->
-  // neeee, siehe task 4
-  Vec2 handle = *std::min_element(
-      possible_cells.begin(), possible_cells.end(), [&](Vec2 cell_a, Vec2 cell_b) {
-        return merged_distances.at(cell_a) < merged_distances.at(cell_b);
-      });
-
-  // todo: auslagern
-  Factory factory = {handle, product};
-  for (auto y = 0; y < Factory::DIMENSIONS.y(); ++y) {
-    for (auto x = 0; x < Factory::DIMENSIONS.x(); ++x) {
-      if (y == 0 || y == Factory::DIMENSIONS.y() - 1 || x == 0 ||
-          x == Factory::DIMENSIONS.x() - 1) {
-        state.occupancy_map.set(Vec2{x, y}, CellOccupancy::INGRESS);
-      } else {
-        state.occupancy_map.set(Vec2{x, y}, CellOccupancy::BLOCKED);
-      }
+  auto min_distance_to_reach_factory_at = [&](const Vec2 handle, const DistanceMap& distance_map) {
+    DistanceT min = distance_map.at(handle);
+    for (Coordinate offset = 0; offset < Factory::DIMENSIONS.width(); ++offset) {
+      min = std::min(min, distance_map.at(handle + Vec2{offset, 0}));
+      min = std::min(min, distance_map.at(handle + Vec2{offset, Factory::DIMENSIONS.height() - 1}));
     }
-  }
+    for (Coordinate offset = 1; offset < Factory::DIMENSIONS.height() - 1; ++offset) {
+      min = std::min(min, distance_map.at(handle + Vec2{0, offset}));
+      min = std::min(min, distance_map.at(handle + Vec2{Factory::DIMENSIONS.width() - 1, offset}));
+    }
+    return min;
+  };
 
+  auto min_reachable_by_all = [&](const Vec2 cell) {
+    DistanceT min = distance_maps[0].at(cell);
+    for (const auto& distance_map : distance_maps) {
+      min = std::max(min, min_distance_to_reach_factory_at(cell, distance_map));
+    }
+    return min;
+  };
+
+  Vec2 handle = *std::ranges::min_element(possible_cells, [&](Vec2 cell_a, Vec2 cell_b) {
+    return min_reachable_by_all(cell_a) < min_reachable_by_all(cell_b);
+  });
+
+  Factory factory = {handle, product};
+  place(factory, state.occupancy_map);
   auto placed = static_cast<FactoryId>(state.factories.size());
   state.factories.emplace(placed, factory);
   return placed;
