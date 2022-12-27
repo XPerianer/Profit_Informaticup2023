@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -32,8 +31,8 @@ struct FieldState {
 inline std::optional<FactoryId> place_factory(ProductType product,
                                               const std::vector<DistanceMap>& distance_maps,
                                               FieldState& state) {
-  auto [possible_placements, possible_cells] =
-      placements_for(Factory::DIMENSIONS, state.occupancy_map, distance_maps[0]);
+  std::vector<Vec2> possible_cells =
+      placements_for<Factory::DIMENSIONS>(state.occupancy_map, distance_maps[0]);
 
   if (possible_cells.empty()) {
     return std::nullopt;

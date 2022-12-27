@@ -41,9 +41,10 @@ class PlacementMapTest : public testing::Test {
     }
 
     DistanceMap merged = merge(distance_maps);
-    auto [placements, cells] = placements_for(Factory::DIMENSIONS, occupancy_map, merged);
+    std::vector<Vec2> cells = placements_for<Factory::DIMENSIONS>(occupancy_map, merged);
+    PlacementMap placement_map = from_valid_cells(merged.dimensions(), cells);
 
-    EXPECT_THAT(placements.map(), testing::ElementsAreArray(expected));
+    EXPECT_THAT(placement_map.map(), testing::ElementsAreArray(expected));
   }
 };
 
