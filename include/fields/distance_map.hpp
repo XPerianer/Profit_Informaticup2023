@@ -15,7 +15,7 @@
 namespace profit {
 
 using DistanceT = int16_t;
-constexpr DistanceT NOT_REACHABLE = -1;
+constexpr DistanceT NOT_REACHABLE = INT16_MAX;
 
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
 
@@ -93,10 +93,6 @@ inline DistanceMap merge(const std::vector<DistanceMap>& maps) {
   for (Vec2 coordinate : result) {
     DistanceT shared_min_xy_distance = 0;
     for (const auto& map : maps) {
-      if (map.at(coordinate) == NOT_REACHABLE) {
-        shared_min_xy_distance = NOT_REACHABLE;
-        break;
-      }
       shared_min_xy_distance = std::max(shared_min_xy_distance, map.at(coordinate));
     }
     result.set(coordinate, shared_min_xy_distance);
