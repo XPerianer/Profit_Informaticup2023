@@ -37,9 +37,12 @@ class FieldStateTest : public testing::Test {
     }
 
     FieldState state = {occupancy_map, {}, {}};
-    FactoryId factory = place_factory(input.products[0].type, distance_maps, state).value_or(-1);
+    auto factory = place_factory(input.products[0].type, distance_maps, state);
+    if (!factory.has_value()) {
+      FAIL("No factory could be placed");
+    }
     std::array<Vec2, Factory::OCCUPIED_CELL_COUNT> occupied =
-        state.factories[factory].occupied_cells();
+        state.factories[factory.value()].occupied_cells();
 
     for (size_t i = 0; i < deposits.size(); i++) {
       Vec2 min_coordinate = *std::ranges::min_element(occupied, [&](auto cell_a, auto cell_b) {
