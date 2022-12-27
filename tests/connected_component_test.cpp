@@ -24,13 +24,13 @@ class ConnectedComponentTest : public testing::Test {
 
     OccupancyMap occupancy_map = occupancies_from(input);
     auto deposits = get_deposits(input);
-    ConnectedComponentUnion cc_union(static_cast<DepositId>(deposits.size()),
-                                     occupancy_map.dimensions());
+    ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
+                                                  occupancy_map.dimensions());
     for (size_t i = 0; i < deposits.size(); i++) {
-      distances_from(deposits[i], occupancy_map, cc_union, static_cast<DepositId>(i));
+      distances_from(deposits[i], occupancy_map, components_wrapper, static_cast<DepositId>(i));
     }
 
-    std::vector<ConnectedComponent> actual = cc_union.extract();
+    std::vector<ConnectedComponent> actual = components_wrapper.extract();
 
     EXPECT_EQ(actual, expected);
   }
