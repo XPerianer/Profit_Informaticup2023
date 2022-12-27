@@ -17,7 +17,7 @@ using namespace geometry;
 using namespace profit;
 using namespace parsing;
 
-// NOLINTBEGIN(readability-identifier-length): Keep Visualization of expected fields comprehensible
+// NOLINTBEGIN(readability-identifier-length): Keep visualization of expected fields comprehensible
 const Placeability i = INVALID;
 const Placeability v = VALID;
 // NOLINTEND(readability-identifier-length)

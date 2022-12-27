@@ -16,7 +16,7 @@ using namespace geometry;
 using namespace profit;
 using namespace parsing;
 
-// NOLINTBEGIN(readability-identifier-length): Keep Visualization of expected fields comprehensible
+// NOLINTBEGIN(readability-identifier-length): Keep visualization of expected fields comprehensible
 const int n = static_cast<int>(NOT_REACHABLE);
 // NOLINTEND(readability-identifier-length)
 
