@@ -15,7 +15,7 @@
 namespace profit {
 
 using DistanceT = int16_t;
-constexpr DistanceT NOT_REACHABLE = INT16_MAX;
+constexpr DistanceT NOT_REACHABLE = std::numeric_limits<DistanceT>::max();
 
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
 
