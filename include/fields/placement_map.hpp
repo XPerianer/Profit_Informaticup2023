@@ -16,20 +16,11 @@ using PlacementMap = Field<Placeability, INVALID, INVALID>;
 
 using geometry::Coordinate;
 
-inline PlacementMap from_valid_cells(Vec2 dimensions, const std::vector<Vec2>& valid_cells) {
-  PlacementMap placements(dimensions);
-  for (auto valid_cell : valid_cells) {
-    placements.set(valid_cell, VALID);
-  }
-  return placements;
-}
-
 /* Assumes handle at top left */
 template <const Vec2& ObjectDimensions>
-inline std::vector<Vec2> placements_for(const OccupancyMap& occupancy_map,
-                                        const DistanceMap& distance_map) {
+inline PlacementMap placements_for(const OccupancyMap& occupancy_map,
+                                   const DistanceMap& distance_map) {
   PlacementMap placements(occupancy_map.dimensions());
-  std::vector<Vec2> possible_cells;
   Coordinate last_invalid = -1;
 
   for (auto y = 0; y < placements.dimensions().y(); ++y) {
@@ -51,13 +42,13 @@ inline std::vector<Vec2> placements_for(const OccupancyMap& occupancy_map,
       if (placements.at(Vec2{x, j}) == INVALID) {
         last_invalid = j;
       }
-      if (last_invalid < i) {
-        possible_cells.emplace_back(x, i);
+      if (last_invalid >= i && i >= 0) {
+        placements.set(Vec2{x, i}, INVALID);
       }
     }
   }
 
-  return possible_cells;
+  return placements;
 }
 
 }  // namespace profit
