@@ -42,7 +42,7 @@ inline void update_reachability_if_placeable(DistanceMap& distances,
 
 /* Returns an approximation */
 inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancy_map,
-                                  ConnectedComponentsWrapper& components_wrapper,
+                                  ConnectedComponentsWrapper* components_wrapper,
                                   const DepositId deposit_id) {
   DistanceMap distances(occupancy_map.dimensions());
   // Invariant: For each cell in the queue: We've reached this cell in (distance) steps.
@@ -60,7 +60,7 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
   while (!reached_ingresses.empty()) {
     Vec2 reached_ingress = reached_ingresses.front();
     reached_ingresses.pop();
-    components_wrapper.set_reachable(deposit_id, reached_ingress);
+    components_wrapper->set_reachable(deposit_id, reached_ingress);
     auto next_distance = static_cast<DistanceT>(distances.at(reached_ingress) + 1);
 
     for (auto rotation : ROTATIONS) {

@@ -32,12 +32,13 @@ class FieldStateTest : public testing::Test {
     distance_maps.reserve(deposits.size());
 
     for (size_t i = 0; i < deposits.size(); i++) {
-      distance_maps.emplace_back(distances_from(deposits[i], occupancy_map, components_wrapper,
+      distance_maps.emplace_back(distances_from(deposits[i], occupancy_map, &components_wrapper,
                                                 static_cast<DepositId>(i)));
     }
 
+    DistanceMap merged = merge(distance_maps);
     FieldState state = {occupancy_map, {}, {}};
-    auto factory = place_factory(input.products[0].type, distance_maps, state);
+    auto factory = place_factory(input.products[0].type, merged, &state);
     if (!factory.has_value()) {
       FAIL("No factory could be placed");
     }
@@ -57,8 +58,7 @@ TEST(FieldState, NoPlacementPossible) {
   OccupancyMap occupancy_map(Vec2{4, 4});
   FieldState state{occupancy_map, {}, {}};
   ProductType type{};
-  std::vector<DistanceMap> distance_maps = {DistanceMap(Vec2{4, 4})};
-  EXPECT_FALSE(place_factory(type, distance_maps, state).has_value());
+  EXPECT_FALSE(place_factory(type, DistanceMap(Vec2{4, 4}), &state).has_value());
 }
 
 TEST(FieldState, Task1) { FieldStateTest::should_be_reachable_in(examples::TASK1, {1, 1, 5}); }

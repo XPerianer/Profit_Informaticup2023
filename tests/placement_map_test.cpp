@@ -36,7 +36,7 @@ class PlacementMapTest : public testing::Test {
     distance_maps.reserve(deposits.size());
 
     for (size_t i = 0; i < deposits.size(); i++) {
-      distance_maps.emplace_back(distances_from(deposits[i], occupancy_map, components_wrapper,
+      distance_maps.emplace_back(distances_from(deposits[i], occupancy_map, &components_wrapper,
                                                 static_cast<DepositId>(i)));
     }
 

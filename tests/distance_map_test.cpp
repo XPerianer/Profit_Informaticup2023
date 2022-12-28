@@ -35,7 +35,7 @@ class DistanceMapTest : public testing::Test {
     ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits_.size()),
                                                   occupancy_map_.dimensions());
     for (size_t i = 0; i < deposits_.size(); i++) {
-      DistanceMap distance_map = distances_from(deposits_[i], occupancy_map_, components_wrapper,
+      DistanceMap distance_map = distances_from(deposits_[i], occupancy_map_, &components_wrapper,
                                                 static_cast<DepositId>(i));
       EXPECT_THAT(distance_map.map(), testing::ElementsAreArray(expected_distances[i]));
     }
@@ -48,7 +48,7 @@ class DistanceMapTest : public testing::Test {
     distance_maps.reserve(deposits_.size());
 
     for (size_t i = 0; i < deposits_.size(); i++) {
-      distance_maps.emplace_back(distances_from(deposits_[i], occupancy_map_, components_wrapper,
+      distance_maps.emplace_back(distances_from(deposits_[i], occupancy_map_, &components_wrapper,
                                                 static_cast<DepositId>(i)));
     }
 
