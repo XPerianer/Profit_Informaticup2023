@@ -31,33 +31,48 @@ struct FieldState {
 inline std::optional<FactoryId> place_factory(ProductType product,
                                               const DistanceMap& cc_merged_distances,
                                               FieldState* state) {
-  PlacementMap placements =
+  PlacementMap handle_placements =
       placements_for<Factory::DIMENSIONS>(state->occupancy_map, cc_merged_distances);
 
-  Vec2 candidate = Vec2{-1, -1};
-  Rectangle latest_placement_shape = Rectangle::from_top_left_and_dimensions(candidate, Vec2{1, 1});
-
-  for (auto cell : cc_merged_distances) {
-    if (placements.at(cell) == VALID) {
-      latest_placement_shape = Rectangle::from_top_left_and_dimensions(cell, Factory::DIMENSIONS);
-    }
-    if (!geometry::is_on_border(latest_placement_shape, cell)) {
+  PlacementMap ingress_placements(handle_placements.dimensions());
+  for (auto cell : handle_placements) {
+    if (handle_placements.at(cell) == INVALID) {
       continue;
     }
-    if (cc_merged_distances.at(cell) < cc_merged_distances.at(candidate)) {
-      candidate = latest_placement_shape.top_left();
+
+    for (Coordinate offset = 0; offset < Factory::DIMENSIONS.width(); ++offset) {
+      ingress_placements.set(cell + Vec2{offset, 0}, VALID);
+      ingress_placements.set(cell + Vec2{offset, Factory::DIMENSIONS.height() - 1}, VALID);
+    }
+    for (Coordinate offset = 1; offset < Factory::DIMENSIONS.height() - 1; ++offset) {
+      ingress_placements.set(cell + Vec2{0, offset}, VALID);
+      ingress_placements.set(cell + Vec2{Factory::DIMENSIONS.width() - 1, offset}, VALID);
     }
   }
 
-  if (candidate.x() < 0) {
-    return std::nullopt;
+  std::vector<std::pair<Vec2, DistanceT>> reachability;
+
+  for (auto cell : cc_merged_distances) {
+    if (ingress_placements.at(cell) == INVALID) {
+      continue;
+    }
+    reachability.emplace_back(cell, cc_merged_distances.at(cell));
   }
 
-  Factory factory = {candidate, product};
-  place(factory, &state->occupancy_map);
-  auto placed = static_cast<FactoryId>(state->factories.size());
-  state->factories.emplace(placed, factory);
-  return placed;
+  std::ranges::sort(reachability,
+                    [&](auto pair_a, auto pair_b) { return pair_a.second < pair_b.second; });
+
+  for (auto pair : reachability) {
+    if (// can be placed here //ingress -> handle mapping missing ) {
+      Factory factory = {pair.first, product};
+      place(factory, &state->occupancy_map);
+      auto placed = static_cast<FactoryId>(state->factories.size());
+      state->factories.emplace(placed, factory);
+      return placed;
+  }
+}
+
+return std::nullopt;
 }
 
 }  // namespace profit
