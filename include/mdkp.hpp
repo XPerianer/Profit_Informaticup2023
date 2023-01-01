@@ -82,7 +82,8 @@ using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
   }
 }
 
-inline void try_to_build_solution_in_component(const parsing::Input& input, const std::vector<ConnectedComponent>& components) {
+inline void try_to_build_solution_in_component(const parsing::Input& input,
+                                               const std::vector<ConnectedComponent>& components) {
   std::vector<StoredResourceCount> remaining_resources_by_deposit(input.deposits.size());
   std::ranges::transform(input.deposits, remaining_resources_by_deposit.begin(),
                          initial_resource_count);

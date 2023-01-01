@@ -13,12 +13,10 @@
 using namespace profit;
 
 class PechTest : public testing::Test {
-  protected:
-
+ protected:
   Product product_good, product_bad;
 
   void SetUp() override {
-
     product_good.points = 10;
     product_good.requirements[ResourceType::TYPE0] = 2;
 
