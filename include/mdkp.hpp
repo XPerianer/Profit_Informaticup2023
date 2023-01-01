@@ -82,7 +82,7 @@ using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
   }
 }
 
-inline void drive(const parsing::Input& input, const std::vector<ConnectedComponent>& components) {
+inline void try_to_build_solution_in_component(const parsing::Input& input, const std::vector<ConnectedComponent>& components) {
   std::vector<StoredResourceCount> remaining_resources_by_deposit(input.deposits.size());
   std::ranges::transform(input.deposits, remaining_resources_by_deposit.begin(),
                          initial_resource_count);
@@ -100,7 +100,8 @@ inline void drive(const parsing::Input& input, const std::vector<ConnectedCompon
     }
   }
 
-  // TODO: Bitmagic?
+  // TODO: Could not copy products, but use a bitmap to signal which products are currently
+  // available
   std::vector<Product> products_that_can_be_tried = input.products;
 
   while (true) {

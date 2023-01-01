@@ -12,27 +12,32 @@
 
 using namespace profit;
 
-TEST(Pech, OutputsCorrectNumberOfElements) {
+class PechTest : public testing::Test {
+  protected:
+
+  Product product_good, product_bad;
+
+  void SetUp() override {
+
+    product_good.points = 10;
+    product_good.requirements[ResourceType::TYPE0] = 2;
+
+    // Product_bad is bad because it has lower points than product_good
+    product_bad.points = 5;
+    product_bad.requirements[ResourceType::TYPE0] = 2;
+  }
+};
+
+TEST_F(PechTest, OutputsCorrectNumberOfElements) {
   AvailableResources resources = {8, 8, 8, 8, 8, 8, 8, 8};
-  Product product_one;
-  product_one.points = 10;
-  product_one.requirements[ResourceType::TYPE0] = 2;
-  auto output = pech(resources, {product_one});
+  auto output = pech(resources, {product_good});
 
   std::vector<ProductCount> expected = {4};
   EXPECT_EQ(expected, output);
 }
 
-TEST(Pech, ChoosesProductWithHigherScore) {
+TEST_F(PechTest, ChoosesProductWithHigherScore) {
   AvailableResources resources = {8, 8, 8, 8, 8, 8, 8, 8};
-  Product product_good;
-  product_good.points = 10;
-  product_good.requirements[ResourceType::TYPE0] = 2;
-
-  // Product_bad is bad because it has lower points than product_good
-  Product product_bad;
-  product_bad.points = 5;
-  product_bad.requirements[ResourceType::TYPE0] = 2;
   auto output = pech(resources, {product_bad, product_good});
   std::vector<ProductCount> expected = {0, 4};
   EXPECT_EQ(expected, output);
