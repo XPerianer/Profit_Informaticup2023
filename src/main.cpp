@@ -24,8 +24,6 @@ using namespace geometry;
 int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
 
-  drive(input, {});
-
   // TODO: lots of calculations with input
   std::vector<PlaceableObject> result = {};
 
