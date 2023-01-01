@@ -33,8 +33,9 @@ int main() {  // NOLINT(bugprone-exception-escape)
   std::cout << serialization::serialize(result);
 #else
   // Extented output for profit website
-  serialization::Output output = serialization::Output{input.dimensions, input.turns,   input.time,
-                                                       input.products,   input.objects, result};
+  serialization::Output output =
+      serialization::Output{input.dimensions, input.turns,     input.time, input.products,
+                            input.deposits,   input.obstacles, result};
   std::cout << serialization::serialize_detailed(output);
 #endif
   return 0;

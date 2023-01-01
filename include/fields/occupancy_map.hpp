@@ -22,23 +22,20 @@ using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy:
 
 inline OccupancyMap occupancies_from(const parsing::Input& input) {
   OccupancyMap occupancy_map(input.dimensions);
-  for (const auto& object : input.objects) {
-    std::visit(utils::Overloaded{[&](const Deposit& deposit) {
-                                   const auto rect = as_rectangle(deposit);
-                                   for (Vec2 coordinate : rect) {
-                                     if (is_on_border(rect, coordinate)) {
-                                       occupancy_map.set(coordinate, CellOccupancy::EGRESS);
-                                     } else {
-                                       occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
-                                     }
-                                   }
-                                 },
-                                 [&](const Obstacle& obstacle) {
-                                   for (Vec2 coordinate : as_rectangle(obstacle)) {
-                                     occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
-                                   }
-                                 }},
-               object);
+  for (const auto& deposit : input.deposits) {
+    const auto rect = as_rectangle(deposit);
+    for (Vec2 coordinate : rect) {
+      if (is_on_border(rect, coordinate)) {
+        occupancy_map.set(coordinate, CellOccupancy::EGRESS);
+      } else {
+        occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
+      }
+    }
+  }
+  for (const auto& obstacle : input.obstacles) {
+    for (Vec2 coordinate : as_rectangle(obstacle)) {
+      occupancy_map.set(coordinate, CellOccupancy::BLOCKED);
+    }
   }
   return occupancy_map;
 }

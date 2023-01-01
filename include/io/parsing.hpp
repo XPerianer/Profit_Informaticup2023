@@ -19,7 +19,6 @@ struct Input {
   uint64_t turns = 0;
   uint64_t time = 0;
   std::vector<Product> products;
-  std::vector<LandscapeObject> objects;
   std::vector<Deposit> deposits;
   std::vector<Obstacle> obstacles;
 
@@ -27,7 +26,8 @@ struct Input {
   bool operator==(const Input& other) const {
     return dimensions == other.dimensions && turns == other.turns && time == other.time &&
            std::ranges::is_permutation(products, other.products) &&
-           std::ranges::is_permutation(objects, other.objects);
+           std::ranges::is_permutation(deposits, other.deposits) &&
+           std::ranges::is_permutation(obstacles, other.obstacles);
   }
 };
 

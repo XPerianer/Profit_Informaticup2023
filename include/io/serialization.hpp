@@ -14,13 +14,15 @@ struct Output {
   uint64_t turns;
   uint64_t time;
   std::vector<Product> products;
-  std::vector<LandscapeObject> landscape_objects;
+  std::vector<Deposit> deposits;
+  std::vector<Obstacle> obstacles;
   std::vector<PlaceableObject> placeable_objects;
 
   bool operator==(const Output& other) const {
     return dimensions == other.dimensions && turns == other.turns && time == other.time &&
            std::ranges::is_permutation(products, other.products) &&
-           std::ranges::is_permutation(landscape_objects, other.landscape_objects) &&
+           std::ranges::is_permutation(deposits, other.deposits) &&
+           std::ranges::is_permutation(obstacles, other.obstacles) &&
            std::ranges::is_permutation(placeable_objects, other.placeable_objects);
   }
 };
@@ -61,25 +63,21 @@ inline nlohmann::json serialize_object(const PlaceableObject& object) {
                     object);
 }
 
-inline nlohmann::json serialize_object(const LandscapeObject& object) {
-  return std::visit(utils::Overloaded{
-                        [&](const Deposit& deposit) -> nlohmann::json {
-                          return {{"type", "deposit"},
-                                  {"x", static_cast<int>(deposit.handle.x())},
-                                  {"y", static_cast<int>(deposit.handle.y())},
-                                  {"width", static_cast<int>(deposit.dimensions.width())},
-                                  {"height", static_cast<int>(deposit.dimensions.height())},
-                                  {"subtype", static_cast<int>(deposit.type)}};
-                        },
-                        [&](const Obstacle& obstacle) -> nlohmann::json {
-                          return {{"type", "obstacle"},
-                                  {"x", static_cast<int>(obstacle.handle.x())},
-                                  {"y", static_cast<int>(obstacle.handle.y())},
-                                  {"width", static_cast<int>(obstacle.dimensions.x())},
-                                  {"height", static_cast<int>(obstacle.dimensions.y())}};
-                        },
-                    },
-                    object);
+inline nlohmann::json serialize_object(const Deposit& deposit) {
+  return {{"type", "deposit"},
+          {"x", static_cast<int>(deposit.handle.x())},
+          {"y", static_cast<int>(deposit.handle.y())},
+          {"width", static_cast<int>(deposit.dimensions.width())},
+          {"height", static_cast<int>(deposit.dimensions.height())},
+          {"subtype", static_cast<int>(deposit.type)}};
+};
+
+inline nlohmann::json serialize_object(const Obstacle& obstacle) {
+  return {{"type", "obstacle"},
+          {"x", static_cast<int>(obstacle.handle.x())},
+          {"y", static_cast<int>(obstacle.handle.y())},
+          {"width", static_cast<int>(obstacle.dimensions.x())},
+          {"height", static_cast<int>(obstacle.dimensions.y())}};
 }
 
 inline nlohmann::json serialize_product(const Product& product) {
@@ -103,8 +101,11 @@ inline nlohmann::json serialize_detailed(const Output& output) {
   out["height"] = static_cast<int>(output.dimensions.y());
 
   nlohmann::json objects = nlohmann::json::array();
-  for (const auto& object : output.landscape_objects) {
-    objects.emplace_back(serialize_object(object));
+  for (const auto& deposit : output.deposits) {
+    objects.emplace_back(serialize_object(deposit));
+  }
+  for (const auto& obstacle : output.obstacles) {
+    objects.emplace_back(serialize_object(obstacle));
   }
   for (const auto& object : output.placeable_objects) {
     objects.emplace_back(serialize_object(object));

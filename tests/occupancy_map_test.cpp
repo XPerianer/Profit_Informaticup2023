@@ -31,10 +31,15 @@ class OccupancyMapTest : public testing::Test {
     EXPECT_THAT(occupancy_map.map(), testing::ElementsAreArray(expected));
   }
 
-  static void with_objects(Vec2 dimensions, const std::vector<LandscapeObject>& objects,
+  static void with_objects(Vec2 dimensions, const std::vector<Deposit>& deposits,
+                           const std::vector<Obstacle>& obstacles,
                            const std::vector<CellOccupancy>& expected) {
-    auto input =
-        Input{.dimensions = dimensions, .turns = 0, .time = 0, .products = {}, .objects = objects};
+    auto input = Input{.dimensions = dimensions,
+                       .turns = 0,
+                       .time = 0,
+                       .products = {},
+                       .deposits = deposits,
+                       .obstacles = obstacles};
     OccupancyMap occupancy_map = occupancies_from(input);
     EXPECT_THAT(occupancy_map.map(), testing::ElementsAreArray(expected));
   }
@@ -42,7 +47,7 @@ class OccupancyMapTest : public testing::Test {
 
 TEST(OccupancyMap, Obstacle) {
   OccupancyMapTest::with_objects(
-      Vec2{5, 5},
+      Vec2{5, 5}, {},
       {
           Obstacle{.handle = {2, 2}, .dimensions = {2, 2}},
       },
@@ -63,6 +68,7 @@ TEST(OccupancyMap, Deposit) {
       {
           Deposit{.handle = {2, 2}, .dimensions = {3, 3}},
       },
+      {},
       {
           // clang-format off
       o, o, o, o, o,

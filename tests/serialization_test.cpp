@@ -22,8 +22,8 @@ TEST(Serialization, ReturnsInput) {
   std::istringstream input_stream{std::string{examples::TASK1}};
   nlohmann::json serialized_input = nlohmann::json::parse(input_stream.str());
   auto input = parsing::parse(input_stream);
-  auto output =
-      Output{input.dimensions, input.turns, input.time, input.products, input.objects, {}};
+  auto output = Output{input.dimensions, input.turns,     input.time, input.products,
+                       input.deposits,   input.obstacles, {}};
   nlohmann::json serialized_output = serialize_detailed(output);
   EXPECT_EQ(serialized_input, serialized_output);
 }
@@ -78,20 +78,27 @@ TEST(Output, DifferentOrdering) {
              .time = 120,
              .products = {Product{ProductType::TYPE0, {{10, 10, 0, 0, 0, 0, 0, 0}}, 10},
                           Product{ProductType::TYPE1, {{0, 0, 10, 10, 0, 0, 0, 0}}, 10}},
-             .landscape_objects = {Obstacle{{8, 0}, {4, 11}}, Obstacle{{3, 12}, {15, 3}},
-                                   Deposit{{0, 0}, {8, 9}, ResourceType::TYPE0}},
+             .deposits = {Deposit{{0, 0}, {8, 9}, ResourceType::TYPE0}},
+             .obstacles =
+                 {
+                     Obstacle{{8, 0}, {4, 11}},
+                     Obstacle{{3, 12}, {15, 3}},
+                 },
              .placeable_objects = {Mine{{8, 0}, Rotation::UP_TO_DOWN},
                                    Factory{{3, 12}, FactoryType::TYPE2}}};
-  auto output_b =
-      Output{.dimensions = {10, 10},
-             .turns = 50,
-             .time = 120,
-             .products = {Product{ProductType::TYPE1, {0, 0, 10, 10, 0, 0, 0, 0}, 10},
-                          Product{ProductType::TYPE0, {10, 10, 0, 0, 0, 0, 0, 0}, 10}},
-             .landscape_objects = {Obstacle{{8, 0}, {4, 11}}, Obstacle{{3, 12}, {15, 3}},
-                                   Deposit{{0, 0}, {8, 9}, ResourceType::TYPE0}},
-             .placeable_objects = {Factory{{3, 12}, FactoryType::TYPE2},
-                                   Mine{{8, 0}, Rotation::UP_TO_DOWN}}};
+  auto output_b = Output{.dimensions = {10, 10},
+                         .turns = 50,
+                         .time = 120,
+                         .products = {Product{ProductType::TYPE1, {0, 0, 10, 10, 0, 0, 0, 0}, 10},
+                                      Product{ProductType::TYPE0, {10, 10, 0, 0, 0, 0, 0, 0}, 10}},
+                         .deposits = {Deposit{{0, 0}, {8, 9}, ResourceType::TYPE0}},
+                         .obstacles =
+                             {
+                                 Obstacle{{8, 0}, {4, 11}},
+                                 Obstacle{{3, 12}, {15, 3}},
+                             },
+                         .placeable_objects = {Factory{{3, 12}, FactoryType::TYPE2},
+                                               Mine{{8, 0}, Rotation::UP_TO_DOWN}}};
 
   EXPECT_EQ(output_a, output_b);
 }
