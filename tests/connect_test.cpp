@@ -13,6 +13,7 @@
 #include "geometry/vec2.hpp"
 #include "io/parsing.hpp"
 #include "placeable.hpp"
+#include "utils.hpp"
 
 using namespace geometry;
 using namespace profit;
@@ -32,8 +33,8 @@ class ConnectionTest : public testing::Test {
 };
 
 TEST(Connect, CantConnectImpossibleThings) {
+  // TODO Handle input not from file to prevent that unit tests get path dependend
   auto input = ConnectionTest::from_file("../tasks/vertically_split_map.json");
-
   auto deposit = input.deposits.at(0);
 
   // Not reachable because of other side of split map
@@ -50,4 +51,34 @@ TEST(Connect, CantConnectImpossibleThings) {
 
   auto pipeline_id = connect(deposit, unreachable_factory, &state);
   EXPECT_EQ(pipeline_id, INVALID_PIPELINE_ID);
+}
+
+TEST(Connect, ConnectWithMineand3Conveyor) {
+  // TODO Handle input not from file to prevent that unit tests get path dependend
+  auto input = ConnectionTest::from_file("../tasks/vertically_split_map.json");
+  auto deposit = input.deposits.at(0);
+
+  auto factory = Factory{
+      .handle = {6, 2},
+      .type = FactoryType::TYPE0,
+  };
+
+  FieldState state = from_input(input);
+
+  auto pipeline_id = connect(deposit, factory, &state);
+
+  Pipeline pipeline = state.pipelines[pipeline_id];
+
+  EXPECT_EQ(state.factories[pipeline.factory], factory);
+  EXPECT_EQ(pipeline.parts.size(), 2);
+  for (auto part : pipeline.parts) {
+    std::visit(utils::Overloaded{
+                   [](Mine mine) { EXPECT_EQ(mine.handle.y(), 6); },
+                   [](Conveyor3 conveyor) { EXPECT_EQ(conveyor.handle.y(), 10); },
+                   [](Conveyor4 /**/) { FAIL("Should not be reached"); },
+                   [](Factory /**/) { FAIL("Should not be reached"); },
+                   [](Combiner /**/) { FAIL("Should not be reached"); },
+               },
+               part);
+  }
 }
