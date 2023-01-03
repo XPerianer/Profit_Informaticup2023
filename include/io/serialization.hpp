@@ -70,7 +70,7 @@ inline nlohmann::json serialize_object(const Deposit& deposit) {
           {"width", static_cast<int>(deposit.dimensions.width())},
           {"height", static_cast<int>(deposit.dimensions.height())},
           {"subtype", static_cast<int>(deposit.type)}};
-};
+}
 
 inline nlohmann::json serialize_object(const Obstacle& obstacle) {
   return {{"type", "obstacle"},
