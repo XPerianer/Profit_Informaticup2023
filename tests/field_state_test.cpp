@@ -36,7 +36,8 @@ class FieldStateTest : public testing::Test {
                                                 static_cast<DepositId>(i)));
     }
 
-    DistanceMap merged = merge(distance_maps);
+    DistanceMap merged = merge(distance_maps, Factory::DIMENSIONS);
+
     FieldState state = {occupancy_map, {}, {}};
     auto factory = place_factory(input.products[0].type, merged, &state);
     if (!factory.has_value()) {
