@@ -24,7 +24,8 @@ const CellOccupancy e = CellOccupancy::EGRESS;
 
 class OccupancyMapTest : public testing::Test {
  public:
-  static void with_example(std::string_view example, const std::vector<CellOccupancy>& expected) {
+  static void with_example(const std::string_view& example,
+                           const std::vector<CellOccupancy>& expected) {
     std::istringstream stream{std::string{example}};
     auto input = parsing::parse(stream);
     OccupancyMap occupancy_map = occupancies_from(input);

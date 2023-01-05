@@ -13,13 +13,13 @@ namespace profit {
 
 using ConnectedComponent = std::vector<DepositId>;
 
-class ConnectedComponentUnion {
+class ConnectedComponentsWrapper {
  private:
   std::unordered_map<DepositId, DepositId> deposits_to_cc_;
   ComponentMap map_;
 
  public:
-  explicit ConnectedComponentUnion(const DepositId count, Vec2 field_dimensions)
+  explicit ConnectedComponentsWrapper(const DepositId count, Vec2 field_dimensions)
       : map_(field_dimensions) {
     deposits_to_cc_.reserve(count);
     for (DepositId i = 0; i < count; ++i) {
