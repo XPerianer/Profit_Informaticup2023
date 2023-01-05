@@ -56,4 +56,15 @@ inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map)
   });
 }
 
+inline void place(const Factory factory, OccupancyMap* occupancy_map) {
+  const Rectangle shape = as_rectangle(factory);
+  for (auto coordinate : shape) {
+    if (geometry::is_on_border(shape, coordinate)) {
+      occupancy_map->set(coordinate, CellOccupancy::INGRESS);
+    } else {
+      occupancy_map->set(coordinate, CellOccupancy::BLOCKED);
+    }
+  }
+}
+
 }  // namespace profit

@@ -15,7 +15,7 @@
 namespace profit {
 
 using DistanceT = int16_t;
-constexpr DistanceT NOT_REACHABLE = -1;
+constexpr DistanceT NOT_REACHABLE = std::numeric_limits<DistanceT>::max();
 
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
 
@@ -42,7 +42,7 @@ inline void update_reachability_if_placeable(DistanceMap& distances,
 
 /* Returns an approximation */
 inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancy_map,
-                                  ConnectedComponentUnion& connected_components,
+                                  ConnectedComponentsWrapper* components_wrapper,
                                   const DepositId deposit_id) {
   DistanceMap distances(occupancy_map.dimensions());
   // Invariant: For each cell in the queue: We've reached this cell in (distance) steps.
@@ -60,7 +60,7 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
   while (!reached_ingresses.empty()) {
     Vec2 reached_ingress = reached_ingresses.front();
     reached_ingresses.pop();
-    connected_components.set_reachable(deposit_id, reached_ingress);
+    components_wrapper->set_reachable(deposit_id, reached_ingress);
     auto next_distance = static_cast<DistanceT>(distances.at(reached_ingress) + 1);
 
     for (auto rotation : ROTATIONS) {
@@ -85,6 +85,43 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
   }
 
   return distances;
+}
+
+/* At each cell: Minimum distance to reach object with dimensions by every map. Assumes handle
+ * at top left. */
+inline DistanceMap merge(const std::vector<DistanceMap>& maps, const Vec2 dimensions = Vec2{1, 1}) {
+  DistanceMap result(maps[0].dimensions());
+
+  auto min_distance_to_reach_object_at = [&](const Vec2 handle, const DistanceMap& map) {
+    if (map.at(handle) == NOT_REACHABLE) {
+      return NOT_REACHABLE;
+    }
+
+    DistanceT min = map.at(handle);
+    for (geometry::Coordinate offset = 0; offset < dimensions.width(); ++offset) {
+      min = std::min(min, map.at(handle + Vec2{offset, 0}));
+      min = std::min(min, map.at(handle + Vec2{offset, dimensions.height() - 1}));
+    }
+    for (geometry::Coordinate offset = 1; offset < dimensions.height() - 1; ++offset) {
+      min = std::min(min, map.at(handle + Vec2{0, offset}));
+      min = std::min(min, map.at(handle + Vec2{dimensions.width() - 1, offset}));
+    }
+    return min;
+  };
+
+  auto min_horizontal_reachable_by_all = [&](const Vec2 cell) {
+    DistanceT min = maps[0].at(cell);
+    for (const auto& map : maps) {
+      min = std::max(min, min_distance_to_reach_object_at(cell, map));
+    }
+    return min;
+  };
+
+  for (auto cell : result) {
+    result.set(cell, min_horizontal_reachable_by_all(cell));
+  }
+
+  return result;
 }
 
 }  // namespace profit

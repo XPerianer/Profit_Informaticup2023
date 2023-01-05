@@ -18,6 +18,8 @@ add_executable(
   distance_map_test.cpp
   occupancy_map_test.cpp
   connected_component_test.cpp
+  placement_map_test.cpp
+  field_state_test.cpp
 )
 
 target_link_libraries(
