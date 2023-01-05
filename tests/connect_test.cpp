@@ -47,9 +47,12 @@ TEST(Connect, CantConnectImpossibleThings) {
       .type = FactoryType::TYPE0,
   };
 
-  FieldState state = from_input(input);
+  FactoryId factory_id = 0;
 
-  auto pipeline_id = connect(deposit, unreachable_factory, &state);
+  FieldState state = from_input(input);
+  state.factories[factory_id] = unreachable_factory;
+
+  auto pipeline_id = connect(deposit, factory_id, &state);
   EXPECT_EQ(pipeline_id, INVALID_PIPELINE_ID);
 }
 
@@ -65,7 +68,10 @@ TEST(Connect, ConnectWithMineand3Conveyor) {
 
   FieldState state = from_input(input);
 
-  auto pipeline_id = connect(deposit, factory, &state);
+  FactoryId factory_id = 0;
+  state.factories[factory_id] = factory;
+
+  auto pipeline_id = connect(deposit, factory_id, &state);
 
   Pipeline pipeline = state.pipelines[pipeline_id];
 
