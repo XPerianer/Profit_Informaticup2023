@@ -12,6 +12,7 @@ add_compile_options(${COMPILER_WARNING_FLAGS})
 
 add_executable(
   unit_test
+  mdkp_test.cpp
   serialization_test.cpp
   parsing_test.cpp
   geometry_test.cpp

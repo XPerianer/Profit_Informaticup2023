@@ -16,28 +16,20 @@ namespace profit::parsing {
 
 struct Input {
   Vec2 dimensions;
-  int32_t turns = 0;
-  int32_t time = 0;
+  uint64_t turns = 0;
+  uint64_t time = 0;
   std::vector<Product> products;
-  std::vector<LandscapeObject> objects;
+  std::vector<Deposit> deposits;
+  std::vector<Obstacle> obstacles;
 
-  static constexpr int32_t DEFAULT_TIME = 300;
+  static constexpr uint64_t DEFAULT_TIME = 300;
   bool operator==(const Input& other) const {
     return dimensions == other.dimensions && turns == other.turns && time == other.time &&
            std::ranges::is_permutation(products, other.products) &&
-           std::ranges::is_permutation(objects, other.objects);
+           std::ranges::is_permutation(deposits, other.deposits) &&
+           std::ranges::is_permutation(obstacles, other.obstacles);
   }
 };
-
-inline std::vector<Deposit> get_deposits(const Input& input) {
-  std::vector<Deposit> deposits;
-  for (auto const& object : input.objects) {
-    std::visit(utils::Overloaded{[&](const Deposit& deposit) { deposits.push_back(deposit); },
-                                 [](const Obstacle& /*obstacle*/) {}},
-               object);
-  }
-  return deposits;
-}
 
 inline LandscapeObject parse_object(const nlohmann::json& input) {
   std::string type = input["type"];
@@ -66,11 +58,16 @@ inline Input parse(std::istream& stream) {
   for (const auto& product_json : json_input["products"]) {
     auto type = static_cast<ProductType>(static_cast<int>(product_json["subtype"]));
     Requirements requirements(static_cast<std::vector<int>>(product_json["resources"]));
-    input.products.push_back({type, requirements, product_json["points"]});
+    Product product{type, requirements, product_json["points"]};
+    if (product.points != 0) {
+      input.products.push_back(product);
+    }
   }
 
   for (const auto& object_json : json_input["objects"]) {
-    input.objects.push_back(parse_object(object_json));
+    std::visit(utils::Overloaded{[&](Deposit deposit) { input.deposits.push_back(deposit); },
+                                 [&](Obstacle obstacle) { input.obstacles.push_back(obstacle); }},
+               parse_object(object_json));
   }
 
   input.time = json_input.value("time", Input::DEFAULT_TIME);

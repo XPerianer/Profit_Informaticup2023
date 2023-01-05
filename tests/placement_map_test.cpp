@@ -29,7 +29,7 @@ class PlacementMapTest : public testing::Test {
     std::istringstream stream{std::string{example}};
     auto input = parsing::parse(stream);
     OccupancyMap occupancy_map = occupancies_from(input);
-    std::vector<Deposit> deposits = get_deposits(input);
+    std::vector<Deposit> deposits = input.deposits;
     ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
                                                   occupancy_map.dimensions());
     std::vector<DistanceMap> distance_maps;

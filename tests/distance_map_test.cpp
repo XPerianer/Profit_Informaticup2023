@@ -28,7 +28,7 @@ class DistanceMapTest : public testing::Test {
     std::istringstream stream{std::string{example}};
     input_ = parsing::parse(stream);
     occupancy_map_ = occupancies_from(input_);
-    deposits_ = get_deposits(input_);
+    deposits_ = input_.deposits;
   }
 
   void test_distances(const std::vector<std::vector<DistanceT>>& expected_distances) {

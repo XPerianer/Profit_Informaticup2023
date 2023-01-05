@@ -10,6 +10,7 @@
 #include "io/parsing.hpp"
 #include "io/serialization.hpp"
 #include "landscape.hpp"
+#include "mdkp.hpp"
 #include "placeable.hpp"
 #include "rotation.hpp"
 #include "utils.hpp"
@@ -30,8 +31,9 @@ int main() {  // NOLINT(bugprone-exception-escape)
   std::cout << serialization::serialize(result);
 #else
   // Extented output for profit website
-  serialization::Output output = serialization::Output{input.dimensions, input.turns,   input.time,
-                                                       input.products,   input.objects, result};
+  serialization::Output output =
+      serialization::Output{input.dimensions, input.turns,     input.time, input.products,
+                            input.deposits,   input.obstacles, result};
   std::cout << serialization::serialize_detailed(output);
 #endif
   return 0;
@@ -85,7 +87,7 @@ inline void select_deposits_and_products(const parsing::Input& input) {
   // Simplest algorithm: Try all products one by one
   for (const auto& product : input.products) {
     const auto& requirements = product.requirements;
-    const std::vector<Deposit> input_deposits = get_deposits(input);
+    const std::vector<Deposit>& input_deposits = input.deposits;
 
     std::vector<Deposit> useful_deposits;
     std::copy_if(input_deposits.begin(), input_deposits.end(), std::back_inserter(useful_deposits),
