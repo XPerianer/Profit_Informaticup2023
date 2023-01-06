@@ -153,6 +153,19 @@ struct Conveyor3 {
 
   [[nodiscard]] constexpr bool can_overlap_at(const Vec2 cell) const { return cell == handle; }
 
+  [[nodiscard]] constexpr Vec2 ingress() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return handle + Vec2{-1, 0};
+      case Rotation::UP_TO_DOWN:
+        return handle + Vec2{0, -1};
+      case Rotation::RIGHT_TO_LEFT:
+        return handle + Vec2{1, 0};
+      case Rotation::DOWN_TO_UP:
+        return handle + Vec2{0, 1};
+    }
+  }
+
   [[nodiscard]] constexpr Vec2 egress() const {
     switch (rotation) {
       case Rotation::LEFT_TO_RIGHT:
@@ -203,6 +216,19 @@ struct Conveyor4 {
       }
     }();
     return Conveyor4{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr Vec2 ingress() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return handle + Vec2{-1, 0};
+      case Rotation::UP_TO_DOWN:
+        return handle + Vec2{0, -1};
+      case Rotation::RIGHT_TO_LEFT:
+        return handle + Vec2{2, 0};
+      case Rotation::DOWN_TO_UP:
+        return handle + Vec2{0, 2};
+    }
   }
 
   [[nodiscard]] constexpr Vec2 egress() const {
@@ -300,6 +326,19 @@ struct Mine {
       }
     }();
     return Mine{handle, rotation};
+  }
+
+  [[nodiscard]] constexpr Vec2 ingress() const {
+    switch (rotation) {
+      case Rotation::LEFT_TO_RIGHT:
+        return handle + Vec2{-1, 1};
+      case Rotation::UP_TO_DOWN:
+        return handle + Vec2{0, -1};
+      case Rotation::RIGHT_TO_LEFT:
+        return handle + Vec2{2, 0};
+      case Rotation::DOWN_TO_UP:
+        return handle + Vec2{1, 2};
+    }
   }
 
   [[nodiscard]] constexpr Vec2 egress() const {
