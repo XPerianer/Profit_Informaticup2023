@@ -37,8 +37,7 @@ constexpr size_t FACTORY_TYPE_COUNT = SUBTYPE_COUNT;
   }
 }
 
-[[nodiscard]] constexpr std::array<Vec2, 3> upstream_egress_cells(Vec2 ingress,
-                                                                     Rotation rotation) {
+[[nodiscard]] constexpr std::array<Vec2, 3> upstream_egress_cells(Vec2 ingress, Rotation rotation) {
   Vec2 top = ingress + Vec2{0, -1};
   Vec2 right = ingress + Vec2{1, 0};
   Vec2 down = ingress + Vec2{0, 1};

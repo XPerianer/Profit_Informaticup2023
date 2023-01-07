@@ -26,7 +26,8 @@ namespace profit {
 using FieldIndex = uint16_t;
 const auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 
-// Using char instead of bool since vector<bool> has weird behaviour that would need to be handled in TwoDimensionalVector
+// Using char instead of bool since vector<bool> has weird behaviour that would need to be handled
+// in TwoDimensionalVector
 using TargetMap = Field<char, 0, 0>;
 
 std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
@@ -97,24 +98,25 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
   for (const auto& [id, pipeline] : state->pipelines) {
     if (id == factory_id) {
       for (const auto& placeable : pipeline.parts) {
-        std::visit(utils::Overloaded{[&](const Mine& mine) {
-                                       for (auto egress : mine.upstream_egress_cells()) {
-                                         target_egress_fields.set(egress, true);
-                                       }
-                                     },
-                                     [](const Combiner&) { /* TODO */ },
-                                     [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
-                                     [&](const Conveyor3 &conveyor) {
-                                       for (auto egress : conveyor.upstream_egress_cells()) {
-                                         target_egress_fields.set(egress, true);
-                                       }
-                                     },
-                                     [&](const Conveyor4 &conveyor) {
-                                       for (auto egress : conveyor.upstream_egress_cells()) {
-                                         target_egress_fields.set(egress, true);
-                                       }
-                                     }},
-                   placeable);
+        std::visit(
+            utils::Overloaded{[&](const Mine& mine) {
+                                for (auto egress : mine.upstream_egress_cells()) {
+                                  target_egress_fields.set(egress, true);
+                                }
+                              },
+                              [](const Combiner&) { /* TODO */ },
+                              [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
+                              [&](const Conveyor3& conveyor) {
+                                for (auto egress : conveyor.upstream_egress_cells()) {
+                                  target_egress_fields.set(egress, true);
+                                }
+                              },
+                              [&](const Conveyor4& conveyor) {
+                                for (auto egress : conveyor.upstream_egress_cells()) {
+                                  target_egress_fields.set(egress, true);
+                                }
+                              }},
+            placeable);
       };
     }
   }
@@ -195,15 +197,15 @@ std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fie
     reached_ingresses.pop();
 
     for (auto rotation : ROTATIONS) {
-      if (auto connected_egress =
-              visit_location_if_placable(ingress, target_egress_fields, predecessors, occupancy_map,
-                                         Conveyor3::with_ingress(ingress, rotation), &reached_ingresses);
+      if (auto connected_egress = visit_location_if_placable(
+              ingress, target_egress_fields, predecessors, occupancy_map,
+              Conveyor3::with_ingress(ingress, rotation), &reached_ingresses);
           connected_egress) {
         return connected_egress;
       }
-      if (auto connected_egress =
-              visit_location_if_placable(ingress, target_egress_fields, predecessors, occupancy_map,
-                                         Conveyor4::with_ingress(ingress, rotation), &reached_ingresses);
+      if (auto connected_egress = visit_location_if_placable(
+              ingress, target_egress_fields, predecessors, occupancy_map,
+              Conveyor4::with_ingress(ingress, rotation), &reached_ingresses);
           connected_egress) {
         return connected_egress;
       }

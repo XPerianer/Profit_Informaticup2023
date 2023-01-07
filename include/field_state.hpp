@@ -55,7 +55,9 @@ inline PipelineId FieldState::add_pipeline(Pipeline pipeline) {
 
 inline FieldState from_input(const parsing::Input &input) {
   FieldState state{
-      occupancies_from(input),{},{},
+      occupancies_from(input),
+      {},
+      {},
   };
   return state;
 }
