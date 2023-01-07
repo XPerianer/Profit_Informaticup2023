@@ -53,6 +53,23 @@ inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map)
   });
 }
 
+inline void place(const Conveyor3 &conveyor, OccupancyMap* occupancy_map) {
+  occupancy_map->set(conveyor.ingress(), CellOccupancy::INGRESS);
+  occupancy_map->set(conveyor.egress(), CellOccupancy::EGRESS);
+  occupancy_map->set(conveyor.handle, CellOccupancy::CONVEYOR_CROSSING);
+}
+
+inline void place(const Conveyor4 &conveyor, OccupancyMap* occupancy_map) {
+  occupancy_map->set(conveyor.ingress(), CellOccupancy::INGRESS);
+  occupancy_map->set(conveyor.egress(), CellOccupancy::EGRESS);
+  occupancy_map->set(conveyor.handle, CellOccupancy::CONVEYOR_CROSSING);
+  if (conveyor.rotation == Rotation::LEFT_TO_RIGHT || conveyor.rotation == Rotation::RIGHT_TO_LEFT) {
+    occupancy_map->set(conveyor.handle + Vec2{1, 0}, CellOccupancy::CONVEYOR_CROSSING);
+  } else {
+    occupancy_map->set(conveyor.handle + Vec2{0, 1}, CellOccupancy::CONVEYOR_CROSSING);
+  }
+}
+
 inline void place(const Factory factory, OccupancyMap* occupancy_map) {
   const Rectangle shape = as_rectangle(factory);
   for (auto coordinate : shape) {

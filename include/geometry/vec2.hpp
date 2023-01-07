@@ -46,4 +46,9 @@ inline constexpr Vec2 operator-(const Vec2& lhs, const Vec2& rhs) {
   return result;
 }
 
+inline constexpr Coordinate manhattan_distance(const Vec2& lhs, const Vec2& rhs) {
+  return std::abs(static_cast<Coordinate::UnderlyingT>(lhs.x() - rhs.x())) +
+         std::abs(static_cast<Coordinate::UnderlyingT>(lhs.y() - rhs.y()));
+}
+
 }  // namespace geometry

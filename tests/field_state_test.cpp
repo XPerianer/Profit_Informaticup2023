@@ -25,7 +25,7 @@ class FieldStateTest : public testing::Test {
     std::istringstream stream{std::string{example}};
     Input input = parsing::parse(stream);
     OccupancyMap occupancy_map = occupancies_from(input);
-    std::vector<Deposit> deposits = input.deposits;
+    std::vector<Deposit> deposits = get_deposits(input);
     ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
                                                   occupancy_map.dimensions());
     std::vector<DistanceMap> distance_maps;

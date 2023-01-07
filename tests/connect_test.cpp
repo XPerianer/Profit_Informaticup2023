@@ -75,7 +75,7 @@ TEST(Connect, ConnectWithMineand3Conveyor) {
 
   Pipeline pipeline = state.pipelines[pipeline_id];
 
-  EXPECT_EQ(state.factories[pipeline.factory], factory);
+  EXPECT_EQ(state.factories[pipeline.factory_id], factory);
   EXPECT_EQ(pipeline.parts.size(), 2);
   for (auto part : pipeline.parts) {
     std::visit(utils::Overloaded{

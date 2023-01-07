@@ -22,9 +22,10 @@ using FactoryId = int16_t;
 using PipelineId = int16_t;
 
 const auto INVALID_PIPELINE_ID = std::numeric_limits<PipelineId>::max();
+PipelineId PIPELINE_INDEX_COUNTER = 0;
 
 struct Pipeline {
-  FactoryId factory;
+  FactoryId factory_id;
   std::vector<PlaceableObject> parts;
 };
 
@@ -33,20 +34,35 @@ struct FieldState {
   // TODO: zelle zu pipeline / factoryindex, damit man nachgucken kann, was einen gerade blockiert
   std::unordered_map<PipelineId, Pipeline> pipelines;
   std::unordered_map<FactoryId, Factory> factories;
+  inline PipelineId add_pipeline(Pipeline pipeline);
 };
 
-static FieldState from_input(const parsing::Input& input) {
+inline PipelineId FieldState::add_pipeline(Pipeline pipeline) {
+  auto index = PIPELINE_INDEX_COUNTER++;
+  pipelines.insert({index, pipeline});
+  for (const PlaceableObject &part : pipeline.parts) {
+    std::visit(utils::Overloaded{
+                   [&](const Conveyor3 &conveyor) { place(conveyor, &occupancy_map); },
+                   [&](const Conveyor4 &conveyor) { place(conveyor, &occupancy_map); },
+                   [](const Combiner &) {},
+                   [](const Mine &) {},
+                   [](const Factory &) {},
+               },
+               part);
+  }
+  return index;
+}
+
+inline FieldState from_input(const parsing::Input &input) {
   FieldState state{
-      .occupancy_map = occupancies_from(input),
-      .pipelines = {},
-      .factories = {},
+      occupancies_from(input),{},{},
   };
   return state;
 }
 
 inline std::optional<FactoryId> place_factory(ProductType product,
-                                              const DistanceMap& cc_merged_distances,
-                                              FieldState* state) {
+                                              const DistanceMap &cc_merged_distances,
+                                              FieldState *state) {
   PlacementMap handle_placements =
       placements_for<Factory::DIMENSIONS>(state->occupancy_map, cc_merged_distances);
 
