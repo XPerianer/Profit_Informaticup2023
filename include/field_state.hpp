@@ -1,4 +1,4 @@
-#include <bits/ranges_algo.h>
+#pragma once
 
 #include <algorithm>
 #include <tuple>
@@ -22,7 +22,7 @@ using FactoryId = int16_t;
 using PipelineId = int16_t;
 
 const auto INVALID_PIPELINE_ID = std::numeric_limits<PipelineId>::max();
-PipelineId PIPELINE_INDEX_COUNTER = 0;
+static PipelineId PIPELINE_INDEX_COUNTER = 0;
 
 struct Pipeline {
   FactoryId factory_id;

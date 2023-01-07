@@ -27,11 +27,11 @@ using FieldIndex = uint16_t;
 const auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 
 // Using char instead of bool since vector<bool> has weird behaviour that would need to be handled in TwoDimensionalVector
-using TargetMap = Field<char, false, false>;
+using TargetMap = Field<char, 0, 0>;
 
-std::optional<Vec2> calculate_path(Deposit deposit, TargetMap target_egress_fields,
-                                   Field<FieldIndex, INVALID_FIELD, INVALID_FIELD> predecessors,
-                                   OccupancyMap occupancy_map);
+std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
+                                   Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>* predecessors,
+                                   OccupancyMap& occupancy_map);
 
 Rotation get_rotation_between(Vec2 start, Vec2 end) {
   auto horizontal_difference = end.x() - start.x();
@@ -120,7 +120,7 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
   }
 
   auto connected_egress =
-      calculate_path(deposit, target_egress_fields, predecessors, state->occupancy_map);
+      calculate_path(deposit, target_egress_fields, &predecessors, state->occupancy_map);
   if (!connected_egress) {
     return INVALID_PIPELINE_ID;
   }
