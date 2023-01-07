@@ -21,20 +21,15 @@ using namespace parsing;
 
 class ConnectionTest : public testing::Test {
  public:
-  static Input from_file(const std::string filename) {
-    std::ifstream file(filename, std::ios::binary);
-    EXPECT_TRUE(file.is_open());
-
+  static Input from_string(const std::string_view& example) {
     // Fill stream with file content
-    std::stringstream stream;
-    stream << file.rdbuf();
+    std::stringstream stream{std::string{example}};
     return parsing::parse(stream);
   }
 };
 
 TEST(Connect, CantConnectImpossibleThings) {
-  // TODO Handle input not from file to prevent that unit tests get path dependend
-  auto input = ConnectionTest::from_file("../tasks/vertically_split_map.json");
+  auto input = ConnectionTest::from_string(examples::VERTICALLY_SPLIT_MAP);
   auto deposit = input.deposits.at(0);
 
   // Not reachable because of other side of split map
@@ -57,8 +52,7 @@ TEST(Connect, CantConnectImpossibleThings) {
 }
 
 TEST(Connect, ConnectWithMineand3Conveyor) {
-  // TODO Handle input not from file to prevent that unit tests get path dependend
-  auto input = ConnectionTest::from_file("../tasks/vertically_split_map.json");
+  auto input = ConnectionTest::from_string(examples::VERTICALLY_SPLIT_MAP);
   auto deposit = input.deposits.at(0);
 
   auto factory = Factory{
