@@ -78,6 +78,14 @@ class Field {
     map_[coordinates] = value;
   }
 
+  // only sets value if inbounds
+  void safe_set(geometry::Vec2 coordinates, CellT value) {
+    if (coordinates.x() >= 0 && coordinates.y() >= 0 && coordinates.x() < dimensions_.width() &&
+        coordinates.y() < dimensions_.height()) {
+      map_[coordinates] = value;
+    }
+  }
+
   [[nodiscard]] geometry::Vec2 dimensions() const { return dimensions_; }
   [[nodiscard]] std::span<const CellT> map() { return map_.span(); }
 

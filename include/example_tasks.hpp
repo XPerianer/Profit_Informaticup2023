@@ -21,4 +21,7 @@ constexpr std::string_view VERY_STRONG_CONSTRAINED =
 constexpr std::string_view MULTIPLE_CONNECTED_COMPONENTS =
     R"({"width":20,"height":20,"objects":[{"type":"obstacle","x":9,"y":0,"width":2,"height":20},{"type":"obstacle","x":0,"y":9,"width":9,"height":2},{"type":"obstacle","x":11,"y":9,"width":9,"height":2},{"type":"deposit","x":0,"y":0,"subtype":0,"width":3,"height":3},{"type":"deposit","x":6,"y":6,"subtype":1,"width":3,"height":3},{"type":"deposit","x":14,"y":1,"subtype":2,"width":3,"height":3},{"type":"deposit","x":11,"y":4,"subtype":3,"width":3,"height":3},{"type":"deposit","x":3,"y":11,"subtype":4,"width":3,"height":3},{"type":"deposit","x":3,"y":14,"subtype":5,"width":3,"height":3},{"type":"deposit","x":13,"y":12,"subtype":6,"width":3,"height":3},{"type":"deposit","x":16,"y":16,"subtype":7,"width":3,"height":3}],"products":[{"type":"product","subtype":0,"resources":[10,0,0,0,0,0,0,0],"points":10}],"turns":100})";
 
+constexpr std::string_view CONSTRAINED_TO_MINE_AND_CONVEYOR3 =
+    R"({"width":5,"height":17,"objects":[{"type":"deposit","x":0,"y":0,"subtype":0,"width":5,"height":5},{"type":"obstacle","x":1,"y":8,"width":4,"height":4},{"type":"obstacle","x":2,"y":5,"width":3,"height":3}],"products":[{"type":"product","subtype":0,"resources":[10,0,0,0,0,0,0,0],"points":10}],"turns":100,"time":10})";
+
 }  // namespace profit::examples

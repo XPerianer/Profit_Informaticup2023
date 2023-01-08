@@ -51,39 +51,49 @@ Rotation get_rotation_between(Vec2 start, Vec2 end) {
   }
 }
 
-std::vector<profit::PlaceableObject>& backtrack_parts(
+std::vector<profit::PlaceableObject> backtrack_parts(
     geometry::Vec2 ending_egress, Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>& predecessors) {
   std::vector<PlaceableObject> parts;
-
-  auto current_egress = ending_egress;
-  auto current_predecessor_index = predecessors.at(current_egress);
   auto width = static_cast<geometry::Coordinate::UnderlyingT>(predecessors.dimensions().width());
-  auto current_predecessor =
-      Vec2{current_predecessor_index % width, current_predecessor_index / width};
-  for (/* TODO */;;) {
+
+  auto object_egress = ending_egress;
+  auto object_ingress_index = predecessors.at(object_egress);
+  auto object_ingress = Vec2{object_ingress_index % width, object_ingress_index / width};
+
+  while (true) {
     // We now need to find out which placable we need to take to connect stuff
+    auto rotation = get_rotation_between(object_ingress, object_egress);
     // First check if this is the last connection, then we need a mine
-    if (predecessors.at(current_predecessor) == INVALID_FIELD) {
+    if (predecessors.at(object_ingress) == INVALID_FIELD) {
       // Put a mine
-      continue;
+      parts.emplace_back(Mine::with_ingress(object_ingress, rotation));
+
+      // Finish
+      return parts;
     }
     // Otherwise we can infer from the distance
-    auto distance = geometry::manhattan_distance(current_predecessor, current_egress);
+    auto distance = geometry::manhattan_distance(object_egress, object_ingress);
 
-    auto rotation = get_rotation_between(current_predecessor, current_egress);
-    if (distance == 3) {
-      parts.emplace_back(Conveyor3::with_ingress(current_predecessor, rotation));
-    } else if (distance == 4) {
-      parts.emplace_back(profit::Conveyor4::with_ingress(current_predecessor, rotation));
+    if (distance == 2) {
+      parts.emplace_back(Conveyor3::with_ingress(object_ingress, rotation));
+    } else if (distance == 3) {
+      parts.emplace_back(profit::Conveyor4::with_ingress(object_ingress, rotation));
     } else {
       FAIL("Unexpected distance between to ingresses, cannot reconstruct placable object");
     }
+
+    // Update
+    auto object_egress_index = predecessors.at(object_ingress);
+    object_egress = Vec2{object_egress_index % width, object_egress_index / width};
+    object_ingress_index = predecessors.at(object_egress);
+    object_ingress = Vec2{object_ingress_index % width, object_ingress_index / width};
   }
 }
 
 PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState* state) {
   Factory factory = state->factories[factory_id];
 
+  // Alternating sequence of ingress/egresses
   Field<FieldIndex, INVALID_FIELD, INVALID_FIELD> predecessors(state->occupancy_map.dimensions());
 
   // Step 0: check which fields we can reach: this can be either existing pipeline or factory
@@ -92,7 +102,7 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
 
   for (Vec2 possible_egress_location :
        geometry::outer_connected_border_cells(as_rectangle(factory))) {
-    target_egress_fields.set(possible_egress_location, true);
+    target_egress_fields.safe_set(possible_egress_location, true);
   }
 
   for (const auto& [id, pipeline] : state->pipelines) {
@@ -101,19 +111,19 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
         std::visit(
             utils::Overloaded{[&](const Mine& mine) {
                                 for (auto egress : mine.upstream_egress_cells()) {
-                                  target_egress_fields.set(egress, true);
+                                  target_egress_fields.safe_set(egress, true);
                                 }
                               },
                               [](const Combiner&) { /* TODO */ },
                               [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
                               [&](const Conveyor3& conveyor) {
                                 for (auto egress : conveyor.upstream_egress_cells()) {
-                                  target_egress_fields.set(egress, true);
+                                  target_egress_fields.safe_set(egress, true);
                                 }
                               },
                               [&](const Conveyor4& conveyor) {
                                 for (auto egress : conveyor.upstream_egress_cells()) {
-                                  target_egress_fields.set(egress, true);
+                                  target_egress_fields.safe_set(egress, true);
                                 }
                               }},
             placeable);
@@ -150,10 +160,20 @@ std::optional<Vec2> visit_location_if_placable(
   if (collides(object, occupancy_map)) {
     return std::nullopt;
   }
+  FieldIndex ingress_index = static_cast<FieldIndex>(ingress.y()) *
+                                 static_cast<FieldIndex>(occupancy_map.dimensions().width()) +
+                             static_cast<FieldIndex>(ingress.x());
   if (target_egress_fields.at(object.egress())) {
     // We can stop our search, reached the destionation
+    predecessors->set(object.egress(), ingress_index);
+    std::cerr << "final set object.egress(), ingress_index: " << object.egress() << ingress
+              << std::endl;
+    std::cerr << "object.ingress" << object.ingress() << std::endl;
     return object.egress();
   }
+  FieldIndex egress_index = static_cast<FieldIndex>(object.egress().y()) *
+                                static_cast<FieldIndex>(occupancy_map.dimensions().width()) +
+                            static_cast<FieldIndex>(object.egress().x());
   for (const Vec2 downstream_ingress_cell : object.downstream_ingress_cells()) {
     bool is_occupied = occupancy_map.at(downstream_ingress_cell) != CellOccupancy::EMPTY;
     bool was_reached_before = predecessors->at(downstream_ingress_cell) != INVALID_FIELD;
@@ -162,12 +182,13 @@ std::optional<Vec2> visit_location_if_placable(
     if (is_occupied || was_reached_before || neighbored_to_egress) {
       continue;
     }
-    FieldIndex start_ingress_index =
-        static_cast<geometry::Coordinate::UnderlyingT>(ingress.y()) *
-            static_cast<geometry::Coordinate::UnderlyingT>(occupancy_map.dimensions().width()) +
-        static_cast<geometry::Coordinate::UnderlyingT>(ingress.x());
-    predecessors->set(downstream_ingress_cell, start_ingress_index);
+    predecessors->set(downstream_ingress_cell, egress_index);
+    std::cerr << "set downsttream_ingress, egress_index: " << downstream_ingress_cell
+              << object.egress() << std::endl;
+    predecessors->set(object.egress(), ingress_index);
+    std::cerr << "set object.egress(), ingress_index: " << object.egress() << ingress << std::endl;
     reached_ingresses->emplace(downstream_ingress_cell);
+    std::cerr << "added: " << downstream_ingress_cell << std::endl;
   }
   return std::nullopt;
 }

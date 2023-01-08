@@ -52,11 +52,11 @@ TEST(Connect, CantConnectImpossibleThings) {
 }
 
 TEST(Connect, ConnectWithMineand3Conveyor) {
-  auto input = ConnectionTest::from_string(examples::VERTICALLY_SPLIT_MAP);
+  auto input = ConnectionTest::from_string(examples::CONSTRAINED_TO_MINE_AND_CONVEYOR3);
   auto deposit = input.deposits.at(0);
 
   auto factory = Factory{
-      .handle = {6, 2},
+      .handle = {0, 12},
       .type = FactoryType::TYPE0,
   };
 
@@ -73,8 +73,14 @@ TEST(Connect, ConnectWithMineand3Conveyor) {
   EXPECT_EQ(pipeline.parts.size(), 2);
   for (auto part : pipeline.parts) {
     std::visit(utils::Overloaded{
-                   [](Mine mine) { EXPECT_EQ(mine.handle.y(), 6); },
-                   [](Conveyor3 conveyor) { EXPECT_EQ(conveyor.handle.y(), 10); },
+                   [](Mine mine) {
+                     EXPECT_EQ(mine.handle.x(), 0);
+                     EXPECT_EQ(mine.handle.y(), 6);
+                   },
+                   [](Conveyor3 conveyor) {
+                     EXPECT_EQ(conveyor.handle.x(), 0);
+                     EXPECT_EQ(conveyor.handle.y(), 10);
+                   },
                    [](Conveyor4 /**/) { FAIL("Should not be reached"); },
                    [](Factory /**/) { FAIL("Should not be reached"); },
                    [](Combiner /**/) { FAIL("Should not be reached"); },
