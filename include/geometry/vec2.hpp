@@ -5,6 +5,8 @@
 
 namespace geometry {
 
+using ScalarIndex = uint16_t;
+
 class Vec2 {
  public:
   constexpr Vec2() = default;
@@ -31,6 +33,16 @@ class Vec2 {
     x_ = x_ - other.x_;
     y_ = y_ - other.y_;
     return *this;
+  }
+
+  static Vec2 from_scalar_index(ScalarIndex index, Coordinate width) {
+    return Vec2{index % static_cast<ScalarIndex>(width),
+                index / static_cast<ScalarIndex>(width)};
+  }
+
+  ScalarIndex to_scalar_index(Coordinate width) {
+    return static_cast<ScalarIndex>(y_) * static_cast<ScalarIndex>(width) +
+           static_cast<ScalarIndex>(x_);
   }
 
  private:

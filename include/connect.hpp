@@ -29,9 +29,11 @@ const auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 // Using char instead of bool since vector<bool> has weird behaviour that would need to be handled
 // in TwoDimensionalVector
 using TargetMap = Field<char, 0, 0>;
+using PredecessorMap = Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>;
 
 std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
-                                   Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>* predecessors,
+                                   PredecessorMap* predecessors,
+                                   PredecessorMap* object_connections,
                                    OccupancyMap& occupancy_map);
 
 Rotation get_rotation_between(Vec2 start, Vec2 end) {
@@ -52,13 +54,12 @@ Rotation get_rotation_between(Vec2 start, Vec2 end) {
 }
 
 std::vector<profit::PlaceableObject> backtrack_parts(
-    geometry::Vec2 ending_egress, Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>& predecessors) {
+    geometry::Vec2 ending_egress, PredecessorMap& predecessors, PredecessorMap& object_connections) {
   std::vector<PlaceableObject> parts;
   auto width = static_cast<geometry::Coordinate::UnderlyingT>(predecessors.dimensions().width());
 
   auto object_egress = ending_egress;
-  auto object_ingress_index = predecessors.at(object_egress);
-  auto object_ingress = Vec2{object_ingress_index % width, object_ingress_index / width};
+  auto object_ingress = Vec2::from_scalar_index(object_connections.at(object_egress), width);
 
   while (true) {
     // We now need to find out which placable we need to take to connect stuff
@@ -79,22 +80,22 @@ std::vector<profit::PlaceableObject> backtrack_parts(
     } else if (distance == 3) {
       parts.emplace_back(profit::Conveyor4::with_ingress(object_ingress, rotation));
     } else {
-      FAIL("Unexpected distance between to ingresses, cannot reconstruct placable object");
+      FAIL("Unexpected distance between two ingresses, cannot reconstruct placable object.");
     }
 
     // Update
-    auto object_egress_index = predecessors.at(object_ingress);
-    object_egress = Vec2{object_egress_index % width, object_egress_index / width};
-    object_ingress_index = predecessors.at(object_egress);
-    object_ingress = Vec2{object_ingress_index % width, object_ingress_index / width};
+    object_egress = Vec2::from_scalar_index(predecessors.at(object_ingress), width);
+    object_ingress = Vec2::from_scalar_index(object_connections.at(object_egress), width);
   }
 }
 
 PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState* state) {
   Factory factory = state->factories[factory_id];
 
-  // Alternating sequence of ingress/egresses
+  // Connection from downstream ingress to egress
   Field<FieldIndex, INVALID_FIELD, INVALID_FIELD> predecessors(state->occupancy_map.dimensions());
+  // Connection from object egress to object ingress
+  Field<FieldIndex, INVALID_FIELD, INVALID_FIELD> object_connections(state->occupancy_map.dimensions());
 
   // Step 0: check which fields we can reach: this can be either existing pipeline or factory
   // borders
@@ -132,13 +133,13 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
   }
 
   auto connected_egress =
-      calculate_path(deposit, target_egress_fields, &predecessors, state->occupancy_map);
+      calculate_path(deposit, target_egress_fields, &predecessors, &object_connections, state->occupancy_map);
   if (!connected_egress) {
     return INVALID_PIPELINE_ID;
   }
   Pipeline pipeline;
   pipeline.factory_id = factory_id;
-  pipeline.parts = backtrack_parts(*connected_egress, predecessors);
+  pipeline.parts = backtrack_parts(*connected_egress, predecessors, object_connections);
   // TODO: Potential problem: Dijkstra could self-intersect, check here again and if intersection
   // return INVALID_PIPELINE_ID
   // Step 3: materialize by
@@ -154,26 +155,22 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
 template <typename PlaceableT>
 std::optional<Vec2> visit_location_if_placable(
     Vec2 ingress, const TargetMap& target_egress_fields,
-    Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>* predecessors,
+    PredecessorMap* predecessors,
+    PredecessorMap* object_connections,
     const OccupancyMap& occupancy_map, const PlaceableT object,
     std::queue<Vec2>* reached_ingresses) {
   if (collides(object, occupancy_map)) {
     return std::nullopt;
   }
-  FieldIndex ingress_index = static_cast<FieldIndex>(ingress.y()) *
-                                 static_cast<FieldIndex>(occupancy_map.dimensions().width()) +
-                             static_cast<FieldIndex>(ingress.x());
+  auto width = occupancy_map.dimensions().width();
   if (target_egress_fields.at(object.egress())) {
     // We can stop our search, reached the destionation
-    predecessors->set(object.egress(), ingress_index);
+    object_connections->set(object.egress(), ingress.to_scalar_index(width));
     std::cerr << "final set object.egress(), ingress_index: " << object.egress() << ingress
               << std::endl;
     std::cerr << "object.ingress" << object.ingress() << std::endl;
     return object.egress();
   }
-  FieldIndex egress_index = static_cast<FieldIndex>(object.egress().y()) *
-                                static_cast<FieldIndex>(occupancy_map.dimensions().width()) +
-                            static_cast<FieldIndex>(object.egress().x());
   for (const Vec2 downstream_ingress_cell : object.downstream_ingress_cells()) {
     bool is_occupied = occupancy_map.at(downstream_ingress_cell) != CellOccupancy::EMPTY;
     bool was_reached_before = predecessors->at(downstream_ingress_cell) != INVALID_FIELD;
@@ -182,11 +179,9 @@ std::optional<Vec2> visit_location_if_placable(
     if (is_occupied || was_reached_before || neighbored_to_egress) {
       continue;
     }
-    predecessors->set(downstream_ingress_cell, egress_index);
-    std::cerr << "set downsttream_ingress, egress_index: " << downstream_ingress_cell
-              << object.egress() << std::endl;
-    predecessors->set(object.egress(), ingress_index);
-    std::cerr << "set object.egress(), ingress_index: " << object.egress() << ingress << std::endl;
+    predecessors->set(downstream_ingress_cell, object.egress().to_scalar_index(width));
+    object_connections->set(object.egress(), ingress.to_scalar_index(width));
+    std::cerr << "Adding object from" << object.ingress()  << " to " << object.egress() << std::endl;
     reached_ingresses->emplace(downstream_ingress_cell);
     std::cerr << "added: " << downstream_ingress_cell << std::endl;
   }
@@ -194,7 +189,8 @@ std::optional<Vec2> visit_location_if_placable(
 }
 
 std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
-                                   Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>* predecessors,
+                                   PredecessorMap* predecessors,
+                                   PredecessorMap* object_connections,
                                    OccupancyMap& occupancy_map) {
   std::queue<Vec2> reached_ingresses;
   // Step 1: Go through all mines and add possible ingresses in queue
@@ -202,7 +198,7 @@ std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fie
        geometry::outer_connected_border_cells(as_rectangle(deposit))) {
     for (auto rotation : ROTATIONS) {
       if (auto connected_egress = visit_location_if_placable(
-              possible_ingress_location, target_egress_fields, predecessors, occupancy_map,
+              possible_ingress_location, target_egress_fields, predecessors, object_connections, occupancy_map,
               Mine::with_ingress(possible_ingress_location, rotation), &reached_ingresses);
           connected_egress) {
         return connected_egress;
@@ -219,13 +215,13 @@ std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fie
 
     for (auto rotation : ROTATIONS) {
       if (auto connected_egress = visit_location_if_placable(
-              ingress, target_egress_fields, predecessors, occupancy_map,
+              ingress, target_egress_fields, predecessors, object_connections, occupancy_map,
               Conveyor3::with_ingress(ingress, rotation), &reached_ingresses);
           connected_egress) {
         return connected_egress;
       }
       if (auto connected_egress = visit_location_if_placable(
-              ingress, target_egress_fields, predecessors, occupancy_map,
+              ingress, target_egress_fields, predecessors, object_connections, occupancy_map,
               Conveyor4::with_ingress(ingress, rotation), &reached_ingresses);
           connected_egress) {
         return connected_egress;

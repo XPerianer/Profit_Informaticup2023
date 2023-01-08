@@ -64,7 +64,6 @@ TEST(Connect, ConnectWithMineand3Conveyor) {
 
   FactoryId factory_id = 0;
   state.factories[factory_id] = factory;
-
   auto pipeline_id = connect(deposit, factory_id, &state);
 
   Pipeline pipeline = state.pipelines[pipeline_id];
@@ -82,6 +81,43 @@ TEST(Connect, ConnectWithMineand3Conveyor) {
                      EXPECT_EQ(conveyor.handle.y(), 10);
                    },
                    [](Conveyor4 /**/) { FAIL("Should not be reached"); },
+                   [](Factory /**/) { FAIL("Should not be reached"); },
+                   [](Combiner /**/) { FAIL("Should not be reached"); },
+               },
+               part);
+  }
+}
+
+TEST(Connect, ConnectWithMineandConveyors) {
+  auto input = ConnectionTest::from_string(examples::CONSTRAINED_TO_MINE_AND_CONVEYORS);
+  auto deposit = input.deposits.at(0);
+
+  auto factory = Factory{
+      .handle = {0, 13},
+      .type = FactoryType::TYPE0,
+  };
+
+  FieldState state = from_input(input);
+
+  FactoryId factory_id = 0;
+  state.factories[factory_id] = factory;
+  auto pipeline_id = connect(deposit, factory_id, &state);
+
+  Pipeline pipeline = state.pipelines[pipeline_id];
+
+  EXPECT_EQ(state.factories[pipeline.factory_id], factory);
+  EXPECT_EQ(pipeline.parts.size(), 4);
+  for (auto part : pipeline.parts) {
+    std::visit(utils::Overloaded{
+                   [](Mine mine) {
+                     EXPECT_EQ(mine.handle.x(), 2);
+                     EXPECT_EQ(mine.handle.y(), 5);
+                   },
+                   [](Conveyor3 /**/) {},
+                   [](Conveyor4 conveyor) {
+                     EXPECT_EQ(conveyor.handle.x(), 4);
+                     EXPECT_EQ(conveyor.handle.y(), 10);
+                   },
                    [](Factory /**/) { FAIL("Should not be reached"); },
                    [](Combiner /**/) { FAIL("Should not be reached"); },
                },

@@ -24,4 +24,7 @@ constexpr std::string_view MULTIPLE_CONNECTED_COMPONENTS =
 constexpr std::string_view CONSTRAINED_TO_MINE_AND_CONVEYOR3 =
     R"({"width":5,"height":17,"objects":[{"type":"deposit","x":0,"y":0,"subtype":0,"width":5,"height":5},{"type":"obstacle","x":1,"y":8,"width":4,"height":4},{"type":"obstacle","x":2,"y":5,"width":3,"height":3}],"products":[{"type":"product","subtype":0,"resources":[10,0,0,0,0,0,0,0],"points":10}],"turns":100,"time":10})";
 
+constexpr std::string_view CONSTRAINED_TO_MINE_AND_CONVEYORS =
+    R"({"width":5,"height":18,"objects":[{"type":"deposit","x":0,"y":0,"subtype":0,"width":5,"height":5},{"type":"obstacle","x":0,"y":5,"width":1,"height":5},{"type":"obstacle","x":1,"y":9,"width":3,"height":4},{"type":"obstacle","x":2,"y":7,"width":3,"height":1}],"products":[{"type":"product","subtype":0,"resources":[10,0,0,0,0,0,0,0],"points":10}],"turns":100,"time":10})";
+
 }  // namespace profit::examples
