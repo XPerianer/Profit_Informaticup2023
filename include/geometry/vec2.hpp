@@ -36,8 +36,7 @@ class Vec2 {
   }
 
   static Vec2 from_scalar_index(ScalarIndex index, Coordinate width) {
-    return Vec2{index % static_cast<ScalarIndex>(width),
-                index / static_cast<ScalarIndex>(width)};
+    return Vec2{index % static_cast<ScalarIndex>(width), index / static_cast<ScalarIndex>(width)};
   }
 
   ScalarIndex to_scalar_index(Coordinate width) {

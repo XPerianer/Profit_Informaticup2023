@@ -8,6 +8,7 @@
 
 #include "connected_component.hpp"
 #include "example_tasks.hpp"
+#include "field_state.hpp"
 #include "fields/distance_map.hpp"
 #include "fields/occupancy_map.hpp"
 #include "geometry/vec2.hpp"
@@ -123,4 +124,22 @@ TEST(Connect, ConnectWithMineandConveyors) {
                },
                part);
   }
+}
+
+TEST(Connect, DoNotConnectWithSelfIntersections) {
+  auto input = ConnectionTest::from_string(examples::IMPOSSIBLE_DUE_TO_SELF_INTERSECTION);
+  auto deposit = input.deposits.at(0);
+
+  auto factory = Factory{
+      .handle = {0, 13},
+      .type = FactoryType::TYPE0,
+  };
+
+  FieldState state = from_input(input);
+
+  FactoryId factory_id = 0;
+  state.factories[factory_id] = factory;
+  auto pipeline_id = connect(deposit, factory_id, &state);
+
+  EXPECT_EQ(pipeline_id, INVALID_PIPELINE_ID);
 }

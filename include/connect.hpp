@@ -32,8 +32,7 @@ using TargetMap = Field<char, 0, 0>;
 using PredecessorMap = Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>;
 
 std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
-                                   PredecessorMap* predecessors,
-                                   PredecessorMap* object_connections,
+                                   PredecessorMap* predecessors, PredecessorMap* object_connections,
                                    OccupancyMap& occupancy_map);
 
 Rotation get_rotation_between(Vec2 start, Vec2 end) {
@@ -53,8 +52,9 @@ Rotation get_rotation_between(Vec2 start, Vec2 end) {
   }
 }
 
-std::vector<profit::PlaceableObject> backtrack_parts(
-    geometry::Vec2 ending_egress, PredecessorMap& predecessors, PredecessorMap& object_connections) {
+std::vector<profit::PlaceableObject> backtrack_parts(geometry::Vec2 ending_egress,
+                                                     PredecessorMap& predecessors,
+                                                     PredecessorMap& object_connections) {
   std::vector<PlaceableObject> parts;
   auto width = static_cast<geometry::Coordinate::UnderlyingT>(predecessors.dimensions().width());
 
@@ -95,7 +95,8 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
   // Connection from downstream ingress to egress
   Field<FieldIndex, INVALID_FIELD, INVALID_FIELD> predecessors(state->occupancy_map.dimensions());
   // Connection from object egress to object ingress
-  Field<FieldIndex, INVALID_FIELD, INVALID_FIELD> object_connections(state->occupancy_map.dimensions());
+  Field<FieldIndex, INVALID_FIELD, INVALID_FIELD> object_connections(
+      state->occupancy_map.dimensions());
 
   // Step 0: check which fields we can reach: this can be either existing pipeline or factory
   // borders
@@ -132,8 +133,8 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
     }
   }
 
-  auto connected_egress =
-      calculate_path(deposit, target_egress_fields, &predecessors, &object_connections, state->occupancy_map);
+  auto connected_egress = calculate_path(deposit, target_egress_fields, &predecessors,
+                                         &object_connections, state->occupancy_map);
   if (!connected_egress) {
     return INVALID_PIPELINE_ID;
   }
@@ -153,12 +154,12 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
 }
 
 template <typename PlaceableT>
-std::optional<Vec2> visit_location_if_placable(
-    Vec2 ingress, const TargetMap& target_egress_fields,
-    PredecessorMap* predecessors,
-    PredecessorMap* object_connections,
-    const OccupancyMap& occupancy_map, const PlaceableT object,
-    std::queue<Vec2>* reached_ingresses) {
+std::optional<Vec2> visit_location_if_placable(Vec2 ingress, const TargetMap& target_egress_fields,
+                                               PredecessorMap* predecessors,
+                                               PredecessorMap* object_connections,
+                                               const OccupancyMap& occupancy_map,
+                                               const PlaceableT object,
+                                               std::queue<Vec2>* reached_ingresses) {
   if (collides(object, occupancy_map)) {
     return std::nullopt;
   }
@@ -181,7 +182,7 @@ std::optional<Vec2> visit_location_if_placable(
     }
     predecessors->set(downstream_ingress_cell, object.egress().to_scalar_index(width));
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
-    std::cerr << "Adding object from" << object.ingress()  << " to " << object.egress() << std::endl;
+    std::cerr << "Adding object from" << object.ingress() << " to " << object.egress() << std::endl;
     reached_ingresses->emplace(downstream_ingress_cell);
     std::cerr << "added: " << downstream_ingress_cell << std::endl;
   }
@@ -189,8 +190,7 @@ std::optional<Vec2> visit_location_if_placable(
 }
 
 std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
-                                   PredecessorMap* predecessors,
-                                   PredecessorMap* object_connections,
+                                   PredecessorMap* predecessors, PredecessorMap* object_connections,
                                    OccupancyMap& occupancy_map) {
   std::queue<Vec2> reached_ingresses;
   // Step 1: Go through all mines and add possible ingresses in queue
@@ -198,8 +198,9 @@ std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fie
        geometry::outer_connected_border_cells(as_rectangle(deposit))) {
     for (auto rotation : ROTATIONS) {
       if (auto connected_egress = visit_location_if_placable(
-              possible_ingress_location, target_egress_fields, predecessors, object_connections, occupancy_map,
-              Mine::with_ingress(possible_ingress_location, rotation), &reached_ingresses);
+              possible_ingress_location, target_egress_fields, predecessors, object_connections,
+              occupancy_map, Mine::with_ingress(possible_ingress_location, rotation),
+              &reached_ingresses);
           connected_egress) {
         return connected_egress;
       }
