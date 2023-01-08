@@ -54,6 +54,15 @@ inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map)
   });
 }
 
+template <>
+inline bool collides(const PlaceableObject& object, const OccupancyMap& occupancy_map) {
+  return std::visit([&](const auto& object) { return collides(object, occupancy_map); }, object);
+}
+
+inline void place(const PlaceableObject& object, OccupancyMap* occupancy_map) {
+  std::visit([&](const auto& object) { place(object, occupancy_map); }, object);
+}
+
 inline void place(const Mine& mine, OccupancyMap* occupancy_map) {
   for (auto occupied : mine.occupied_cells()) {
     occupancy_map->set(occupied, CellOccupancy::BLOCKED);
@@ -97,6 +106,10 @@ inline void place(const Factory factory, OccupancyMap* occupancy_map) {
       occupancy_map->set(coordinate, CellOccupancy::BLOCKED);
     }
   }
+}
+
+inline void remove(const PlaceableObject& object, OccupancyMap* occupancy_map) {
+  std::visit([&](const auto& object) { remove(object, occupancy_map); }, object);
 }
 
 template <typename Placable>

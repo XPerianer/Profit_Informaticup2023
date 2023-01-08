@@ -52,14 +52,16 @@ Rotation get_rotation_between(Vec2 start, Vec2 end) {
   }
 }
 
-std::vector<profit::PlaceableObject> backtrack_parts(geometry::Vec2 ending_egress,
-                                                     PredecessorMap& predecessors,
-                                                     PredecessorMap& object_connections) {
+std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
+    geometry::Vec2 ending_egress, PredecessorMap& predecessors, PredecessorMap& object_connections,
+    OccupancyMap* occupancy_map) {
   std::vector<PlaceableObject> parts;
   auto width = static_cast<geometry::Coordinate::UnderlyingT>(predecessors.dimensions().width());
 
   auto object_egress = ending_egress;
   auto object_ingress = Vec2::from_scalar_index(object_connections.at(object_egress), width);
+
+  auto finished = false;
 
   while (true) {
     // We now need to find out which placable we need to take to connect stuff
@@ -68,24 +70,38 @@ std::vector<profit::PlaceableObject> backtrack_parts(geometry::Vec2 ending_egres
     if (predecessors.at(object_ingress) == INVALID_FIELD) {
       // Put a mine
       parts.emplace_back(Mine::with_ingress(object_ingress, rotation));
+      finished = true;
+    } else {
+      // Otherwise we can infer from the distance
+      auto distance = geometry::manhattan_distance(object_egress, object_ingress);
 
-      // Finish
+      if (distance == 2) {
+        parts.emplace_back(Conveyor3::with_ingress(object_ingress, rotation));
+      } else if (distance == 3) {
+        parts.emplace_back(profit::Conveyor4::with_ingress(object_ingress, rotation));
+      } else {
+        FAIL("Unexpected distance between two ingresses, cannot reconstruct placable object.");
+      }
+    }
+
+    // Check for collisions
+    if (collides(parts.back(), *occupancy_map)) {
+      parts.pop_back();
+      for (auto& part : parts) {
+        remove(part, occupancy_map);
+      }
+      return std::nullopt;
+    }
+
+    if (finished) {
       return parts;
     }
-    // Otherwise we can infer from the distance
-    auto distance = geometry::manhattan_distance(object_egress, object_ingress);
-
-    if (distance == 2) {
-      parts.emplace_back(Conveyor3::with_ingress(object_ingress, rotation));
-    } else if (distance == 3) {
-      parts.emplace_back(profit::Conveyor4::with_ingress(object_ingress, rotation));
-    } else {
-      FAIL("Unexpected distance between two ingresses, cannot reconstruct placable object.");
-    }
-
     // Update
     object_egress = Vec2::from_scalar_index(predecessors.at(object_ingress), width);
     object_ingress = Vec2::from_scalar_index(object_connections.at(object_egress), width);
+
+    // Update occupancies
+    place(parts.back(), occupancy_map);
   }
 }
 
@@ -138,16 +154,20 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
   if (!connected_egress) {
     return INVALID_PIPELINE_ID;
   }
+  auto parts =
+      backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
+  // Potential problem: Dijkstra could self-intersect, check here again and if there was a
+  // self-intersection, we say that we can not build that
+  // TODO: We could recover more gracefully, for example by placing everything that can be placed
+  // and then searching for non intersecting connections
+  if (!parts) {
+    return INVALID_PIPELINE_ID;
+  }
+
   Pipeline pipeline;
   pipeline.factory_id = factory_id;
-  pipeline.parts = backtrack_parts(*connected_egress, predecessors, object_connections);
-  // TODO: Potential problem: Dijkstra could self-intersect, check here again and if intersection
-  // return INVALID_PIPELINE_ID
-  // Step 3: materialize by
-  // tracing back the predecessors of the fields we have written and placing these objects in
-  // the placeable parts
+  pipeline.parts = *parts;
 
-  // Step 4: update field parts? Who should do this?
   // TODO: deduplicate with distance_map.hpp
   // TODO: Add support von combiners
   return state->add_pipeline(pipeline);
