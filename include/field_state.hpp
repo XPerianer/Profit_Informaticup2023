@@ -35,6 +35,7 @@ struct FieldState {
   std::unordered_map<PipelineId, Pipeline> pipelines;
   std::unordered_map<FactoryId, Factory> factories;
   inline PipelineId add_pipeline(Pipeline pipeline);
+  std::vector<PlaceableObject> placed_objects();
 };
 
 inline PipelineId FieldState::add_pipeline(Pipeline pipeline) {
@@ -51,6 +52,19 @@ inline PipelineId FieldState::add_pipeline(Pipeline pipeline) {
                part);
   }
   return index;
+}
+
+inline std::vector<PlaceableObject> FieldState::placed_objects() {
+  std::vector<PlaceableObject> objects;
+  for (auto [_, factory] : factories) {
+    objects.emplace_back(factory);
+  }
+  for (auto [_, pipeline] : pipelines) {
+    for (auto part : pipeline.parts) {
+      objects.emplace_back(part);
+    }
+  }
+  return objects;
 }
 
 inline FieldState from_input(const parsing::Input &input) {

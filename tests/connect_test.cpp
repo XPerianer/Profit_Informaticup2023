@@ -49,7 +49,7 @@ TEST(Connect, CantConnectImpossibleThings) {
   state.factories[factory_id] = unreachable_factory;
 
   auto pipeline_id = connect(deposit, factory_id, &state);
-  EXPECT_EQ(pipeline_id, INVALID_PIPELINE_ID);
+  EXPECT_EQ(pipeline_id.has_value(), false);
 }
 
 TEST(Connect, ConnectWithMineand3Conveyor) {
@@ -67,7 +67,9 @@ TEST(Connect, ConnectWithMineand3Conveyor) {
   state.factories[factory_id] = factory;
   auto pipeline_id = connect(deposit, factory_id, &state);
 
-  Pipeline pipeline = state.pipelines[pipeline_id];
+  EXPECT_TRUE(pipeline_id);
+
+  Pipeline pipeline = state.pipelines[*pipeline_id];
 
   EXPECT_EQ(state.factories[pipeline.factory_id], factory);
   EXPECT_EQ(pipeline.parts.size(), 2);
@@ -104,7 +106,9 @@ TEST(Connect, ConnectWithMineandConveyors) {
   state.factories[factory_id] = factory;
   auto pipeline_id = connect(deposit, factory_id, &state);
 
-  Pipeline pipeline = state.pipelines[pipeline_id];
+  EXPECT_TRUE(pipeline_id);
+
+  Pipeline pipeline = state.pipelines[*pipeline_id];
 
   EXPECT_EQ(state.factories[pipeline.factory_id], factory);
   EXPECT_EQ(pipeline.parts.size(), 4);
@@ -141,5 +145,5 @@ TEST(Connect, DoNotConnectWithSelfIntersections) {
   state.factories[factory_id] = factory;
   auto pipeline_id = connect(deposit, factory_id, &state);
 
-  EXPECT_EQ(pipeline_id, INVALID_PIPELINE_ID);
+  EXPECT_EQ(pipeline_id.has_value(), false);
 }

@@ -105,7 +105,8 @@ std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
   }
 }
 
-PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState* state) {
+std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory_id,
+                                  FieldState* state) {
   Factory factory = state->factories[factory_id];
 
   // Connection from downstream ingress to egress
@@ -152,7 +153,7 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
   auto connected_egress = calculate_path(deposit, target_egress_fields, &predecessors,
                                          &object_connections, state->occupancy_map);
   if (!connected_egress) {
-    return INVALID_PIPELINE_ID;
+    return std::nullopt;
   }
   auto parts =
       backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
@@ -161,7 +162,7 @@ PipelineId connect(const Deposit deposit, const FactoryId factory_id, FieldState
   // TODO: We could recover more gracefully, for example by placing everything that can be placed
   // and then searching for non intersecting connections
   if (!parts) {
-    return INVALID_PIPELINE_ID;
+    return std::nullopt;
   }
 
   Pipeline pipeline;

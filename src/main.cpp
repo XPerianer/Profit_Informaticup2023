@@ -3,6 +3,8 @@
 #include <variant>
 #include <vector>
 
+#include "connect.hpp"
+#include "field_state.hpp"
 #include "fields/distance_map.hpp"
 #include "fields/field.hpp"
 #include "fields/occupancy_map.hpp"
@@ -24,8 +26,70 @@ using namespace geometry;
 int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
 
-  // TODO: lots of calculations with input
-  std::vector<PlaceableObject> result = {};
+  OccupancyMap occupancy_map = occupancies_from(input);
+  auto deposits = input.deposits;
+  ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
+                                                occupancy_map.dimensions());
+  for (size_t i = 0; i < deposits.size(); i++) {
+    distances_from(deposits[i], occupancy_map, &components_wrapper, static_cast<DepositId>(i));
+  }
+
+  std::vector<ConnectedComponent> connected_components = components_wrapper.extract();
+  std::vector<DistanceMap> distance_maps;
+  distance_maps.reserve(deposits.size());
+  FieldState state = {occupancy_map, {}, {}};
+
+  for (size_t i = 0; i < deposits.size(); i++) {
+    distance_maps.emplace_back(
+        distances_from(deposits[i], occupancy_map, &components_wrapper, static_cast<DepositId>(i)));
+  }
+
+  DistanceMap merged = merge(distance_maps, Factory::DIMENSIONS);
+
+  for (const auto &component : connected_components) {
+    std::cerr << "Starting with first component\n";
+    AvailableResources resources = available_resources(component, input);
+    std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
+    std::cerr << " ----- Fabrication plan -----\n";
+    for (auto product : fabrication_plan) {
+      std::cerr << product << "\n";
+    }
+    std::cerr << " ----- Fabrication plan -----\n";
+    // try to realize one by one
+    // TODO: optimize by building product with higher scores first
+    // TODO: optimize by building the correct proportions
+    for (unsigned int i = 0; i < fabrication_plan.size(); i++) {
+      auto product = input.products[i];
+      auto count = fabrication_plan[i];
+      std::cerr << "Starting with product " << i << ", count is " << count << "\n";
+      if (count == 0) {
+        continue;
+      }
+      std::cerr << "Trying to place factory\n";
+      auto factory_id = place_factory(input.products[i].type, merged, &state);
+      if (!factory_id) {
+        continue;
+      }
+      std::cerr << "Placed factory\n";
+      for (auto resource_type : RESOURCE_TYPES) {
+        if (product.requirements[resource_type] == 0) {
+          continue;
+        }
+        for (auto deposit_id : component) {
+          auto deposit = input.deposits[deposit_id];
+          if (deposit.type != resource_type) {
+            continue;
+          }
+          auto pipeline_id = connect(deposit, *factory_id, &state);
+          if (!pipeline_id) {
+            continue;
+          }
+        }
+      }
+    }
+  }
+
+  std::vector<PlaceableObject> result = state.placed_objects();
 
 #ifdef NDEBUG
   std::cout << serialization::serialize(result);
@@ -61,8 +125,6 @@ int main() {  // NOLINT(bugprone-exception-escape)
  *       -> gegeben N deposits, Designe Pipelines und Factory, um die Produktion zu realisieren
  */
 
-#include <queue>
-
 namespace production_realization {
 
 // Idee: Immer erstmal nur eine Produktionspipeline (-> genau eine Fabrik) bauen
@@ -73,61 +135,5 @@ namespace production_realization {
 // Auch: Die Methode versucht immer direkt kürzeste Wege zu bauen
 //    Überlegung: Kürzester Weg könnte kritisches Feld belagern, was uns später nicht erlaubt,
 //    weitere Pipelines zu bauen Evtl explizite Kreuzungen setzen?
-
-inline bool attempt_realize(const std::vector<Deposit>& /*deposits*/,
-                            FactoryType /*factory_type*/) {
-  // minen platzieren
-
-  // fabrik platzieren
-  // verbinden
-  return false;
-}
-
-inline void select_deposits_and_products(const parsing::Input& input) {
-  // Simplest algorithm: Try all products one by one
-  for (const auto& product : input.products) {
-    const auto& requirements = product.requirements;
-    const std::vector<Deposit>& input_deposits = input.deposits;
-
-    std::vector<Deposit> useful_deposits;
-    std::copy_if(input_deposits.begin(), input_deposits.end(), std::back_inserter(useful_deposits),
-                 [&](const Deposit& deposit) { return requirements[deposit.type] != 0; });
-
-    // Now try if we can make this work
-    attempt_realize(useful_deposits, product.type);
-  }
-}
-
-inline std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
-                                                           Vec2 /*ingress_target_field*/,
-                                                           const OccupancyMap& /*occupancies*/) {
-  // Breitensuche, von Start, immer mit allen 4 (Conveyor3) + 4 (Conveyor4) + 4 (Combiner)
-  // Bewegungsmöglichkeiten
-  return std::nullopt;
-
-  // Invariante: Für Felder, die in der queue sind, gilt: Hier dürfen Inputs hin, für den
-  // gewünschten
-  std::queue<Vec2> reached_ingestion_fields;
-
-  // TODO: Alle benachbarten Felder von egress_start_field in die Queue pushen, wenn nicht auch mit
-  // anderem Egress verbunden
-  // TODO auch: Vielleicht bei Verbindung zu anderem Egress warnen (wir erwarten nicht, dass das
-  // häufig passiert?) (Problem ist: +|.|+|) reached_ingestion_fields.push(start);
-
-  while (!reached_ingestion_fields.empty()) {
-    Vec2 reached_field = reached_ingestion_fields.front();
-    reached_ingestion_fields.pop();
-
-    (void)reached_field;
-
-    // TODO: Ausprobieren
-    // 3-unit conveyor
-    // for(Rotation rot = 0; rot < 4; ++rot) {
-
-    //
-    // 4-unit conveyor
-    // combinern
-  }
-}
 
 }  // namespace production_realization

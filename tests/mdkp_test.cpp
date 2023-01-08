@@ -45,3 +45,10 @@ TEST_F(PechTest, ChoosesProductWithHigherScore) {
   expected = {4, 0};
   EXPECT_EQ(expected, output);
 }
+
+TEST_F(PechTest, WorksForOneResource) {
+  AvailableResources resources = {8};
+  auto output = pech(resources, {bad_product_});
+  std::vector<ProductCount> expected = {4};
+  EXPECT_EQ(expected, output);
+}
