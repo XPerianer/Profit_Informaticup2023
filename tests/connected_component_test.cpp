@@ -37,15 +37,15 @@ class ConnectedComponentTest : public testing::Test {
 };
 
 TEST(ConnectedComponent, Task1) {
-  ConnectedComponentTest::with_example(examples::TASK1, {{2, 1, 0}});
+  ConnectedComponentTest::with_example(examples::TASK1, {{0, 1, 2}});
 }
 
 TEST(ConnectedComponent, Task2) { ConnectedComponentTest::with_example(examples::TASK2, {{0}}); }
 
-TEST(ConnectedComponent, Task3) { ConnectedComponentTest::with_example(examples::TASK3, {{1, 0}}); }
+TEST(ConnectedComponent, Task3) { ConnectedComponentTest::with_example(examples::TASK3, {{0, 1}}); }
 
 TEST(ConnectedComponent, Task4) {
-  ConnectedComponentTest::with_example(examples::TASK4, {{3, 2, 1, 0}});
+  ConnectedComponentTest::with_example(examples::TASK4, {{0, 1, 2, 3}});
 }
 
 TEST(ConnectedComponent, TrickyConveyorConnection) {
@@ -62,5 +62,5 @@ TEST(ConnectedComponent, VerticallySplitMap) {
 
 TEST(ConnectedComponent, MultipleConnectedComponents) {
   ConnectedComponentTest::with_example(examples::MULTIPLE_CONNECTED_COMPONENTS,
-                                       {{1, 0}, {3, 2}, {5, 4}, {7, 6}});
+                                       {{0, 1}, {2, 3}, {4, 5}, {6, 7}});
 }
