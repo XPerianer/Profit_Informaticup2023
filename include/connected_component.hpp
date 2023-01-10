@@ -15,37 +15,75 @@ using ConnectedComponent = std::vector<DepositId>;
 
 class ConnectedComponentsWrapper {
  private:
-  std::unordered_map<DepositId, DepositId> deposits_to_cc_;
+  std::vector<DepositId> components_;
+  std::vector<int> sizes_;
+  DepositId elements_;
+  int count_;
   ComponentMap map_;
 
  public:
-  explicit ConnectedComponentsWrapper(const DepositId count, Vec2 field_dimensions)
-      : map_(field_dimensions) {
-    deposits_to_cc_.reserve(count);
+  explicit ConnectedComponentsWrapper(DepositId count, Vec2 field_dimensions)
+      : elements_(count), count_(count), map_(field_dimensions) {
     for (DepositId i = 0; i < count; ++i) {
-      deposits_to_cc_[i] = i;
+      components_.emplace_back(i);
+      sizes_.emplace_back(1);
     }
+  }
+
+  DepositId find(DepositId deposit) {
+    while (deposit != components_[deposit]) {
+      components_[deposit] = components_[components_[deposit]];
+      deposit = components_[deposit];
+    }
+    return deposit;
   }
 
   void set_reachable(const DepositId deposit, Vec2 coordinate) {
     if (map_.at(coordinate) == NO_COMPONENT) {
-      map_.set(coordinate, deposits_to_cc_[deposit]);
-    } else {
-      deposits_to_cc_[deposit] = map_.at(coordinate);
+      map_.set(coordinate, deposit);
+      return;
     }
+    DepositId root_a = find(deposit);
+    DepositId root_b = find(map_.at(coordinate));
+    if (root_a == root_b) {
+      return;
+    }
+    if (sizes_[root_a] < sizes_[root_b]) {
+      components_[root_a] = root_b;
+      sizes_[root_b] += sizes_[root_a];
+    } else {
+      components_[root_b] = root_a;
+      sizes_[root_a] += sizes_[root_b];
+    }
+    count_--;
+  }
+
+  bool connected(DepositId deposit_a, DepositId deposit_b) {
+    return find(deposit_a) == find(deposit_b);
   }
 
   std::vector<ConnectedComponent> extract() {
-    std::vector<ConnectedComponent> connected_components(deposits_to_cc_.size());
-    for (const auto& [key, value] : deposits_to_cc_) {
-      connected_components[value].emplace_back(key);
+    std::vector<ConnectedComponent> connected_components;
+    connected_components.reserve(count_);
+    std::vector<bool> added(elements_, false);
+
+    for (DepositId deposit = 0; deposit < elements_; deposit++) {
+      if (added[deposit]) {
+        continue;
+      }
+
+      ConnectedComponent connected_component;
+      for (DepositId candidate = deposit; candidate < elements_; candidate++) {
+        if (added[candidate] || !connected(deposit, candidate)) {
+          continue;
+        }
+        connected_component.emplace_back(candidate);
+        added[candidate] = true;
+      }
+      connected_components.emplace_back(connected_component);
     }
-    std::vector<ConnectedComponent> compressed;
-    std::ranges::copy_if(connected_components, std::back_inserter(compressed),
-                         [&](const ConnectedComponent& connected_component) {
-                           return !connected_component.empty();
-                         });
-    return compressed;
+
+    return connected_components;
   }
 };
 
