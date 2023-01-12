@@ -12,4 +12,4 @@ namespace profit::solver {
 
 std::vector<profit::PlaceableObject> simple_greedy_solver(profit::parsing::Input& input);
 
-}  // namespace solver
+}  // namespace profit::solver

@@ -56,12 +56,13 @@ inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map)
 
 template <>
 inline bool collides(const PlaceableObject& object, const OccupancyMap& occupancy_map) {
-  return std::visit([&](const auto& placable) { return collides(placable, occupancy_map); }, object);
+  return std::visit([&](const auto& placable) { return collides(placable, occupancy_map); },
+                    object);
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
 inline void place(const PlaceableObject& object, OccupancyMap* occupancy_map) {
-// NOLINTNEXTLINE(misc-no-recursion)
+  // NOLINTNEXTLINE(misc-no-recursion)
   std::visit([&](const auto& placable) { place(placable, occupancy_map); }, object);
 }
 
