@@ -32,8 +32,9 @@ using TargetMap = Field<char, 0, 0>;
 using PredecessorMap = Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>;
 
 inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
-                                   PredecessorMap* predecessors, PredecessorMap* object_connections,
-                                   OccupancyMap& occupancy_map);
+                                          PredecessorMap* predecessors,
+                                          PredecessorMap* object_connections,
+                                          OccupancyMap& occupancy_map);
 
 inline Rotation get_rotation_between(Vec2 start, Vec2 end) {
   auto horizontal_difference = end.x() - start.x();
@@ -107,7 +108,7 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
 
 // TODO: deduplicate with distance_map.hpp see #28
 inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory_id,
-                                  FieldState* state) {
+                                         FieldState* state) {
   Factory factory = state->factories[factory_id];
 
   // Connection from downstream ingress to egress
@@ -174,12 +175,10 @@ inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId 
 }
 
 template <typename PlaceableT>
-inline std::optional<Vec2> visit_location_if_placable(Vec2 ingress, const TargetMap& target_egress_fields,
-                                               PredecessorMap* predecessors,
-                                               PredecessorMap* object_connections,
-                                               const OccupancyMap& occupancy_map,
-                                               const PlaceableT object,
-                                               std::queue<Vec2>* reached_ingresses) {
+inline std::optional<Vec2> visit_location_if_placable(
+    Vec2 ingress, const TargetMap& target_egress_fields, PredecessorMap* predecessors,
+    PredecessorMap* object_connections, const OccupancyMap& occupancy_map, const PlaceableT object,
+    std::queue<Vec2>* reached_ingresses) {
   if (collides(object, occupancy_map)) {
     return std::nullopt;
   }
@@ -210,8 +209,9 @@ inline std::optional<Vec2> visit_location_if_placable(Vec2 ingress, const Target
 }
 
 inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
-                                   PredecessorMap* predecessors, PredecessorMap* object_connections,
-                                   OccupancyMap& occupancy_map) {
+                                          PredecessorMap* predecessors,
+                                          PredecessorMap* object_connections,
+                                          OccupancyMap& occupancy_map) {
   std::queue<Vec2> reached_ingresses;
   // Step 1: Go through all mines and add possible ingresses in queue
   for (Vec2 possible_ingress_location :

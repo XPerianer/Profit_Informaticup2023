@@ -27,7 +27,6 @@ using namespace geometry;
 int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
 
-
   std::vector<PlaceableObject> result = solver::simple_greedy_solver(input);
 
 #ifdef NDEBUG
