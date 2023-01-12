@@ -1,7 +1,6 @@
 #include "solver.hpp"
 
-namespace profit {
-namespace solver {
+namespace profit::solver {
 inline void solve_component(const ConnectedComponent &component, FieldState *state,
                             const profit::parsing::Input &input, const DistanceMap &merged) {
   std::cerr << "Starting with component\n";
@@ -72,5 +71,4 @@ std::vector<PlaceableObject> simple_greedy_solver(parsing::Input &input) {
   }
   return state.placed_objects();
 }
-}  // namespace solver
-}  // namespace profit
+}  // namespace profit::solver
