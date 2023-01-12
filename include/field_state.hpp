@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -77,8 +76,8 @@ inline FieldState from_input(const parsing::Input &input) {
 }
 
 inline std::optional<FactoryId> place_factory(ProductType product,
-                                              const DistanceMap &cc_merged_distances,
-                                              FieldState *state) {
+                                              const DistanceMap& cc_merged_distances,
+                                              FieldState* state) {
   PlacementMap handle_placements =
       placements_for<Factory::DIMENSIONS>(state->occupancy_map, cc_merged_distances);
 
