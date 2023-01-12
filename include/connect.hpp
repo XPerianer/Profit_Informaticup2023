@@ -105,6 +105,7 @@ std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
   }
 }
 
+// TODO: deduplicate with distance_map.hpp see #28
 std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory_id,
                                   FieldState* state) {
   Factory factory = state->factories[factory_id];
@@ -160,7 +161,7 @@ std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory
   // Potential problem: Dijkstra could self-intersect, check here again and if there was a
   // self-intersection, we say that we can not build that
   // TODO: We could recover more gracefully, for example by placing everything that can be placed
-  // and then searching for non intersecting connections
+  // and then searching for non intersecting connections see #27
   if (!parts) {
     return std::nullopt;
   }
@@ -169,8 +170,6 @@ std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory
   pipeline.factory_id = factory_id;
   pipeline.parts = *parts;
 
-  // TODO: deduplicate with distance_map.hpp
-  // TODO: Add support von combiners
   return state->add_pipeline(pipeline);
 }
 

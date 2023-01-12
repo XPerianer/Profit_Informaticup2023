@@ -56,8 +56,8 @@ int main() {  // NOLINT(bugprone-exception-escape)
     }
     std::cerr << " ----- Fabrication plan -----\n";
     // try to realize one by one
-    // TODO: optimize by building product with higher scores first
-    // TODO: optimize by building the correct proportions
+    // TODO: optimize by building product with higher scores first see #24
+    // TODO: optimize by building the correct proportions see #25
     for (unsigned int i = 0; i < fabrication_plan.size(); i++) {
       auto product = input.products[i];
       auto count = fabrication_plan[i];
