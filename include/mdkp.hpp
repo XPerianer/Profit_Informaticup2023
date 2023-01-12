@@ -32,7 +32,7 @@ using ProductCount = StoredResourceCount;
 using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
 
 [[nodiscard]] inline AvailableResources available_resources(const ConnectedComponent& component,
-                                                            parsing::Input& input) {
+                                                            const parsing::Input& input) {
   AvailableResources resources;
   for (const auto deposit_id : component) {
     auto deposit = input.deposits[deposit_id];

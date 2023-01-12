@@ -23,7 +23,7 @@ using PipelineId = int16_t;
 constexpr auto INVALID_PIPELINE_ID = std::numeric_limits<PipelineId>::max();
 
 struct Pipeline {
-  FactoryId factory_id;
+  FactoryId factory_id = INVALID_PIPELINE_ID;
   std::vector<PlaceableObject> parts;
 };
 
