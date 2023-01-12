@@ -15,6 +15,7 @@
 #include "mdkp.hpp"
 #include "placeable.hpp"
 #include "rotation.hpp"
+#include "solver.hpp"
 #include "utils.hpp"
 
 // NOLINTBEGIN(google-build-using-namespace): In main, we allow using these
@@ -26,70 +27,8 @@ using namespace geometry;
 int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
 
-  OccupancyMap occupancy_map = occupancies_from(input);
-  auto deposits = input.deposits;
-  ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
-                                                occupancy_map.dimensions());
-  for (size_t i = 0; i < deposits.size(); i++) {
-    distances_from(deposits[i], occupancy_map, &components_wrapper, static_cast<DepositId>(i));
-  }
 
-  std::vector<ConnectedComponent> connected_components = components_wrapper.extract();
-  std::vector<DistanceMap> distance_maps;
-  distance_maps.reserve(deposits.size());
-  FieldState state = {occupancy_map, {}, {}};
-
-  for (size_t i = 0; i < deposits.size(); i++) {
-    distance_maps.emplace_back(
-        distances_from(deposits[i], occupancy_map, &components_wrapper, static_cast<DepositId>(i)));
-  }
-
-  DistanceMap merged = merge(distance_maps, Factory::DIMENSIONS);
-
-  for (const auto &component : connected_components) {
-    std::cerr << "Starting with first component\n";
-    AvailableResources resources = available_resources(component, input);
-    std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
-    std::cerr << " ----- Fabrication plan -----\n";
-    for (auto product : fabrication_plan) {
-      std::cerr << product << "\n";
-    }
-    std::cerr << " ----- Fabrication plan -----\n";
-    // try to realize one by one
-    // TODO: optimize by building product with higher scores first see #24
-    // TODO: optimize by building the correct proportions see #25
-    for (unsigned int i = 0; i < fabrication_plan.size(); i++) {
-      auto product = input.products[i];
-      auto count = fabrication_plan[i];
-      std::cerr << "Starting with product " << i << ", count is " << count << "\n";
-      if (count == 0) {
-        continue;
-      }
-      std::cerr << "Trying to place factory\n";
-      auto factory_id = place_factory(input.products[i].type, merged, &state);
-      if (!factory_id) {
-        continue;
-      }
-      std::cerr << "Placed factory\n";
-      for (auto resource_type : RESOURCE_TYPES) {
-        if (product.requirements[resource_type] == 0) {
-          continue;
-        }
-        for (auto deposit_id : component) {
-          auto deposit = input.deposits[deposit_id];
-          if (deposit.type != resource_type) {
-            continue;
-          }
-          auto pipeline_id = connect(deposit, *factory_id, &state);
-          if (!pipeline_id) {
-            continue;
-          }
-        }
-      }
-    }
-  }
-
-  std::vector<PlaceableObject> result = state.placed_objects();
+  std::vector<PlaceableObject> result = solver::simple_greedy_solver(input);
 
 #ifdef NDEBUG
   std::cout << serialization::serialize(result);

@@ -31,11 +31,11 @@ const auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 using TargetMap = Field<char, 0, 0>;
 using PredecessorMap = Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>;
 
-std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
+inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
                                    PredecessorMap* predecessors, PredecessorMap* object_connections,
                                    OccupancyMap& occupancy_map);
 
-Rotation get_rotation_between(Vec2 start, Vec2 end) {
+inline Rotation get_rotation_between(Vec2 start, Vec2 end) {
   auto horizontal_difference = end.x() - start.x();
   auto vertical_difference = end.y() - start.y();
   if (std::abs(static_cast<geometry::Coordinate::UnderlyingT>(horizontal_difference)) >
@@ -52,7 +52,7 @@ Rotation get_rotation_between(Vec2 start, Vec2 end) {
   }
 }
 
-std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
+inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
     geometry::Vec2 ending_egress, PredecessorMap& predecessors, PredecessorMap& object_connections,
     OccupancyMap* occupancy_map) {
   std::vector<PlaceableObject> parts;
@@ -106,7 +106,7 @@ std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
 }
 
 // TODO: deduplicate with distance_map.hpp see #28
-std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory_id,
+inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory_id,
                                   FieldState* state) {
   Factory factory = state->factories[factory_id];
 
@@ -174,7 +174,7 @@ std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory
 }
 
 template <typename PlaceableT>
-std::optional<Vec2> visit_location_if_placable(Vec2 ingress, const TargetMap& target_egress_fields,
+inline std::optional<Vec2> visit_location_if_placable(Vec2 ingress, const TargetMap& target_egress_fields,
                                                PredecessorMap* predecessors,
                                                PredecessorMap* object_connections,
                                                const OccupancyMap& occupancy_map,
@@ -209,7 +209,7 @@ std::optional<Vec2> visit_location_if_placable(Vec2 ingress, const TargetMap& ta
   return std::nullopt;
 }
 
-std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
+inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
                                    PredecessorMap* predecessors, PredecessorMap* object_connections,
                                    OccupancyMap& occupancy_map) {
   std::queue<Vec2> reached_ingresses;
