@@ -8,7 +8,7 @@
 #include "placeable.hpp"
 #include "resource_type.hpp"
 
-namespace solver {
+namespace profit::solver {
 
 std::vector<profit::PlaceableObject> simple_greedy_solver(profit::parsing::Input& input);
 
