@@ -24,11 +24,15 @@ namespace profit {
 // playing field is at max 100*100 big, so 16 bytes are enough to address every field with a single
 // index
 using FieldIndex = uint16_t;
-const auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
+constexpr auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 
-// Using char instead of bool since vector<bool> has weird behaviour that would need to be handled
+// Not using a simple bool since vector<bool> has weird behaviour that would need to be handled
 // in TwoDimensionalVector
-using TargetMap = Field<char, 0, 0>;
+enum Target : bool {
+  TARGET = true,
+  NO_TARGET = false,
+};
+using TargetMap = Field<Target, NO_TARGET, NO_TARGET>;
 using PredecessorMap = Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>;
 
 inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
@@ -45,12 +49,11 @@ inline Rotation get_rotation_between(Vec2 start, Vec2 end) {
       return Rotation::LEFT_TO_RIGHT;
     }
     return Rotation::RIGHT_TO_LEFT;
-  } else {
-    if (vertical_difference > 0) {
-      return Rotation::UP_TO_DOWN;
-    }
-    return Rotation::DOWN_TO_UP;
   }
+  if (vertical_difference > 0) {
+    return Rotation::UP_TO_DOWN;
+  }
+  return Rotation::DOWN_TO_UP;
 }
 
 inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
@@ -123,7 +126,7 @@ inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId 
 
   for (Vec2 possible_egress_location :
        geometry::outer_connected_border_cells(as_rectangle(factory))) {
-    target_egress_fields.safe_set(possible_egress_location, true);
+    target_egress_fields.safe_set(possible_egress_location, TARGET);
   }
 
   for (const auto& [id, pipeline] : state->pipelines) {
@@ -132,19 +135,19 @@ inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId 
         std::visit(
             utils::Overloaded{[&](const Mine& mine) {
                                 for (auto egress : mine.upstream_egress_cells()) {
-                                  target_egress_fields.safe_set(egress, true);
+                                  target_egress_fields.safe_set(egress, TARGET);
                                 }
                               },
                               [](const Combiner&) { /* TODO */ },
                               [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
                               [&](const Conveyor3& conveyor) {
                                 for (auto egress : conveyor.upstream_egress_cells()) {
-                                  target_egress_fields.safe_set(egress, true);
+                                  target_egress_fields.safe_set(egress, TARGET);
                                 }
                               },
                               [&](const Conveyor4& conveyor) {
                                 for (auto egress : conveyor.upstream_egress_cells()) {
-                                  target_egress_fields.safe_set(egress, true);
+                                  target_egress_fields.safe_set(egress, TARGET);
                                 }
                               }},
             placeable);
