@@ -60,6 +60,7 @@ inline bool collides(const PlaceableObject& object, const OccupancyMap& occupanc
 }
 
 inline void place(const PlaceableObject& object, OccupancyMap* occupancy_map) {
+  //NOLINTNEXTLINE(misc-no-recursion)
   std::visit([&](const auto& placable) { place(placable, occupancy_map); }, object);
 }
 
@@ -144,6 +145,7 @@ inline void remove(const Conveyor4& object, OccupancyMap* occupancy_map) {
 
 template <>
 inline void remove(const PlaceableObject& object, OccupancyMap* occupancy_map) {
+  //NOLINTNEXTLINE(misc-no-recursion)
   std::visit([&](const auto& placable) { remove(placable, occupancy_map); }, object);
 }
 
