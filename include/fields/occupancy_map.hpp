@@ -60,7 +60,7 @@ inline bool collides(const PlaceableObject& object, const OccupancyMap& occupanc
 }
 
 inline void place(const PlaceableObject& object, OccupancyMap* occupancy_map) {
-  std::visit([&](const auto& object) { place(object, occupancy_map); }, object);
+  std::visit([&](const auto& placable) { place(placable, occupancy_map); }, object);
 }
 
 inline void place(const Mine& mine, OccupancyMap* occupancy_map) {
@@ -108,10 +108,6 @@ inline void place(const Factory factory, OccupancyMap* occupancy_map) {
   }
 }
 
-inline void remove(const PlaceableObject& object, OccupancyMap* occupancy_map) {
-  std::visit([&](const auto& object) { remove(object, occupancy_map); }, object);
-}
-
 template <typename Placable>
 inline void remove(const Placable& object, OccupancyMap* occupancy_map) {
   for (auto cell : object.occupied_cells()) {
@@ -144,6 +140,11 @@ inline void remove(const Conveyor4& object, OccupancyMap* occupancy_map) {
   } else {
     remove_on_conveyor_crossing(object.handle + Vec2{0, 1}, occupancy_map);
   }
+}
+
+template <>
+inline void remove(const PlaceableObject& object, OccupancyMap* occupancy_map) {
+  std::visit([&](const auto& placable) { remove(placable, occupancy_map); }, object);
 }
 
 }  // namespace profit
