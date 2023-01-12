@@ -1,8 +1,8 @@
 #include "solver.hpp"
 
 namespace profit::solver {
-inline void solve_component(const ConnectedComponent &component, FieldState *state,
-                            const profit::parsing::Input &input, const DistanceMap &merged) {
+inline void solve_component(const ConnectedComponent& component, FieldState* state,
+                            const profit::parsing::Input& input, const DistanceMap& merged) {
   std::cerr << "Starting with component\n";
   AvailableResources resources = available_resources(component, input);
   std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
@@ -45,7 +45,7 @@ inline void solve_component(const ConnectedComponent &component, FieldState *sta
   }
 }
 
-std::vector<PlaceableObject> simple_greedy_solver(parsing::Input &input) {
+std::vector<PlaceableObject> simple_greedy_solver(parsing::Input& input) {
   OccupancyMap occupancy_map = occupancies_from(input);
   auto deposits = input.deposits;
   ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
@@ -66,7 +66,7 @@ std::vector<PlaceableObject> simple_greedy_solver(parsing::Input &input) {
 
   const DistanceMap merged = merge(distance_maps, Factory::DIMENSIONS);
 
-  for (const auto &component : connected_components) {
+  for (const auto& component : connected_components) {
     solve_component(component, &state, input, merged);
   }
   return state.placed_objects();
