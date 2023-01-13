@@ -1,6 +1,7 @@
 #include "solver.hpp"
 
 #include "objects/placeable.hpp"
+#include "score.hpp"
 
 namespace profit {
 inline void solve_component(const ConnectedComponent& component, FieldState* state,
@@ -68,9 +69,8 @@ void simple_greedy_solver(const parsing::Input& input,
 
   for (const auto& component : connected_components) {
     solve_component(component, &state, input, merged);
-    // TODO: use the right score here
-    constexpr int TODO_SCORE = 10;
-    update_solution(Solution{TODO_SCORE, state.placed_objects()});
+    auto solution_score = score(state, input.turns, input);
+    update_solution(Solution{solution_score, state.placed_objects()});
   }
 }
 }  // namespace profit
