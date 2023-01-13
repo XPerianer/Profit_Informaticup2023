@@ -30,7 +30,7 @@ int main() {  // NOLINT(bugprone-exception-escape)
   timespec time{};
   clock_gettime(CLOCK_REALTIME, &time);
   const int time_to_stop_threads_and_write_best_solution = 2;
-  time.tv_sec += 10 - time_to_stop_threads_and_write_best_solution;
+  time.tv_sec += input.time - time_to_stop_threads_and_write_best_solution;
   while (sync.worker_threads_count != 0 && return_code == 0) {
     std::cerr << sync.worker_threads_count << " count\n";
     return_code = pthread_cond_timedwait(&sync.worker_thread_condition,
