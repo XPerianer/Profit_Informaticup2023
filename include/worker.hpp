@@ -5,7 +5,6 @@
 #include <concepts>
 #include <utility>
 
-#include "placeable.hpp"
 #include "product.hpp"
 #include "solver.hpp"
 
