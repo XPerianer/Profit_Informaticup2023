@@ -22,7 +22,7 @@ struct Input {
   std::vector<Deposit> deposits;
   std::vector<Obstacle> obstacles;
 
-  static constexpr uint64_t DEFAULT_TIME = 300;
+  static constexpr time_t DEFAULT_TIME = 300;
   bool operator==(const Input& other) const {
     return dimensions == other.dimensions && turns == other.turns && time == other.time &&
            std::ranges::is_permutation(products, other.products) &&
