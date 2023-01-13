@@ -24,6 +24,10 @@ struct Synchronization {
   pthread_mutex_t best_solution_mutex;
   pthread_mutex_t worker_threads_count_mutex;
 
+  Synchronization(const Synchronization& other) = delete;
+  Synchronization& operator=(const Synchronization& other) = delete;
+  Synchronization(Synchronization&& other) = delete;
+
   ~Synchronization() {
     pthread_cond_destroy(&worker_thread_condition);
     pthread_mutex_destroy(&worker_thread_condition_mutex);
@@ -33,7 +37,7 @@ struct Synchronization {
 };
 
 struct Worker {
-  Worker(Solution& solution, Synchronization& sync, const parsing::Input input)
+  Worker(Solution& solution, Synchronization& sync, const parsing::Input& input)
       : solution_(solution), sync_(sync), input_(input) {}
 
   inline void run() {
@@ -69,7 +73,7 @@ struct Worker {
         this);
   }
 
-  inline int stop() const { return pthread_cancel(thread_id_); }
+  inline void stop() const { pthread_cancel(thread_id_); }
 
  private:
   Solution& solution_;

@@ -48,7 +48,7 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
 }
 
 void simple_greedy_solver(const parsing::Input& input,
-                          std::function<void(Solution)> update_solution) {
+                          const std::function<void(const Solution)>& update_solution) {
   OccupancyMap occupancy_map = occupancies_from(input);
   auto deposits = input.deposits;
   ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
@@ -69,7 +69,8 @@ void simple_greedy_solver(const parsing::Input& input,
   for (const auto& component : connected_components) {
     solve_component(component, &state, input, merged);
     // TODO: use the right score here
-    update_solution(Solution{10, state.placed_objects()});
+    constexpr int TODO_SCORE = 10;
+    update_solution(Solution{TODO_SCORE, state.placed_objects()});
   }
 }
 }  // namespace profit

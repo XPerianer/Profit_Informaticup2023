@@ -16,6 +16,6 @@ struct Solution {
 };
 
 void simple_greedy_solver(const parsing::Input& input,
-                          std::function<void(Solution)> update_solution);
+                          std::function<void(const Solution)> update_solution);
 
 }  // namespace profit
