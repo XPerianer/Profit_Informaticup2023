@@ -41,6 +41,23 @@ using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
   return resources;
 }
 
+[[nodiscard]] inline ProductScore product_score(const AvailableResources& resources,
+                                                const Product& product) {
+  ProductScore max_score = std::numeric_limits<ProductScore>::max();
+  for (ResourceType resource : RESOURCE_TYPES) {
+    if (product.requirements[resource] == 0) {
+      continue;
+    }
+    // TODO(Richard): Nochmal wegen Static Casts überlegen -- können wir ResourceRequirements
+    // generalisieren?
+    auto producable = static_cast<ProductCount>(resources[static_cast<size_t>(resource)] /
+                                                product.requirements[resource]);
+    ProductScore limitation_by_current_resource = producable * product.points;
+    max_score = std::min(max_score, limitation_by_current_resource);
+  }
+  return max_score;
+}
+
 [[nodiscard]] inline std::vector<ProductCount> pech(AvailableResources resources,
                                                     const std::vector<Product>& products) {
   std::vector<ProductCount> result(products.size());
@@ -50,21 +67,7 @@ using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
     const Product* best_product = nullptr;
 
     for (const Product& product : products) {
-      ProductScore max_score_for_current_product = std::numeric_limits<ProductScore>::max();
-
-      for (ResourceType resource : RESOURCE_TYPES) {
-        if (product.requirements[resource] == 0) {
-          continue;
-        }
-        // TODO(Richard): Nochmal wegen Static Casts überlegen -- können wir ResourceRequirements
-        // generalisieren?
-        auto producable = static_cast<ProductCount>(resources[static_cast<size_t>(resource)] /
-                                                    product.requirements[resource]);
-        ProductScore limitation_by_current_resource = producable * product.points;
-        max_score_for_current_product =
-            std::min(max_score_for_current_product, limitation_by_current_resource);
-      }
-
+      ProductScore max_score_for_current_product = product_score(resources, product);
       if (max_score_for_current_product > max_product_score) {
         best_product = &product;
         max_product_score = max_score_for_current_product;

@@ -21,9 +21,11 @@ using FactoryId = int16_t;
 using PipelineId = int16_t;
 
 constexpr auto INVALID_PIPELINE_ID = std::numeric_limits<PipelineId>::max();
+constexpr auto INVALID_DEPOSIT_ID = std::numeric_limits<PipelineId>::max();
 
 struct Pipeline {
   FactoryId factory_id = INVALID_PIPELINE_ID;
+  DepositId deposit_id = INVALID_DEPOSIT_ID;
   std::vector<PlaceableObject> parts;
 };
 
