@@ -48,8 +48,6 @@ using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
     if (product.requirements[resource] == 0) {
       continue;
     }
-    // TODO(Richard): Nochmal wegen Static Casts überlegen -- können wir ResourceRequirements
-    // generalisieren?
     auto producable = static_cast<ProductCount>(resources[static_cast<size_t>(resource)] /
                                                 product.requirements[resource]);
     ProductScore limitation_by_current_resource = producable * product.points;

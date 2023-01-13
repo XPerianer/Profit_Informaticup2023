@@ -26,10 +26,11 @@ inline profit::ProductCount product_at_turn(const auto& pipeline, Turn empty_at,
   if (pipeline.parts.size() > turn) {
     return 0;
   }
+  const auto flow_per_time_step = 3;
   if (turn > empty_at + pipeline.parts.size() + 1) {
-    return 3 * (empty_at + pipeline.parts.size() + 1);
+    return flow_per_time_step * (empty_at + pipeline.parts.size() + 1);
   }
-  return 3 * (turn - pipeline.parts.size() - 1);
+  return flow_per_time_step * (turn - pipeline.parts.size() - 1);
 }
 
 inline profit::ProductScore score(const profit::FieldState& state, Turn turn,
