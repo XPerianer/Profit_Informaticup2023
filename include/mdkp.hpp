@@ -12,11 +12,11 @@
 #include "fields/distance_map.hpp"
 #include "fields/occupancy_map.hpp"
 #include "io/parsing.hpp"
-#include "landscape.hpp"
-#include "placeable.hpp"
-#include "product.hpp"
-#include "resource_type.hpp"
-#include "subtype.hpp"
+#include "objects/landscape.hpp"
+#include "objects/placeable.hpp"
+#include "objects/product.hpp"
+#include "objects/resource_type.hpp"
+#include "objects/subtype.hpp"
 
 namespace profit {
 

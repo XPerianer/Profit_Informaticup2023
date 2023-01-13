@@ -5,8 +5,8 @@
 #include "connect.hpp"
 #include "io/parsing.hpp"
 #include "mdkp.hpp"
-#include "placeable.hpp"
-#include "resource_type.hpp"
+#include "objects/placeable.hpp"
+#include "objects/resource_type.hpp"
 
 namespace profit::solver {
 

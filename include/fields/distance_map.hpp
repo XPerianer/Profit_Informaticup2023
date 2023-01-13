@@ -9,8 +9,8 @@
 #include "fields/occupancy_map.hpp"
 #include "geometry/rectangle.hpp"
 #include "geometry/vec2.hpp"
-#include "placeable.hpp"
-#include "utils.hpp"
+#include "miscellany/utils.hpp"
+#include "objects/placeable.hpp"
 
 namespace profit {
 

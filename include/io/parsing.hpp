@@ -7,10 +7,10 @@
 #include <variant>
 #include <vector>
 
-#include "assert.hpp"
-#include "landscape.hpp"
-#include "placeable.hpp"
-#include "product.hpp"
+#include "miscellany/assert.hpp"
+#include "objects/landscape.hpp"
+#include "objects/placeable.hpp"
+#include "objects/product.hpp"
 
 namespace profit::parsing {
 

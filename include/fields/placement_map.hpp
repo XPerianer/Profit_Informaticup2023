@@ -5,7 +5,7 @@
 #include "fields/occupancy_map.hpp"
 #include "geometry/coordinate.hpp"
 #include "geometry/vec2.hpp"
-#include "landscape.hpp"
+#include "objects/landscape.hpp"
 
 namespace profit {
 enum Placeability : bool {

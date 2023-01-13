@@ -2,8 +2,8 @@
 
 #include <gtest/gtest.h>
 
-#include "example_tasks.hpp"
-#include "utils.hpp"
+#include "miscellany/utils.hpp"
+#include "resources/example_tasks.hpp"
 
 using namespace profit;
 using namespace serialization;

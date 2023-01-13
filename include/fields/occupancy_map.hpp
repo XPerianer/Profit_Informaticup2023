@@ -6,7 +6,7 @@
 #include "geometry/rectangle.hpp"
 #include "geometry/vec2.hpp"
 #include "io/parsing.hpp"
-#include "landscape.hpp"
+#include "objects/landscape.hpp"
 
 namespace profit {
 
