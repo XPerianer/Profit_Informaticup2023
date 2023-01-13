@@ -11,6 +11,7 @@
 namespace profit {
 
 struct Synchronization {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
   Synchronization() {
     pthread_cond_init(&worker_thread_condition, NULL);
     pthread_mutex_init(&worker_thread_condition_mutex, NULL);
@@ -25,6 +26,7 @@ struct Synchronization {
 
   Synchronization(const Synchronization& other) = delete;
   Synchronization& operator=(const Synchronization& other) = delete;
+  Synchronization& operator=(const Synchronization&& other) = delete;
   Synchronization(Synchronization&& other) = delete;
 
   ~Synchronization() {
@@ -40,7 +42,7 @@ struct Worker {
       : solution_(solution), sync_(sync), input_(input) {}
 
   inline void run() {
-    simple_greedy_solver(input_, [&](Solution solution) { update_solution(solution); });
+    simple_greedy_solver(input_, [&](Solution solution) { update_solution(std::move(solution)); });
     worker_thread_add(-1);
   }
 

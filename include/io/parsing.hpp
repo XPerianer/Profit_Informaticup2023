@@ -17,7 +17,7 @@ namespace profit::parsing {
 struct Input {
   Vec2 dimensions;
   uint64_t turns = 0;
-  uint64_t time = 0;
+  time_t time = 0;
   std::vector<Product> products;
   std::vector<Deposit> deposits;
   std::vector<Obstacle> obstacles;

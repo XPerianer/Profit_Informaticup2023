@@ -12,7 +12,7 @@ namespace profit::serialization {
 struct Output {
   Vec2 dimensions;
   uint64_t turns;
-  uint64_t time;
+  time_t time;
   std::vector<Product> products;
   std::vector<Deposit> deposits;
   std::vector<Obstacle> obstacles;
