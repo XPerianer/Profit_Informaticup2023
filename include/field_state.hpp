@@ -7,23 +7,23 @@
 #include "fields/distance_map.hpp"
 #include "fields/occupancy_map.hpp"
 #include "fields/placement_map.hpp"
-#include "geometry/coordinate.hpp"
 #include "geometry/rectangle.hpp"
 #include "geometry/vec2.hpp"
 #include "io/parsing.hpp"
-#include "placeable.hpp"
-#include "product.hpp"
+#include "objects/placeable.hpp"
+#include "objects/product.hpp"
 
 namespace profit {
-using geometry::Coordinate;
 
 using FactoryId = int16_t;
 using PipelineId = int16_t;
 
 constexpr auto INVALID_PIPELINE_ID = std::numeric_limits<PipelineId>::max();
+constexpr auto INVALID_DEPOSIT_ID = std::numeric_limits<PipelineId>::max();
 
 struct Pipeline {
   FactoryId factory_id = INVALID_PIPELINE_ID;
+  DepositId deposit_id = INVALID_DEPOSIT_ID;
   std::vector<PlaceableObject> parts;
 };
 

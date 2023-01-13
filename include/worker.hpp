@@ -5,7 +5,7 @@
 #include <concepts>
 #include <utility>
 
-#include "product.hpp"
+#include "objects/placeable.hpp"
 #include "solver.hpp"
 
 namespace profit {

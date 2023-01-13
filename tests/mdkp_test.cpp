@@ -6,9 +6,9 @@
 #include <string>
 
 #include "io/parsing.hpp"
-#include "product.hpp"
-#include "resource_type.hpp"
-#include "utils.hpp"
+#include "miscellany/utils.hpp"
+#include "objects/product.hpp"
+#include "objects/resource_type.hpp"
 
 using namespace profit;
 

@@ -10,18 +10,11 @@ add_definitions(-DGTEST_DONT_DEFINE_FAIL)
 
 add_compile_options(${COMPILER_WARNING_FLAGS})
 
+file(GLOB_RECURSE ALL_CPP_TEST_FILES *.cpp)
+
 add_executable(
   unit_test
-  mdkp_test.cpp
-  serialization_test.cpp
-  parsing_test.cpp
-  geometry_test.cpp
-  distance_map_test.cpp
-  occupancy_map_test.cpp
-  connected_component_test.cpp
-  connect_test.cpp
-  placement_map_test.cpp
-  field_state_test.cpp
+  ${ALL_CPP_TEST_FILES}
 )
 
 target_link_libraries(

@@ -2,8 +2,8 @@
 #include <concepts>
 #include <vector>
 
-#include "assert.hpp"
 #include "geometry/vec2.hpp"
+#include "miscellany/assert.hpp"
 
 namespace geometry {
 

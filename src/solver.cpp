@@ -1,6 +1,6 @@
 #include "solver.hpp"
 
-#include "placeable.hpp"
+#include "objects/placeable.hpp"
 
 namespace profit {
 inline void solve_component(const ConnectedComponent& component, FieldState* state,
