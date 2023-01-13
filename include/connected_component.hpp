@@ -7,7 +7,7 @@
 
 #include "fields/component_map.hpp"
 #include "geometry/vec2.hpp"
-#include "landscape.hpp"
+#include "objects/landscape.hpp"
 
 namespace profit {
 

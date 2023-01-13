@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <limits>
 
-#include "assert.hpp"
+#include "miscellany/assert.hpp"
 
 namespace geometry {
 

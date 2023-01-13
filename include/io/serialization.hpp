@@ -3,9 +3,9 @@
 #include <vector>
 
 #include "io/parsing.hpp"
-#include "landscape.hpp"
-#include "placeable.hpp"
-#include "utils.hpp"
+#include "miscellany/utils.hpp"
+#include "objects/landscape.hpp"
+#include "objects/placeable.hpp"
 
 namespace profit::serialization {
 

@@ -1,7 +1,7 @@
 #pragma once
 #include <initializer_list>
 
-#include "subtype.hpp"
+#include "objects/subtype.hpp"
 
 namespace profit {
 

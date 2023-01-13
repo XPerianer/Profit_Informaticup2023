@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "geometry/vec2.hpp"
-#include "utils.hpp"
+#include "miscellany/utils.hpp"
 
 namespace geometry {
 

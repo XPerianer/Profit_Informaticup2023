@@ -4,8 +4,8 @@
 
 #include "geometry/rectangle.hpp"
 #include "geometry/vec2.hpp"
-#include "resource_type.hpp"
-#include "utils.hpp"
+#include "miscellany/utils.hpp"
+#include "objects/resource_type.hpp"
 
 namespace profit {
 
