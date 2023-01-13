@@ -178,3 +178,5 @@ CheckOptions:
 
   - key: readability-identifier-naming.VariableCase
     value: lower_case
+  - key: readability-function-cognitive-complexity.IgnoreMacros
+    value: true

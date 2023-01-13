@@ -3,17 +3,9 @@
 #include <variant>
 #include <vector>
 
-#include "fields/distance_map.hpp"
-#include "fields/field.hpp"
-#include "fields/occupancy_map.hpp"
-#include "geometry/rectangle.hpp"
 #include "io/parsing.hpp"
 #include "io/serialization.hpp"
-#include "landscape.hpp"
-#include "mdkp.hpp"
-#include "placeable.hpp"
-#include "rotation.hpp"
-#include "utils.hpp"
+#include "solver.hpp"
 
 // NOLINTBEGIN(google-build-using-namespace): In main, we allow using these
 using namespace profit;
@@ -24,8 +16,7 @@ using namespace geometry;
 int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
 
-  // TODO: lots of calculations with input
-  std::vector<PlaceableObject> result = {};
+  std::vector<PlaceableObject> result = solver::simple_greedy_solver(input);
 
 #ifdef NDEBUG
   std::cout << serialization::serialize(result);
@@ -61,8 +52,6 @@ int main() {  // NOLINT(bugprone-exception-escape)
  *       -> gegeben N deposits, Designe Pipelines und Factory, um die Produktion zu realisieren
  */
 
-#include <queue>
-
 namespace production_realization {
 
 // Idee: Immer erstmal nur eine Produktionspipeline (-> genau eine Fabrik) bauen
@@ -73,61 +62,5 @@ namespace production_realization {
 // Auch: Die Methode versucht immer direkt kürzeste Wege zu bauen
 //    Überlegung: Kürzester Weg könnte kritisches Feld belagern, was uns später nicht erlaubt,
 //    weitere Pipelines zu bauen Evtl explizite Kreuzungen setzen?
-
-inline bool attempt_realize(const std::vector<Deposit>& /*deposits*/,
-                            FactoryType /*factory_type*/) {
-  // minen platzieren
-
-  // fabrik platzieren
-  // verbinden
-  return false;
-}
-
-inline void select_deposits_and_products(const parsing::Input& input) {
-  // Simplest algorithm: Try all products one by one
-  for (const auto& product : input.products) {
-    const auto& requirements = product.requirements;
-    const std::vector<Deposit>& input_deposits = input.deposits;
-
-    std::vector<Deposit> useful_deposits;
-    std::copy_if(input_deposits.begin(), input_deposits.end(), std::back_inserter(useful_deposits),
-                 [&](const Deposit& deposit) { return requirements[deposit.type] != 0; });
-
-    // Now try if we can make this work
-    attempt_realize(useful_deposits, product.type);
-  }
-}
-
-inline std::optional<std::vector<PlaceableObject>> connect(Vec2 /*egress_start_field*/,
-                                                           Vec2 /*ingress_target_field*/,
-                                                           const OccupancyMap& /*occupancies*/) {
-  // Breitensuche, von Start, immer mit allen 4 (Conveyor3) + 4 (Conveyor4) + 4 (Combiner)
-  // Bewegungsmöglichkeiten
-  return std::nullopt;
-
-  // Invariante: Für Felder, die in der queue sind, gilt: Hier dürfen Inputs hin, für den
-  // gewünschten
-  std::queue<Vec2> reached_ingestion_fields;
-
-  // TODO: Alle benachbarten Felder von egress_start_field in die Queue pushen, wenn nicht auch mit
-  // anderem Egress verbunden
-  // TODO auch: Vielleicht bei Verbindung zu anderem Egress warnen (wir erwarten nicht, dass das
-  // häufig passiert?) (Problem ist: +|.|+|) reached_ingestion_fields.push(start);
-
-  while (!reached_ingestion_fields.empty()) {
-    Vec2 reached_field = reached_ingestion_fields.front();
-    reached_ingestion_fields.pop();
-
-    (void)reached_field;
-
-    // TODO: Ausprobieren
-    // 3-unit conveyor
-    // for(Rotation rot = 0; rot < 4; ++rot) {
-
-    //
-    // 4-unit conveyor
-    // combinern
-  }
-}
 
 }  // namespace production_realization

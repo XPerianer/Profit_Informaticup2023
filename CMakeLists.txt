@@ -42,7 +42,8 @@ endif()
 
 
 ##### EXECUTABLES #####
-add_executable(main src/main.cpp)
+file(GLOB_RECURSE SRC_FILES src/*.cpp)
+add_executable(main ${SRC_FILES})
 target_compile_options(main PRIVATE ${COMPILER_WARNING_FLAGS})
 
 enable_testing()

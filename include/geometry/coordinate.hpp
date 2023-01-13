@@ -50,4 +50,5 @@ constexpr Coordinate operator-(Coordinate lhs, Coordinate rhs) {
   return Coordinate{static_cast<Coordinate::UnderlyingT>(lhs) -
                     static_cast<Coordinate::UnderlyingT>(rhs)};
 }
+
 }  // namespace geometry

@@ -48,3 +48,6 @@ results/
 
 # Allow creating a local .ignore file
 .ignore
+
+# Mac-specific
+.DS_STORE
