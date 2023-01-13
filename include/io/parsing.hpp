@@ -17,12 +17,12 @@ namespace profit::parsing {
 struct Input {
   Vec2 dimensions;
   uint64_t turns = 0;
-  uint64_t time = 0;
+  time_t time = 0;
   std::vector<Product> products;
   std::vector<Deposit> deposits;
   std::vector<Obstacle> obstacles;
 
-  static constexpr uint64_t DEFAULT_TIME = 300;
+  static constexpr time_t DEFAULT_TIME = 300;
   bool operator==(const Input& other) const {
     return dimensions == other.dimensions && turns == other.turns && time == other.time &&
            std::ranges::is_permutation(products, other.products) &&

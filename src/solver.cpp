@@ -1,6 +1,9 @@
 #include "solver.hpp"
 
-namespace profit::solver {
+#include "objects/placeable.hpp"
+#include "score.hpp"
+
+namespace profit {
 inline void solve_component(const ConnectedComponent& component, FieldState* state,
                             const profit::parsing::Input& input, const DistanceMap& merged) {
   std::cerr << "Starting with component\n";
@@ -45,7 +48,8 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
   }
 }
 
-std::vector<PlaceableObject> simple_greedy_solver(parsing::Input& input) {
+void simple_greedy_solver(const parsing::Input& input,
+                          const std::function<void(const Solution)>& update_solution) {
   OccupancyMap occupancy_map = occupancies_from(input);
   auto deposits = input.deposits;
   ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
@@ -65,7 +69,8 @@ std::vector<PlaceableObject> simple_greedy_solver(parsing::Input& input) {
 
   for (const auto& component : connected_components) {
     solve_component(component, &state, input, merged);
+    auto solution_score = score(state, input.turns, input);
+    update_solution(Solution{solution_score, state.placed_objects()});
   }
-  return state.placed_objects();
 }
-}  // namespace profit::solver
+}  // namespace profit
