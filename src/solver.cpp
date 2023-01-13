@@ -50,9 +50,6 @@ std::vector<PlaceableObject> simple_greedy_solver(parsing::Input& input) {
   auto deposits = input.deposits;
   ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
                                                 occupancy_map.dimensions());
-  for (size_t i = 0; i < deposits.size(); i++) {
-    distances_from(deposits[i], occupancy_map, &components_wrapper, static_cast<DepositId>(i));
-  }
 
   std::vector<ConnectedComponent> connected_components = components_wrapper.extract();
   std::vector<DistanceMap> distance_maps;

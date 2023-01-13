@@ -29,7 +29,6 @@ struct Pipeline {
 
 struct FieldState {
   OccupancyMap occupancy_map;
-  // TODO: zelle zu pipeline / factoryindex, damit man nachgucken kann, was einen gerade blockiert
   std::unordered_map<PipelineId, Pipeline> pipelines;
   std::unordered_map<FactoryId, Factory> factories;
   inline PipelineId add_pipeline(const Pipeline& pipeline);

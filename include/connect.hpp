@@ -26,8 +26,6 @@ namespace profit {
 using FieldIndex = uint16_t;
 constexpr auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 
-// Not using a simple bool since vector<bool> has weird behaviour that would need to be handled
-// in TwoDimensionalVector
 enum Target : bool {
   TARGET = true,
   NO_TARGET = false,
@@ -100,11 +98,9 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
     if (finished) {
       return parts;
     }
-    // Update
     object_egress = Vec2::from_scalar_index(predecessors.at(object_ingress), width);
     object_ingress = Vec2::from_scalar_index(object_connections.at(object_egress), width);
 
-    // Update occupancies
     place(parts.back(), occupancy_map);
   }
 }
@@ -187,7 +183,6 @@ inline std::optional<Vec2> visit_location_if_placable(
   }
   auto width = occupancy_map.dimensions().width();
   if (target_egress_fields.at(object.egress())) {
-    // We can stop our search, reached the destionation
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
     std::cerr << "final set object.egress(), ingress_index: " << object.egress() << ingress
               << std::endl;

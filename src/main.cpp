@@ -3,20 +3,9 @@
 #include <variant>
 #include <vector>
 
-#include "connect.hpp"
-#include "field_state.hpp"
-#include "fields/distance_map.hpp"
-#include "fields/field.hpp"
-#include "fields/occupancy_map.hpp"
-#include "geometry/rectangle.hpp"
 #include "io/parsing.hpp"
 #include "io/serialization.hpp"
-#include "landscape.hpp"
-#include "mdkp.hpp"
-#include "placeable.hpp"
-#include "rotation.hpp"
 #include "solver.hpp"
-#include "utils.hpp"
 
 // NOLINTBEGIN(google-build-using-namespace): In main, we allow using these
 using namespace profit;

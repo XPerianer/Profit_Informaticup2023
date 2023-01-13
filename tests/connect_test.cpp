@@ -23,7 +23,6 @@ using namespace parsing;
 class ConnectionTest : public testing::Test {
  public:
   static Input from_string(const std::string_view& example) {
-    // Fill stream with file content
     std::stringstream stream{std::string{example}};
     return parsing::parse(stream);
   }

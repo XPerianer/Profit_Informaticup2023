@@ -1,7 +1,5 @@
 #pragma once
 
-#include <tuple>
-
 #include "fields/distance_map.hpp"
 #include "fields/field.hpp"
 #include "fields/occupancy_map.hpp"
