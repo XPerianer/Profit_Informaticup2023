@@ -24,7 +24,7 @@ int main() {  // NOLINT(bugprone-exception-escape)
   Synchronization sync;
 
   pthread_mutex_lock(&sync.worker_thread_condition_mutex);
-  Worker worker(best_solution, sync, input);
+  Worker worker(&best_solution, &sync, input);
   worker.start();
   int return_code = 0;
   timespec time{};
