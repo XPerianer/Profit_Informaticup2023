@@ -21,8 +21,6 @@
 
 namespace profit {
 
-// playing field is at max 100*100 big, so 16 bytes are enough to address every field with a single
-// index
 using FieldIndex = uint16_t;
 constexpr auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 
@@ -66,15 +64,11 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
   auto finished = false;
 
   while (true) {
-    // We now need to find out which placable we need to take to connect stuff
     auto rotation = get_rotation_between(object_ingress, object_egress);
-    // First check if this is the last connection, then we need a mine
     if (predecessors.at(object_ingress) == INVALID_FIELD) {
-      // Put a mine
       parts.emplace_back(Mine::with_ingress(object_ingress, rotation));
       finished = true;
     } else {
-      // Otherwise we can infer from the distance
       auto distance = geometry::manhattan_distance(object_egress, object_ingress);
 
       if (distance == 2) {
@@ -86,7 +80,6 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
       }
     }
 
-    // Check for collisions
     if (collides(parts.back(), *occupancy_map)) {
       parts.pop_back();
       for (auto& part : parts) {
@@ -126,29 +119,30 @@ inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId 
   }
 
   for (const auto& [id, pipeline] : state->pipelines) {
-    if (id == factory_id) {
-      for (const auto& placeable : pipeline.parts) {
-        std::visit(
-            utils::Overloaded{[&](const Mine& mine) {
-                                for (auto egress : mine.upstream_egress_cells()) {
-                                  target_egress_fields.safe_set(egress, TARGET);
-                                }
-                              },
-                              [](const Combiner&) { /* TODO */ },
-                              [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
-                              [&](const Conveyor3& conveyor) {
-                                for (auto egress : conveyor.upstream_egress_cells()) {
-                                  target_egress_fields.safe_set(egress, TARGET);
-                                }
-                              },
-                              [&](const Conveyor4& conveyor) {
-                                for (auto egress : conveyor.upstream_egress_cells()) {
-                                  target_egress_fields.safe_set(egress, TARGET);
-                                }
-                              }},
-            placeable);
-      };
+    if (id != factory_id) {
+      continue;
     }
+    for (const auto& placeable : pipeline.parts) {
+      std::visit(
+          utils::Overloaded{[&](const Mine& mine) {
+                              for (auto egress : mine.upstream_egress_cells()) {
+                                target_egress_fields.safe_set(egress, TARGET);
+                              }
+                            },
+                            [](const Combiner&) { /* TODO */ },
+                            [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
+                            [&](const Conveyor3& conveyor) {
+                              for (auto egress : conveyor.upstream_egress_cells()) {
+                                target_egress_fields.safe_set(egress, TARGET);
+                              }
+                            },
+                            [&](const Conveyor4& conveyor) {
+                              for (auto egress : conveyor.upstream_egress_cells()) {
+                                target_egress_fields.safe_set(egress, TARGET);
+                              }
+                            }},
+          placeable);
+    };
   }
 
   auto connected_egress = calculate_path(deposit, target_egress_fields, &predecessors,
@@ -211,7 +205,6 @@ inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egr
                                           PredecessorMap* object_connections,
                                           OccupancyMap& occupancy_map) {
   std::queue<Vec2> reached_ingresses;
-  // Step 1: Go through all mines and add possible ingresses in queue
   for (Vec2 possible_ingress_location :
        geometry::outer_connected_border_cells(as_rectangle(deposit))) {
     for (auto rotation : ROTATIONS) {
@@ -225,9 +218,6 @@ inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egr
     }
   }
 
-  // Step 2: Loop over all
-  // ingresses in queue and add possible ingresses based on the objects we can potentially
-  // place, terminating when we have reached desired factory field
   while (!reached_ingresses.empty()) {
     Vec2 ingress = reached_ingresses.front();
     reached_ingresses.pop();
