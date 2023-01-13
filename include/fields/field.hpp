@@ -4,7 +4,7 @@
 
 #include "geometry/two_dimensional_vector.hpp"
 #include "geometry/vec2.hpp"
-#include "utils.hpp"
+#include "miscellany/utils.hpp"
 
 namespace profit {
 

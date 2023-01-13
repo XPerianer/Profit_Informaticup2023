@@ -6,11 +6,11 @@
 #include <cstddef>
 #include <vector>
 
-#include "example_tasks.hpp"
+#include "geometry/rotation.hpp"
 #include "geometry/vec2.hpp"
 #include "io/parsing.hpp"
-#include "placeable.hpp"
-#include "rotation.hpp"
+#include "objects/placeable.hpp"
+#include "resources/example_tasks.hpp"
 
 using namespace geometry;
 using namespace profit;

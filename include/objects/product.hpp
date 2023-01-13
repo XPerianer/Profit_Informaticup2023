@@ -5,8 +5,8 @@
 #include <cstdint>
 #include <vector>
 
-#include "assert.hpp"
-#include "resource_type.hpp"
+#include "miscellany/assert.hpp"
+#include "objects/resource_type.hpp"
 
 namespace profit {
 

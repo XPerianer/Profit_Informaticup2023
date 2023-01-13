@@ -6,13 +6,13 @@
 #include <vector>
 
 #include "connected_component.hpp"
-#include "example_tasks.hpp"
 #include "fields/distance_map.hpp"
 #include "fields/occupancy_map.hpp"
 #include "geometry/vec2.hpp"
 #include "io/parsing.hpp"
-#include "placeable.hpp"
-#include "product.hpp"
+#include "objects/placeable.hpp"
+#include "objects/product.hpp"
+#include "resources/example_tasks.hpp"
 
 using namespace geometry;
 using namespace profit;

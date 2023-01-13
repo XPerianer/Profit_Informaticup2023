@@ -3,12 +3,12 @@
 #include <array>
 #include <variant>
 
-#include "assert.hpp"
 #include "geometry/rectangle.hpp"
+#include "geometry/rotation.hpp"
 #include "geometry/vec2.hpp"
-#include "rotation.hpp"
-#include "subtype.hpp"
-#include "utils.hpp"
+#include "miscellany/assert.hpp"
+#include "miscellany/utils.hpp"
+#include "objects/subtype.hpp"
 
 namespace profit {
 
