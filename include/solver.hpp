@@ -8,13 +8,14 @@
 #include "placeable.hpp"
 #include "resource_type.hpp"
 
-namespace profit{
+namespace profit {
 
 struct Solution {
   profit::ProductScore score = 0;
   std::vector<PlaceableObject> parts;
 };
 
-void simple_greedy_solver(const parsing::Input& input, std::function<void(Solution)> update_solution);
+void simple_greedy_solver(const parsing::Input& input,
+                          std::function<void(Solution)> update_solution);
 
-}  // namespace profit::solver
+}  // namespace profit

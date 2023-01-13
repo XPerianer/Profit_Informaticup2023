@@ -32,7 +32,6 @@ struct Synchronization {
   }
 };
 
-
 struct Worker {
   Worker(Solution& solution, Synchronization& sync, const parsing::Input input)
       : solution_(solution), sync_(sync), input_(input) {}
