@@ -25,7 +25,10 @@
 #ifdef NDEBUG
 #define DEBUG(x)
 #else
-#define DEBUG(x) do { std::cerr << x; } while (0)
+#define DEBUG(x)    \
+  do {              \
+    std::cerr << x; \
+  } while (0)
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)

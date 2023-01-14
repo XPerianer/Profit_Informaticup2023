@@ -52,7 +52,7 @@ inline Rotation get_rotation_between(Vec2 start, Vec2 end) {
   return Rotation::DOWN_TO_UP;
 }
 
-inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
+inline std::pair<bool, std::vector<profit::PlaceableObject>> backtrack_parts(
     geometry::Vec2 ending_egress, PredecessorMap& predecessors, PredecessorMap& object_connections,
     OccupancyMap* occupancy_map, bool mine_at_end = true) {
   std::vector<PlaceableObject> parts;
@@ -84,20 +84,39 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
 
     if (collides(parts.back(), *occupancy_map)) {
       parts.pop_back();
-      for (auto& part : parts) {
-        remove(part, occupancy_map);
-      }
-      return std::nullopt;
+      return {false, parts};
     }
 
     if (finished) {
-      return parts;
+      return {true, parts};
     }
     object_egress = Vec2::from_scalar_index(predecessors.at(object_ingress), width);
     object_ingress = Vec2::from_scalar_index(object_connections.at(object_egress), width);
 
     place(parts.back(), occupancy_map);
   }
+}
+
+inline void set_part_as_target(const PlaceableObject& placeable, TargetMap* target_egress_fields) {
+  std::visit(
+      utils::Overloaded{[&](const Mine& mine) {
+                          for (auto egress : mine.upstream_egress_cells()) {
+                            target_egress_fields->safe_set(egress, TARGET);
+                          }
+                        },
+                        [](const Combiner&) { /* TODO */ },
+                        [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
+                        [&](const Conveyor3& conveyor) {
+                          for (auto egress : conveyor.upstream_egress_cells()) {
+                            target_egress_fields->safe_set(egress, TARGET);
+                          }
+                        },
+                        [&](const Conveyor4& conveyor) {
+                          for (auto egress : conveyor.upstream_egress_cells()) {
+                            target_egress_fields->safe_set(egress, TARGET);
+                          }
+                        }},
+      placeable);
 }
 
 // TODO: deduplicate with distance_map.hpp see #28
@@ -125,26 +144,8 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
       continue;
     }
     for (const auto& placeable : pipeline.parts) {
-      std::visit(
-          utils::Overloaded{[&](const Mine& mine) {
-                              for (auto egress : mine.upstream_egress_cells()) {
-                                target_egress_fields.safe_set(egress, TARGET);
-                              }
-                            },
-                            [](const Combiner&) { /* TODO */ },
-                            [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
-                            [&](const Conveyor3& conveyor) {
-                              for (auto egress : conveyor.upstream_egress_cells()) {
-                                target_egress_fields.safe_set(egress, TARGET);
-                              }
-                            },
-                            [&](const Conveyor4& conveyor) {
-                              for (auto egress : conveyor.upstream_egress_cells()) {
-                                target_egress_fields.safe_set(egress, TARGET);
-                              }
-                            }},
-          placeable);
-    };
+      set_part_as_target(placeable, &target_egress_fields);
+    }
   }
 
   auto deposit = input.deposits[deposit_id];
@@ -153,21 +154,50 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
   if (!connected_egress) {
     return std::nullopt;
   }
-  auto parts =
+  auto [finished, parts] =
       backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
   // Potential problem: Dijkstra could self-intersect, check here again and if there was a
   // self-intersection, we say that we can not build that
   // TODO: We could recover more gracefully, for example by placing everything that can be placed
   // and then searching for non intersecting connections see #27
-  if (!parts) {
+  if (!finished) {
     DEBUG("Self-intersection inside connect\n");
-    return std::nullopt;
+
+    PredecessorMap predecessors(input.dimensions);
+    PredecessorMap object_connections(predecessors.dimensions());
+    TargetMap target_to_path(predecessors.dimensions());
+    set_part_as_target(parts.back(), &target_to_path);
+    // Try to run connect again with all parts without intersections on the field
+    auto connected_egress = calculate_path(deposit, target_to_path, &predecessors,
+                                           &object_connections, state->occupancy_map);
+    if (!connected_egress) {
+      for (auto& part : parts) {
+        remove(part, &state->occupancy_map);
+      }
+      return std::nullopt;
+    }
+    auto [extra_finished, extra_parts] =
+        backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
+    DEBUG("finished: " << finished << "\n");
+
+    if (!extra_finished) {
+      for (auto& part : parts) {
+        remove(part, &state->occupancy_map);
+      }
+      for (auto& part : extra_parts) {
+        remove(part, &state->occupancy_map);
+      }
+      return std::nullopt;
+    }
+    for (auto part : extra_parts) {
+      parts.push_back(part);
+    }
   }
 
   Pipeline pipeline;
   pipeline.deposit_id = deposit_id;
   pipeline.factory_id = factory_id;
-  pipeline.parts = *parts;
+  pipeline.parts = parts;
 
   return state->add_pipeline(pipeline);
 }
