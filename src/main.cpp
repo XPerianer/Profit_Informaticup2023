@@ -37,6 +37,8 @@ int main() {  // NOLINT(bugprone-exception-escape)
                                          &sync.worker_thread_condition_mutex, &time);
   }
 
+  pthread_mutex_lock(&sync.best_solution_mutex);
+
 #ifdef NDEBUG
   std::cout << serialization::serialize(best_solution.parts);
 #else
@@ -46,6 +48,7 @@ int main() {  // NOLINT(bugprone-exception-escape)
                             input.deposits,   input.obstacles, best_solution.parts};
   std::cout << serialization::serialize_detailed(output);
 #endif
+  pthread_mutex_unlock(&sync.best_solution_mutex);
 
   return 0;
 }

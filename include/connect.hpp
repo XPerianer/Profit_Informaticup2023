@@ -99,8 +99,8 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
 }
 
 // TODO: deduplicate with distance_map.hpp see #28
-inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory_id,
-                                         FieldState* state) {
+inline std::optional<PipelineId> connect(const DepositId &deposit_id, const FactoryId factory_id,
+                                         FieldState* state, const parsing::Input &input) {
   Factory factory = state->factories[factory_id];
 
   // Connection from downstream ingress to egress
@@ -145,6 +145,7 @@ inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId 
     };
   }
 
+  auto deposit = input.deposits[deposit_id];
   auto connected_egress = calculate_path(deposit, target_egress_fields, &predecessors,
                                          &object_connections, state->occupancy_map);
   if (!connected_egress) {
@@ -161,6 +162,7 @@ inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId 
   }
 
   Pipeline pipeline;
+  pipeline.deposit_id = deposit_id;
   pipeline.factory_id = factory_id;
   pipeline.parts = *parts;
 

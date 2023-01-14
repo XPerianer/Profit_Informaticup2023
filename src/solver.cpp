@@ -41,7 +41,7 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
         if (deposit.type != resource_type) {
           continue;
         }
-        auto pipeline_id = connect(deposit, *factory_id, state);
+        auto pipeline_id = connect(deposit_id, *factory_id, state, input);
         if (!pipeline_id) {
           continue;
         }

@@ -19,7 +19,8 @@ using FactoryId = int16_t;
 using PipelineId = int16_t;
 
 constexpr auto INVALID_PIPELINE_ID = std::numeric_limits<PipelineId>::max();
-constexpr auto INVALID_DEPOSIT_ID = std::numeric_limits<PipelineId>::max();
+constexpr auto INVALID_DEPOSIT_ID = std::numeric_limits<DepositId>::max();
+constexpr auto INVALID_FACTORY_ID = std::numeric_limits<FactoryId>::max();
 
 struct Pipeline {
   FactoryId factory_id = INVALID_PIPELINE_ID;
@@ -38,6 +39,8 @@ struct FieldState {
 };
 
 inline PipelineId FieldState::add_pipeline(const Pipeline& pipeline) {
+  DEBUG_ASSERT(pipeline.deposit_id != INVALID_DEPOSIT_ID, "Trying to add pipeline with invalid deposit_id");
+  DEBUG_ASSERT(pipeline.factory_id != INVALID_FACTORY_ID, "Trying to add pipeline with invalid factory_id");
   auto index = pipeline_index_counter++;
   pipelines.insert({index, pipeline});
   for (const PlaceableObject& part : pipeline.parts) {
