@@ -33,6 +33,7 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
     }
     DEBUG("Placed factory\n");
     for (auto resource_type : RESOURCE_TYPES) {
+      DEBUG("Starting with resource " << static_cast<int>(resource_type) << " requirements are " << product.requirements[resource_type] << "\n");
       if (product.requirements[resource_type] == 0) {
         continue;
       }
@@ -41,8 +42,10 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
         if (deposit.type != resource_type) {
           continue;
         }
+        DEBUG("Connecting " << deposit_id << " with " << *factory_id << "\n");
         auto pipeline_id = connect(deposit_id, *factory_id, state, input);
         if (!pipeline_id) {
+          DEBUG("Failed connecting");
           continue;
         }
       }
@@ -57,7 +60,6 @@ void simple_greedy_solver(const parsing::Input& input,
   ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
                                                 occupancy_map.dimensions());
 
-  std::vector<ConnectedComponent> connected_components = components_wrapper.extract();
   std::vector<DistanceMap> distance_maps;
   distance_maps.reserve(deposits.size());
   FieldState state = {occupancy_map, {}, {}};
@@ -69,7 +71,10 @@ void simple_greedy_solver(const parsing::Input& input,
 
   const DistanceMap merged = merge(distance_maps, Factory::DIMENSIONS);
 
+  std::vector<ConnectedComponent> connected_components = components_wrapper.extract();
+
   for (const auto& component : connected_components) {
+    DEBUG("size: " << component.size() << "\n");
     solve_component(component, &state, input, merged);
     auto solution_score = score(state, input.turns, input);
     update_solution(Solution{solution_score, state.placed_objects()});
