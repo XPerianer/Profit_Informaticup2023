@@ -7,6 +7,8 @@
 #include "mdkp.hpp"
 using Turn = uint64_t;
 
+const auto flow_per_time_step = 3;
+
 inline std::vector<Turn> when_are_deposits_empty(const profit::FieldState& state,
                                                  const profit::parsing::Input& input) {
   std::vector<Turn> when_empty(input.deposits.size());
@@ -16,8 +18,8 @@ inline std::vector<Turn> when_are_deposits_empty(const profit::FieldState& state
   }
   for (unsigned int i = 0; i < input.deposits.size(); i++) {
     const auto& deposit = input.deposits[i];
-    when_empty[i] =
-        static_cast<Turn>(profit::initial_resource_count(deposit)) / 3 * connected_pipelines[i];
+    when_empty[i] = static_cast<Turn>(profit::initial_resource_count(deposit)) /
+                    flow_per_time_step * connected_pipelines[i];
   }
   return when_empty;
 }
@@ -26,7 +28,6 @@ inline profit::ProductCount product_at_turn(const auto& pipeline, Turn empty_at,
   if (pipeline.parts.size() > turn) {
     return 0;
   }
-  const auto flow_per_time_step = 3;
   if (turn > empty_at + pipeline.parts.size() + 1) {
     return flow_per_time_step * (empty_at + pipeline.parts.size() + 1);
   }
