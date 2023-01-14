@@ -9,13 +9,13 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
   DEBUG("Starting with component\n");
   AvailableResources resources = available_resources(component, input);
   std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
-  #ifndef NDEBUG
+#ifndef NDEBUG
   DEBUG(" ----- Fabrication plan -----\n");
   for (auto product : fabrication_plan) {
     DEBUG(product << "\n");
   }
   DEBUG(" ----- Fabrication plan -----\n");
-  #endif
+#endif
   // try to realize one by one
   // TODO: optimize by building product with higher scores first see #24
   // TODO: optimize by building the correct proportions see #25

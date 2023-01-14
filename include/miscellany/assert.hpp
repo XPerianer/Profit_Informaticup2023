@@ -26,7 +26,10 @@
 #define DEBUG(x)
 #else
 // NOLINTNEXTLINE(bugprone-macro-parentheses)
-#define DEBUG(x) do { std::cerr << x; } while (0)
+#define DEBUG(x)    \
+  do {              \
+    std::cerr << x; \
+  } while (0)
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)

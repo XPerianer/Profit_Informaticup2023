@@ -99,8 +99,8 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
 }
 
 // TODO: deduplicate with distance_map.hpp see #28
-inline std::optional<PipelineId> connect(const DepositId &deposit_id, const FactoryId factory_id,
-                                         FieldState* state, const parsing::Input &input) {
+inline std::optional<PipelineId> connect(const DepositId& deposit_id, const FactoryId factory_id,
+                                         FieldState* state, const parsing::Input& input) {
   Factory factory = state->factories[factory_id];
 
   // Connection from downstream ingress to egress
@@ -180,8 +180,7 @@ inline std::optional<Vec2> visit_location_if_placable(
   auto width = occupancy_map.dimensions().width();
   if (target_egress_fields.at(object.egress())) {
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
-    DEBUG("final set object.egress(), ingress_index: " << object.egress() << ingress
-              << "\n");
+    DEBUG("final set object.egress(), ingress_index: " << object.egress() << ingress << "\n");
     DEBUG("object.ingress" << object.ingress() << "\n");
     return object.egress();
   }
