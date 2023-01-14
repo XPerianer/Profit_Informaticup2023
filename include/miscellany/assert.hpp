@@ -25,6 +25,7 @@
 #ifdef NDEBUG
 #define DEBUG(x)
 #else
+// NOLINTNEXTLINE(bugprone-macro-parentheses)
 #define DEBUG(x) do { std::cerr << x; } while (0)
 #endif
 
