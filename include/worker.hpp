@@ -51,11 +51,11 @@ struct Worker {
     sync_->worker_threads_count += number;
     pthread_mutex_unlock(&sync_->worker_threads_count_mutex);
     pthread_cond_signal(&sync_->worker_thread_condition);
-    std::cerr << "cond_signal\n";
+    DEBUG("cond_signal\n");
   }
 
   inline void update_solution(Solution solution) {
-    std::cerr << "Update of solution\n";
+    DEBUG("Update of solution\n");
     pthread_mutex_lock(&sync_->best_solution_mutex);
     if (solution.score > solution_->score) {
       (*solution_) = std::move(solution);
