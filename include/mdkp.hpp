@@ -82,7 +82,8 @@ using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
         static_cast<ProductCount>(max_product_score / best_product->points);
 
     constexpr auto ALPHA_INVERSE = 20;
-    ProductCount product_count = std::max(1, maximum_producable_product_count / ALPHA_INVERSE);
+    ProductCount product_count =
+        std::max(static_cast<ProductCount>(1), maximum_producable_product_count / ALPHA_INVERSE);
 
     result[best_product_index] += product_count;
 
@@ -126,7 +127,8 @@ inline void try_to_build_solution_in_component(const parsing::Input& input,
       std::vector<ProductCount> to_realize =
           pech(remaining_resources_by_component[component_id], products_that_can_be_tried);
 
-      if (std::accumulate(to_realize.begin(), to_realize.end(), 0) == 0) {
+      if (std::accumulate(to_realize.begin(), to_realize.end(), 0) ==
+          static_cast<ProductCount>(0)) {
         break;  // TODO(DomJ): Nochmal ganz stark nachdenken.
       }
 
