@@ -127,8 +127,8 @@ inline void try_to_build_solution_in_component(const parsing::Input& input,
       std::vector<ProductCount> to_realize =
           pech(remaining_resources_by_component[component_id], products_that_can_be_tried);
 
-      if (std::accumulate(to_realize.begin(), to_realize.end(), 0) ==
-          static_cast<ProductCount>(0)) {
+      if (std::accumulate(to_realize.begin(), to_realize.end(), static_cast<ProductCount>(0)) ==
+          0) {
         break;  // TODO(DomJ): Nochmal ganz stark nachdenken.
       }
 
