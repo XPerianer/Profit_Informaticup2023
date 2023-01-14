@@ -5,6 +5,7 @@
 #include "geometry/rectangle.hpp"
 #include "geometry/vec2.hpp"
 #include "miscellany/utils.hpp"
+#include "objects/product.hpp"
 #include "objects/resource_type.hpp"
 
 namespace profit {
@@ -12,7 +13,7 @@ namespace profit {
 using geometry::Rectangle;
 using geometry::Vec2;
 
-using StoredResourceCount = int32_t;
+using StoredResourceCount = profit::ResourceRequirement;
 
 struct Deposit {
   Vec2 handle;
