@@ -6,7 +6,7 @@
 namespace profit {
 inline void solve_component(const ConnectedComponent& component, FieldState* state,
                             const profit::parsing::Input& input, const DistanceMap& merged) {
-  DEBUG("Starting with component\n");
+  DEBUG("Starting with component with size " << component.size() << " \n");
   AvailableResources resources = available_resources(component, input);
   std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
 #ifndef NDEBUG
@@ -39,6 +39,7 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
       }
       for (auto deposit_id : component) {
         auto deposit = input.deposits[deposit_id];
+        DEBUG("Deposit type " << static_cast<int>(deposit.type) << "\n");
         if (deposit.type != resource_type) {
           continue;
         }
