@@ -16,7 +16,7 @@ inline std::optional<FactoryId> get_realizing_factory(ProductType type, const Fi
   return std::nullopt;
 }
 
-inline bool try_placing_factories(FieldState* state, const profit::parsing::Input& input,
+inline void try_placing_factories(FieldState* state, const profit::parsing::Input& input,
                                   const DistanceMap& merged,
                                   const std::vector<ProductCount>& fabrication_plan) {
   for (unsigned int i = 0; i < fabrication_plan.size(); i++) {
