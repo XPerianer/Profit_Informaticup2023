@@ -34,11 +34,12 @@ TEST(Solver, PlacesTwoMinesInTaskTwo) {
   profit::simple_greedy_solver(input, [&](const Solution& solution) {
     DEBUG("Update call with score " << solution.score << " and " << solution.parts.size() << "\n");
     if (solution.score > best_solution.score || best_solution.parts.empty()) {
-      DEBUG("Best solution set new with score " << solution.score << " and " << solution.parts.size() << "\n");
+      DEBUG("Best solution set new with score " << solution.score << " and "
+                                                << solution.parts.size() << "\n");
       best_solution = solution;
     }
   });
 
   EXPECT_EQ(best_solution.score, 90);
-  EXPECT_EQ(best_solution.parts.size(), 9); // One factory and two pathes, each 4 long
+  EXPECT_EQ(best_solution.parts.size(), 9);  // One factory and two pathes, each 4 long
 }
