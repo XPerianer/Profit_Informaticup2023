@@ -244,7 +244,7 @@ inline std::optional<Vec2> visit_location_if_placable(
 inline bool can_place_ingress(Vec2 cell, const OccupancyMap& occupancy_map) {
   return std::ranges::all_of(neighbors(cell), [&](auto neighbor) {
     return !static_cast<bool>(occupancy_map.at(neighbor) == CellOccupancy::EGRESS &&
-        any_neighbor_is(occupancy_map, neighbor, CellOccupancy::INGRESS));
+                              any_neighbor_is(occupancy_map, neighbor, CellOccupancy::INGRESS));
   });
 }
 
