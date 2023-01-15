@@ -12,7 +12,6 @@
 #include "miscellany/utils.hpp"
 #include "objects/placeable.hpp"
 
-
 namespace profit {
 
 using DistanceT = int16_t;

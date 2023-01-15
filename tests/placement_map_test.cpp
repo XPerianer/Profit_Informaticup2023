@@ -13,7 +13,6 @@
 #include "objects/placeable.hpp"
 #include "resources/example_tasks.hpp"
 
-
 using namespace geometry;
 using namespace profit;
 using namespace parsing;

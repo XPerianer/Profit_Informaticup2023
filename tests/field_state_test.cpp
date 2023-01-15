@@ -14,7 +14,6 @@
 #include "objects/product.hpp"
 #include "resources/example_tasks.hpp"
 
-
 using namespace geometry;
 using namespace profit;
 using namespace parsing;
