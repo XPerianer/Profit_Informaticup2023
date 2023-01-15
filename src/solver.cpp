@@ -100,7 +100,7 @@ void simple_greedy_solver(const parsing::Input& input,
       auto& state = field_states[i];
       DEBUG("size: " << component.size() << "\n");
       keep_running |= solve_component(component, &state, input, merged);
-      auto solution_score = score(state, input.turns - 1, input);
+      auto solution_score = score(state, input.turns, input);
       update_solution(Solution{solution_score, state.placed_objects()});
     }
   }
