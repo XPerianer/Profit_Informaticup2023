@@ -24,9 +24,10 @@ namespace profit {
 using FieldIndex = uint16_t;
 constexpr auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 
-enum Target : bool {
-  TARGET = true,
-  NO_TARGET = false,
+enum Target {
+  NO_TARGET = 0,
+  TARGET = 1,
+  CONVEYOR_TARGET = 2,
 };
 using TargetMap = Field<Target, NO_TARGET, NO_TARGET>;
 using PredecessorMap = Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>;
@@ -102,7 +103,7 @@ inline void set_part_as_target(const PlaceableObject& placeable, TargetMap* targ
   std::visit(
       utils::Overloaded{[&](const Mine& mine) {
                           for (auto egress : mine.upstream_egress_cells()) {
-                            target_egress_fields->safe_set(egress, TARGET);
+                            target_egress_fields->safe_set(egress, CONVEYOR_TARGET);
                           }
                         },
                         [](const Combiner&) { /* TODO */ },
@@ -212,7 +213,10 @@ inline std::optional<Vec2> visit_location_if_placable(
     return std::nullopt;
   }
   auto width = occupancy_map.dimensions().width();
-  if (target_egress_fields.at(object.egress())) {
+  if ((std::is_same<Mine, PlaceableT>::value &&
+       target_egress_fields.at(object.egress()) == TARGET) ||
+      (!std::is_same<Mine, PlaceableT>::value &&
+       target_egress_fields.at(object.egress()) != NO_TARGET)) {
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
     return object.egress();
   }
