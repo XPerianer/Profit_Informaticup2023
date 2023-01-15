@@ -30,7 +30,6 @@ inline bool solve_component(const ConnectedComponent& component, FieldState* sta
   }
   DEBUG_PRINT(" ----- Fabrication plan -----\n");
 #endif
-  // try to realize one by one
   // TODO: optimize by building product with higher scores first see #24
   // TODO: optimize by building the correct proportions see #25
   for (unsigned int i = 0; i < fabrication_plan.size(); i++) {

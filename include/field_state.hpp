@@ -58,7 +58,7 @@ inline PipelineId FieldState::add_pipeline(const Pipeline& pipeline) {
   return index;
 }
 
-inline std::vector<PlaceableObject> FieldState::placed_objects() {
+[[nodiscard]] inline std::vector<PlaceableObject> FieldState::placed_objects() {
   std::vector<PlaceableObject> objects;
   for (auto [_, factory] : factories) {
     objects.emplace_back(factory);
@@ -71,7 +71,7 @@ inline std::vector<PlaceableObject> FieldState::placed_objects() {
   return objects;
 }
 
-inline FieldState from_input(const parsing::Input& input) {
+[[nodiscard]] inline FieldState from_input(const parsing::Input& input) {
   FieldState state{
       occupancies_from(input),
       {},
@@ -80,9 +80,9 @@ inline FieldState from_input(const parsing::Input& input) {
   return state;
 }
 
-inline std::optional<FactoryId> place_factory(ProductType product,
-                                              const DistanceMap& cc_merged_distances,
-                                              FieldState* state) {
+[[nodiscard]] inline std::optional<FactoryId> place_factory(ProductType product,
+                                                            const DistanceMap& cc_merged_distances,
+                                                            FieldState* state) {
   PlacementMap handle_placements =
       placements_for<Factory::DIMENSIONS>(state->occupancy_map, cc_merged_distances);
 

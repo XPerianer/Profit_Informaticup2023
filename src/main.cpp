@@ -16,7 +16,6 @@ using namespace profit;
 using namespace geometry;
 // NOLINTEND(google-build-using-namespace)
 
-// For now, we allow exception escape (causing std::terminate -> error shown)
 int main() {  // NOLINT(bugprone-exception-escape)
   parsing::Input input = parsing::parse(std::cin);
 
