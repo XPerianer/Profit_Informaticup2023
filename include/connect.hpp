@@ -161,7 +161,7 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
   // TODO: We could recover more gracefully, for example by placing everything that can be placed
   // and then searching for non intersecting connections see #27
   if (!finished) {
-    DEBUG("Self-intersection inside connect\n");
+    DEBUG_PRINT("Self-intersection inside connect\n");
 
     PredecessorMap predecessors(input.dimensions);
     PredecessorMap object_connections(predecessors.dimensions());
@@ -178,7 +178,7 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
     }
     auto [extra_finished, extra_parts] =
         backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
-    DEBUG("finished: " << finished << "\n");
+    DEBUG_PRINT("finished: " << finished << "\n");
 
     if (!extra_finished) {
       for (auto& part : parts) {

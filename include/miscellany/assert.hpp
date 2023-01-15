@@ -23,12 +23,12 @@
 #endif
 
 #ifdef NDEBUG
-#define DEBUG(x)
+#define DEBUG_PRINT(x)
 #else
 // NOLINTBEGIN(bugprone-macro-parentheses)
-#define DEBUG(x)    \
-  do {              \
-    std::cerr << x; \
+#define DEBUG_PRINT(x) \
+  do {                 \
+    std::cerr << x;    \
   } while (0)
 #endif
 // NOLINTEND(bugprone-macro-parentheses)
