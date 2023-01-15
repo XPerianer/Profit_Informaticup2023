@@ -11,8 +11,8 @@ using Turn = uint32_t;
 
 const profit::ResourceRequirement flow_per_time_step = 3;
 
-inline std::vector<Turn> when_are_deposits_empty(const profit::FieldState& state,
-                                                 const profit::parsing::Input& input) {
+[[nodiscard]] inline std::vector<Turn> when_are_deposits_empty(
+    const profit::FieldState& state, const profit::parsing::Input& input) {
   std::vector<Turn> when_empty(input.deposits.size());
   std::vector<int> connected_pipelines(input.deposits.size());
   for (const auto& [_, pipeline] : state.pipelines) {
@@ -27,8 +27,8 @@ inline std::vector<Turn> when_are_deposits_empty(const profit::FieldState& state
   return when_empty;
 }
 
-inline profit::ResourceRequirement ressources_at_turn(const auto& pipeline, Turn empty_at,
-                                                      Turn turn) {
+[[nodiscard]] inline profit::ResourceRequirement ressources_at_turn(const auto& pipeline,
+                                                                    Turn empty_at, Turn turn) {
   if (pipeline.parts.size() + 1 >= turn) {
     return 0;
   }
@@ -36,8 +36,8 @@ inline profit::ResourceRequirement ressources_at_turn(const auto& pipeline, Turn
                   static_cast<profit::ResourceRequirement>(empty_at * flow_per_time_step));
 }
 
-inline profit::ProductScore score(const profit::FieldState& state, Turn turn,
-                                  const profit::parsing::Input& input) {
+[[nodiscard]] inline profit::ProductScore score(const profit::FieldState& state, Turn turn,
+                                                const profit::parsing::Input& input) {
   profit::ProductScore score = 0;
   std::vector<Turn> when_empty = when_are_deposits_empty(state, input);
   std::vector<profit::AvailableResources> resources_per_factory(state.factories.size());

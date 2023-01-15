@@ -42,7 +42,7 @@ struct Worker {
       : solution_(solution), sync_(sync), input_(input) {}
 
   inline void run() {
-    simple_greedy_solver(input_, [&](Solution solution) { update_solution(std::move(solution)); });
+    simple_greedy_solver(input_, [&](const Solution& solution) { copy_if_better(solution); });
     worker_thread_add(-1);
   }
 
@@ -54,14 +54,15 @@ struct Worker {
     DEBUG_PRINT("cond_signal\n");
   }
 
-  inline void update_solution(Solution solution) {
+  inline void copy_if_better(const Solution& solution) {
     pthread_mutex_lock(&sync_->best_solution_mutex);
     DEBUG_PRINT("Update call of solution with score " << solution.score << " and "
                                                       << solution.parts.size() << "parts\n");
     if (solution.score > solution_->score ||
         (solution.score == solution_->score && solution.parts.size() > solution_->parts.size())) {
       DEBUG_PRINT("Update executed\n");
-      (*solution_) = std::move(solution);
+      solution_->score = solution.score;
+      solution_->parts.assign(solution.parts.begin(), solution.parts.end());
     }
     pthread_mutex_unlock(&sync_->best_solution_mutex);
   }

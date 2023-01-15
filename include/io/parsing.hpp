@@ -31,7 +31,7 @@ struct Input {
   }
 };
 
-inline LandscapeObject parse_object(const nlohmann::json& input) {
+[[nodiscard]] inline LandscapeObject parse_object(const nlohmann::json& input) {
   std::string type = input["type"];
   Vec2 coordinate = {static_cast<int>(input["x"]), static_cast<int>(input["y"])};
   Vec2 dimensions = {static_cast<int>(input["width"]), static_cast<int>(input["height"])};
@@ -46,7 +46,7 @@ inline LandscapeObject parse_object(const nlohmann::json& input) {
   FAIL("unexpected input object type.");
 }
 
-inline Input parse(std::istream& stream) {
+[[nodiscard]] inline Input parse(std::istream& stream) {
   nlohmann::json json_input;
   stream >> json_input;
 

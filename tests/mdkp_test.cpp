@@ -20,7 +20,6 @@ class PechTest : public testing::Test {
     good_product_.points = 10;
     good_product_.requirements[ResourceType::TYPE0] = 2;
 
-    // Product_bad is bad because it has lower points than product_good
     bad_product_.points = 5;
     bad_product_.requirements[ResourceType::TYPE0] = 2;
   }

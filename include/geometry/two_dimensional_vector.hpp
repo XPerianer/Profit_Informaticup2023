@@ -25,7 +25,7 @@ class TwoDimensionalVector {
   const T& operator[](Vec2 index) const { return data_[scalar_index(index)]; }
 
  private:
-  [[nodiscard]] size_t scalar_index(Vec2 index) const {
+  [[nodiscard]] inline size_t scalar_index(Vec2 index) const {
     return static_cast<size_t>(index.y()) * static_cast<size_t>(dimensions_.width()) +
            static_cast<size_t>(index.x());
   }

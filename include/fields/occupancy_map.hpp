@@ -21,7 +21,7 @@ enum class CellOccupancy {
 
 using OccupancyMap = Field<CellOccupancy, CellOccupancy::BLOCKED, CellOccupancy::EMPTY>;
 
-inline OccupancyMap occupancies_from(const parsing::Input& input) {
+[[nodiscard]] inline OccupancyMap occupancies_from(const parsing::Input& input) {
   OccupancyMap occupancy_map(input.dimensions);
   for (const auto& deposit : input.deposits) {
     const auto rect = as_rectangle(deposit);
@@ -42,7 +42,7 @@ inline OccupancyMap occupancies_from(const parsing::Input& input) {
 }
 
 template <typename Placeable>
-inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map) {
+[[nodiscard]] inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map) {
   return std::ranges::any_of(object.occupied_cells(),
                              [&](const Vec2 cell) {
                                auto occupancy = occupancy_map.at(cell);
@@ -59,7 +59,7 @@ inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map)
 }
 
 template <>
-inline bool collides(const Factory& object, const OccupancyMap& occupancy_map) {
+[[nodiscard]] inline bool collides(const Factory& object, const OccupancyMap& occupancy_map) {
   return std::ranges::any_of(object.occupied_cells(), [&](const Vec2 cell) {
     auto occupancy = occupancy_map.at(cell);
     return occupancy != CellOccupancy::EMPTY;
@@ -67,7 +67,8 @@ inline bool collides(const Factory& object, const OccupancyMap& occupancy_map) {
 }
 
 template <>
-inline bool collides(const PlaceableObject& object, const OccupancyMap& occupancy_map) {
+[[nodiscard]] inline bool collides(const PlaceableObject& object,
+                                   const OccupancyMap& occupancy_map) {
   return std::visit([&](const auto& placable) { return collides(placable, occupancy_map); },
                     object);
 }

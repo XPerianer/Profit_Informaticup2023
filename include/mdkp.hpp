@@ -113,14 +113,9 @@ inline void try_to_build_solution_in_component(const parsing::Input& input,
     }
   }
 
-  // TODO: Could not copy products, but use a bitmap to signal which products are currently
-  // available
   std::vector<Product> products_that_can_be_tried = input.products;
 
   while (true) {
-    // Eine Sache: Evtl haben Produkte keine überlagernden Ressourcen
-    //  -> Dann werden Dinge einfacher, beachten
-
     for (const ConnectedComponent& component : components) {
       size_t component_id = &component - components.data();
 
@@ -129,29 +124,10 @@ inline void try_to_build_solution_in_component(const parsing::Input& input,
 
       if (std::accumulate(to_realize.begin(), to_realize.end(), static_cast<ProductCount>(0)) ==
           0) {
-        break;  // TODO(DomJ): Nochmal ganz stark nachdenken.
+        break;
       }
-
-      // Vereinfachung: Alle Ressourcen in einen Topf schmeißen. Hieraus entscheiden, welches
-      // Produkt wir als nächstes produzieren wollen, und wie oft Dann versuchen zu realisieren.
-      // Das klappt potenziell nicht, dann überspringen, weiter machen mit nächstem Produkt
-
-      // Problem: Sobald Pipeline gebaut draint sie die gesamten Ressources des Deposits
-      // -> Daher der Algorithmus: Immer Produkt nehmen, das bei komplett-Verwendung als nächstes
-      // den Score maximiert
-      //
-      // Damit sind Folgeiterationen nicht mehr "Gegeben diese verfügbaren Ressourcen, was sollte
-      // ich bauen?" sondern "Wem kann ich was wegnehmen, um den Score zu verbessern".
-      //
-
-      // realize(/* Todo */);
     }
-
-    // ausgeben, was als nächstes realisiert werden soll
-    // je nachdem was ähm
-    // ob das funktioniert muss man halt verschieden darauf reagieren.
   }
-  // irgendwas
 }
 
 }  // namespace profit

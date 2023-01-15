@@ -30,7 +30,7 @@ class ConnectedComponentsWrapper {
     }
   }
 
-  DepositId find(DepositId deposit) {
+  [[nodiscard]] inline DepositId find(DepositId deposit) {
     while (deposit != components_[deposit]) {
       components_[deposit] = components_[components_[deposit]];
       deposit = components_[deposit];
@@ -38,7 +38,7 @@ class ConnectedComponentsWrapper {
     return deposit;
   }
 
-  void set_reachable(const DepositId deposit, Vec2 coordinate) {
+  inline void set_reachable(const DepositId deposit, Vec2 coordinate) {
     if (map_.at(coordinate) == NO_COMPONENT) {
       map_.set(coordinate, deposit);
       return;
@@ -58,11 +58,11 @@ class ConnectedComponentsWrapper {
     count_--;
   }
 
-  bool connected(DepositId deposit_a, DepositId deposit_b) {
+  [[nodiscard]] inline bool connected(DepositId deposit_a, DepositId deposit_b) {
     return find(deposit_a) == find(deposit_b);
   }
 
-  std::vector<ConnectedComponent> extract() {
+  [[nodiscard]] inline std::vector<ConnectedComponent> extract() {
     std::vector<ConnectedComponent> connected_components;
     connected_components.reserve(count_);
     std::vector<bool> added(elements_, false);

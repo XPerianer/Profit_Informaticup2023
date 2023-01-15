@@ -62,11 +62,13 @@ class Rectangle {
   [[nodiscard]] constexpr Vec2 inner_bottom_right() const { return bottom_right_ - Vec2{1, 1}; }
   [[nodiscard]] constexpr Vec2 dimensions() const { return dimensions_; }
 
-  constexpr static Rectangle from_top_left_and_dimensions(Vec2 top_left, Vec2 dimensions) {
+  [[nodiscard]] constexpr static Rectangle from_top_left_and_dimensions(Vec2 top_left,
+                                                                        Vec2 dimensions) {
     return {top_left, dimensions};
   }
 
-  constexpr static Rectangle from_top_left_and_bottom_right(Vec2 top_left, Vec2 bottom_right) {
+  [[nodiscard]] constexpr static Rectangle from_top_left_and_bottom_right(Vec2 top_left,
+                                                                          Vec2 bottom_right) {
     return {top_left, bottom_right - top_left};
   }
 
@@ -82,7 +84,7 @@ class Rectangle {
   Vec2 dimensions_;
 };
 
-constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
+[[nodiscard]] constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
   return ((coordinate.x() == rect.top_left().x() ||
            coordinate.x() == rect.inner_bottom_right().x()) &&
           coordinate.y() >= rect.top_left().y() && coordinate.y() < rect.bottom_right().y()) ||
@@ -92,7 +94,7 @@ constexpr bool is_on_border(const Rectangle& rect, Vec2 coordinate) {
 }
 
 /* Cells that are connected to a border cell of the rectangle */
-constexpr std::vector<Vec2> outer_connected_border_cells(const Rectangle& rect) {
+[[nodiscard]] constexpr std::vector<Vec2> outer_connected_border_cells(const Rectangle& rect) {
   std::vector<Vec2> result(2 * static_cast<int>(rect.dimensions().width()) +
                            2 * static_cast<int>(rect.dimensions().height()));
 

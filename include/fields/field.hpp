@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <span>
 
 #include "geometry/two_dimensional_vector.hpp"
@@ -78,7 +79,6 @@ class Field {
     map_[coordinates] = value;
   }
 
-  // only sets value if inbounds
   void safe_set(geometry::Vec2 coordinates, CellT value) {
     if (coordinates.x() >= 0 && coordinates.y() >= 0 && coordinates.x() < dimensions_.width() &&
         coordinates.y() < dimensions_.height()) {
@@ -97,29 +97,21 @@ class Field {
   geometry::TwoDimensionalVector<CellT, InitialValue> map_;
 };
 
-inline std::vector<Vec2> neighbors(Vec2 cell) {
+[[nodiscard]] constexpr std::vector<Vec2> neighbors(Vec2 cell) {
   return {cell + Vec2{0, -1}, cell + Vec2{-1, 0}, cell + Vec2{1, 0}, cell + Vec2{0, 1}};
 }
 
 template <typename FieldT>
-bool any_neighbor_is(const FieldT& field, Vec2 cell, const typename FieldT::CellT& cell_value) {
-  bool any_is = false;
-  any_is |= field.at(cell + Vec2{0, -1}) == cell_value;
-  any_is |= field.at(cell + Vec2{-1, 0}) == cell_value;
-  any_is |= field.at(cell + Vec2{1, 0}) == cell_value;
-  any_is |= field.at(cell + Vec2{0, 1}) == cell_value;
-  return any_is;
+[[nodiscard]] inline uint8_t any_neighbor_count(const FieldT& field, Vec2 cell,
+                                                const typename FieldT::CellT& cell_value) {
+  return std::ranges::count_if(neighbors(cell),
+                               [&](auto neighbor) { return field.at(neighbor) == cell_value; });
 }
 
 template <typename FieldT>
-uint8_t any_neighbor_count(const FieldT& field, Vec2 cell,
-                           const typename FieldT::CellT& cell_value) {
-  uint8_t count = 0;
-  count += field.at(cell + Vec2{0, -1}) == cell_value;
-  count += field.at(cell + Vec2{-1, 0}) == cell_value;
-  count += field.at(cell + Vec2{1, 0}) == cell_value;
-  count += field.at(cell + Vec2{0, 1}) == cell_value;
-  return count;
+[[nodiscard]] inline bool any_neighbor_is(const FieldT& field, Vec2 cell,
+                                          const typename FieldT::CellT& cell_value) {
+  return any_neighbor_count(field, cell, cell_value) > 0;
 }
 
 }  // namespace profit
