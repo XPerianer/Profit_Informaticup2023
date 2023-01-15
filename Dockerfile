@@ -9,7 +9,8 @@ COPY ./include ./include
 COPY ./src ./src
 COPY ./tests ./tests
 
+ENV CMAKE_BUILD_TYPE=Release
 RUN cmake .
-RUN cmake --build . --target main --config Release
+RUN cmake --build . --target main
 
 CMD [ "./main" ]
