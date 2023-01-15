@@ -4,8 +4,11 @@
 #include "score.hpp"
 
 namespace profit {
-inline void solve_component(const ConnectedComponent& component, FieldState* state,
+inline bool solve_component(const ConnectedComponent& component, FieldState* state,
                             const profit::parsing::Input& input, const DistanceMap& merged) {
+
+  bool changed_something = false;
+
   DEBUG("Starting with component with size " << component.size() << " \n");
   AvailableResources resources = available_resources(component, input);
   std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
@@ -50,9 +53,11 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
           DEBUG("Failed connecting");
           continue;
         }
+        changed_something = true;
       }
     }
   }
+  return changed_something;
 }
 
 void simple_greedy_solver(const parsing::Input& input,
@@ -75,11 +80,15 @@ void simple_greedy_solver(const parsing::Input& input,
 
   std::vector<ConnectedComponent> connected_components = components_wrapper.extract();
 
-  for (const auto& component : connected_components) {
-    DEBUG("size: " << component.size() << "\n");
-    solve_component(component, &state, input, merged);
-    auto solution_score = score(state, input.turns, input);
-    update_solution(Solution{solution_score, state.placed_objects()});
+  bool keep_running = true;
+  while(keep_running) {
+    keep_running = false;
+    for (const auto& component : connected_components) {
+      DEBUG("size: " << component.size() << "\n");
+      keep_running |= solve_component(component, &state, input, merged);
+      auto solution_score = score(state, input.turns, input);
+      update_solution(Solution{solution_score, state.placed_objects()});
+    }
   }
 }
 }  // namespace profit

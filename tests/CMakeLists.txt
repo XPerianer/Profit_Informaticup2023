@@ -15,6 +15,7 @@ file(GLOB_RECURSE ALL_CPP_TEST_FILES *.cpp)
 add_executable(
   unit_test
   ${ALL_CPP_TEST_FILES}
+  ../src/solver.cpp
 )
 
 target_link_libraries(
