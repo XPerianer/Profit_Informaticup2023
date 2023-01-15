@@ -56,8 +56,9 @@ struct Worker {
 
   inline void update_solution(Solution solution) {
     pthread_mutex_lock(&sync_->best_solution_mutex);
-    if (solution.score > solution_->score || solution_->parts.empty()) {
-      DEBUG("Update of solution with score " << solution.score << "\n");
+    DEBUG("Update call of solution with score " << solution.score << " and " << solution.parts.size() << "parts\n");
+    if (solution.score > solution_->score || (solution.score == solution_->score && solution.parts.size() > solution_->parts.size())) {
+      DEBUG("Update executed\n");
       (*solution_) = std::move(solution);
     }
     pthread_mutex_unlock(&sync_->best_solution_mutex);
