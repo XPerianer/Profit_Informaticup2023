@@ -32,10 +32,12 @@ int main() {  // NOLINT(bugprone-exception-escape)
   const int time_to_stop_threads_and_write_best_solution = 2;
   time.tv_sec += input.time - time_to_stop_threads_and_write_best_solution;
   while (sync.worker_threads_count != 0 && return_code == 0) {
-    std::cerr << sync.worker_threads_count << " count\n";
+    DEBUG(sync.worker_threads_count << " count\n");
     return_code = pthread_cond_timedwait(&sync.worker_thread_condition,
                                          &sync.worker_thread_condition_mutex, &time);
   }
+
+  pthread_mutex_lock(&sync.best_solution_mutex);
 
 #ifdef NDEBUG
   std::cout << serialization::serialize(best_solution.parts);
@@ -46,6 +48,7 @@ int main() {  // NOLINT(bugprone-exception-escape)
                             input.deposits,   input.obstacles, best_solution.parts};
   std::cout << serialization::serialize_detailed(output);
 #endif
+  pthread_mutex_unlock(&sync.best_solution_mutex);
 
   return 0;
 }

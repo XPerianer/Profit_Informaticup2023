@@ -30,7 +30,7 @@ class ConnectionTest : public testing::Test {
 
 TEST(Connect, CantConnectImpossibleThings) {
   auto input = ConnectionTest::from_string(examples::VERTICALLY_SPLIT_MAP);
-  auto deposit = input.deposits.at(0);
+  DepositId deposit_id = 0;
 
   // Not reachable because of other side of split map
   // In real code this should not happen, as both
@@ -47,13 +47,13 @@ TEST(Connect, CantConnectImpossibleThings) {
   FieldState state = from_input(input);
   state.factories[factory_id] = unreachable_factory;
 
-  auto pipeline_id = connect(deposit, factory_id, &state);
+  auto pipeline_id = connect(deposit_id, factory_id, &state, input);
   EXPECT_EQ(pipeline_id.has_value(), false);
 }
 
 TEST(Connect, ConnectWithMineand3Conveyor) {
   auto input = ConnectionTest::from_string(examples::CONSTRAINED_TO_MINE_AND_CONVEYOR3);
-  auto deposit = input.deposits.at(0);
+  DepositId deposit_id = 0;
 
   auto factory = Factory{
       .handle = {0, 12},
@@ -64,7 +64,7 @@ TEST(Connect, ConnectWithMineand3Conveyor) {
 
   FactoryId factory_id = 0;
   state.factories[factory_id] = factory;
-  auto pipeline_id = connect(deposit, factory_id, &state);
+  auto pipeline_id = connect(deposit_id, factory_id, &state, input);
 
   EXPECT_TRUE(pipeline_id);
 
@@ -92,7 +92,7 @@ TEST(Connect, ConnectWithMineand3Conveyor) {
 
 TEST(Connect, ConnectWithMineandConveyors) {
   auto input = ConnectionTest::from_string(examples::CONSTRAINED_TO_MINE_AND_CONVEYORS);
-  auto deposit = input.deposits.at(0);
+  DepositId deposit_id = 0;
 
   auto factory = Factory{
       .handle = {0, 13},
@@ -103,7 +103,7 @@ TEST(Connect, ConnectWithMineandConveyors) {
 
   FactoryId factory_id = 0;
   state.factories[factory_id] = factory;
-  auto pipeline_id = connect(deposit, factory_id, &state);
+  auto pipeline_id = connect(deposit_id, factory_id, &state, input);
 
   EXPECT_TRUE(pipeline_id);
 
@@ -131,7 +131,7 @@ TEST(Connect, ConnectWithMineandConveyors) {
 
 TEST(Connect, DoNotConnectWithSelfIntersections) {
   auto input = ConnectionTest::from_string(examples::IMPOSSIBLE_DUE_TO_SELF_INTERSECTION);
-  auto deposit = input.deposits.at(0);
+  DepositId deposit_id = 0;
 
   auto factory = Factory{
       .handle = {0, 13},
@@ -142,7 +142,7 @@ TEST(Connect, DoNotConnectWithSelfIntersections) {
 
   FactoryId factory_id = 0;
   state.factories[factory_id] = factory;
-  auto pipeline_id = connect(deposit, factory_id, &state);
+  auto pipeline_id = connect(deposit_id, factory_id, &state, input);
 
   EXPECT_EQ(pipeline_id.has_value(), false);
 }

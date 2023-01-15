@@ -99,8 +99,8 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
 }
 
 // TODO: deduplicate with distance_map.hpp see #28
-inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId factory_id,
-                                         FieldState* state) {
+inline std::optional<PipelineId> connect(const DepositId& deposit_id, const FactoryId factory_id,
+                                         FieldState* state, const parsing::Input& input) {
   Factory factory = state->factories[factory_id];
 
   // Connection from downstream ingress to egress
@@ -145,6 +145,7 @@ inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId 
     };
   }
 
+  auto deposit = input.deposits[deposit_id];
   auto connected_egress = calculate_path(deposit, target_egress_fields, &predecessors,
                                          &object_connections, state->occupancy_map);
   if (!connected_egress) {
@@ -161,6 +162,7 @@ inline std::optional<PipelineId> connect(const Deposit deposit, const FactoryId 
   }
 
   Pipeline pipeline;
+  pipeline.deposit_id = deposit_id;
   pipeline.factory_id = factory_id;
   pipeline.parts = *parts;
 
@@ -178,9 +180,6 @@ inline std::optional<Vec2> visit_location_if_placable(
   auto width = occupancy_map.dimensions().width();
   if (target_egress_fields.at(object.egress())) {
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
-    std::cerr << "final set object.egress(), ingress_index: " << object.egress() << ingress
-              << std::endl;
-    std::cerr << "object.ingress" << object.ingress() << std::endl;
     return object.egress();
   }
   for (const Vec2 downstream_ingress_cell : object.downstream_ingress_cells()) {
@@ -193,9 +192,7 @@ inline std::optional<Vec2> visit_location_if_placable(
     }
     predecessors->set(downstream_ingress_cell, object.egress().to_scalar_index(width));
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
-    std::cerr << "Adding object from" << object.ingress() << " to " << object.egress() << std::endl;
     reached_ingresses->emplace(downstream_ingress_cell);
-    std::cerr << "added: " << downstream_ingress_cell << std::endl;
   }
   return std::nullopt;
 }
