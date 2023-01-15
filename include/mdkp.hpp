@@ -33,7 +33,7 @@ using AvailableResources = std::array<StoredResourceCount, SUBTYPE_COUNT>;
 
 [[nodiscard]] inline AvailableResources available_resources(const ConnectedComponent& component,
                                                             const parsing::Input& input) {
-  AvailableResources resources;
+  AvailableResources resources{};
   for (const auto deposit_id : component) {
     auto deposit = input.deposits[deposit_id];
     resources[static_cast<char>(deposit.type)] += initial_resource_count(deposit);
