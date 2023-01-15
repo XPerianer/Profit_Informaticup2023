@@ -52,3 +52,41 @@ TEST_F(PechTest, WorksForOneResource) {
   std::vector<ProductCount> expected = {4};
   EXPECT_EQ(expected, output);
 }
+
+TEST_F(PechTest, Task1) {
+  AvailableResources resources = {125, 125, 245};
+  Product product = {
+      .type = profit::Subtype::TYPE0, .requirements{3, 3, 3, 0, 0, 0, 0, 0}, .points = 10};
+  auto output = pech(resources, {product});
+  std::vector<ProductCount> expected = {41};
+  EXPECT_EQ(expected, output);
+}
+
+TEST_F(PechTest, Task2) {
+  AvailableResources resources = {125};
+  Product product = {
+      .type = profit::Subtype::TYPE0, .requirements{10, 0, 0, 0, 0, 0, 0, 0}, .points = 10};
+  auto output = pech(resources, {product});
+  std::vector<ProductCount> expected = {12};
+  EXPECT_EQ(expected, output);
+}
+
+TEST_F(PechTest, Task3) {
+  AvailableResources resources = {245, 45};
+  Product product = {
+      .type = profit::Subtype::TYPE0, .requirements{36, 3, 0, 0, 0, 0, 0, 0}, .points = 10};
+  auto output = pech(resources, {product});
+  std::vector<ProductCount> expected = {6};
+  EXPECT_EQ(expected, output);
+}
+
+TEST_F(PechTest, Task4) {
+  AvailableResources resources = {360, 360, 360, 360};
+  Product product_one = {
+      .type = profit::Subtype::TYPE0, .requirements{10, 10, 0, 0, 0, 0, 0, 0}, .points = 10};
+  Product product_two = {
+      .type = profit::Subtype::TYPE0, .requirements{0, 0, 10, 10, 0, 0, 0, 0}, .points = 10};
+  auto output = pech(resources, {product_one, product_two});
+  std::vector<ProductCount> expected = {36, 36};
+  EXPECT_EQ(expected, output);
+}
