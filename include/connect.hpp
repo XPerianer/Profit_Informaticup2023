@@ -213,8 +213,6 @@ inline std::optional<Vec2> visit_location_if_placable(
   auto width = occupancy_map.dimensions().width();
   if (target_egress_fields.at(object.egress())) {
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
-    DEBUG("final set object.egress(), ingress_index: " << object.egress() << ingress << "\n");
-    DEBUG("object.ingress" << object.ingress() << "\n");
     return object.egress();
   }
   for (const Vec2 downstream_ingress_cell : object.downstream_ingress_cells()) {
@@ -227,9 +225,7 @@ inline std::optional<Vec2> visit_location_if_placable(
     }
     predecessors->set(downstream_ingress_cell, object.egress().to_scalar_index(width));
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
-    DEBUG("Adding object from" << object.ingress() << " to " << object.egress() << "\n");
     reached_ingresses->emplace(downstream_ingress_cell);
-    DEBUG("added: " << downstream_ingress_cell << "\n");
   }
   return std::nullopt;
 }

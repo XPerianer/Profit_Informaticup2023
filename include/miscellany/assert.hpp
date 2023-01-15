@@ -25,10 +25,12 @@
 #ifdef NDEBUG
 #define DEBUG(x)
 #else
+// NOLINTBEGIN(bugprone-macro-parentheses)
 #define DEBUG(x)    \
   do {              \
     std::cerr << x; \
   } while (0)
 #endif
+// NOLINTEND(bugprone-macro-parentheses)
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
