@@ -235,6 +235,16 @@ inline std::optional<Vec2> visit_location_if_placable(
   return std::nullopt;
 }
 
+inline bool can_place_ingress(Vec2 cell, const OccupancyMap& occupancy_map) {
+  for (auto neighbor : neighbors(cell)) {
+    if (occupancy_map.at(neighbor) == CellOccupancy::EGRESS &&
+        any_neighbor_is(occupancy_map, neighbor, CellOccupancy::INGRESS)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 inline std::optional<Vec2> ingresses_from_deposits(std::queue<Vec2>* reached_ingresses,
                                                    Deposit deposit, TargetMap& target_egress_fields,
                                                    PredecessorMap* predecessors,
@@ -242,6 +252,9 @@ inline std::optional<Vec2> ingresses_from_deposits(std::queue<Vec2>* reached_ing
                                                    OccupancyMap& occupancy_map) {
   for (Vec2 possible_ingress_location :
        geometry::outer_connected_border_cells(as_rectangle(deposit))) {
+    if (!can_place_ingress(possible_ingress_location, occupancy_map)) {
+      continue;
+    }
     for (auto rotation : ROTATIONS) {
       if (auto connected_egress = visit_location_if_placable(
               possible_ingress_location, target_egress_fields, predecessors, object_connections,
