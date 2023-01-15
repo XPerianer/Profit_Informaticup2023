@@ -126,4 +126,21 @@ inline void update_reachability_if_placeable(DistanceMap* distances,
   return result;
 }
 
+[[nodiscard]] inline std::vector<DistanceMap> merge_by_cc(
+    const std::vector<ConnectedComponent>& connected_components,
+    const std::vector<DistanceMap>& distance_maps, const Vec2 dimensions = Vec2{1, 1}) {
+  std::vector<DistanceMap> cc_merged;
+  cc_merged.reserve(connected_components.size());
+
+  for (const auto& component : connected_components) {
+    std::vector<DistanceMap> cc_distances;
+    cc_distances.reserve(component.size());
+    std::ranges::transform(
+        component, std::back_inserter(cc_distances),
+        [&](DepositId deposit) -> DistanceMap { return distance_maps[deposit]; });
+    cc_merged.emplace_back(merge(cc_distances, dimensions));
+  }
+  return cc_merged;
+}
+
 }  // namespace profit
