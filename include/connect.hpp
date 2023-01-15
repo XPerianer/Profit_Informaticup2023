@@ -206,7 +206,7 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
   auto [finished, parts] =
       backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
   if (!finished) {
-    if (!recover_from_self_intersection(deposit, parts, state, input) ) {
+    if (!recover_from_self_intersection(deposit, parts, state, input)) {
       return std::nullopt;
     }
   }
