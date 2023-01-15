@@ -242,13 +242,10 @@ inline std::optional<Vec2> visit_location_if_placable(
 }
 
 inline bool can_place_ingress(Vec2 cell, const OccupancyMap& occupancy_map) {
-  for (auto neighbor : neighbors(cell)) {
-    if (occupancy_map.at(neighbor) == CellOccupancy::EGRESS &&
-        any_neighbor_is(occupancy_map, neighbor, CellOccupancy::INGRESS)) {
-      return false;
-    }
-  }
-  return true;
+  return std::ranges::all_of(neighbors(cell), [&](auto neighbor) {
+    return !static_cast<bool>(occupancy_map.at(neighbor) == CellOccupancy::EGRESS &&
+        any_neighbor_is(occupancy_map, neighbor, CellOccupancy::INGRESS));
+  });
 }
 
 inline std::optional<Vec2> ingresses_from_deposits(std::queue<Vec2>* reached_ingresses,
