@@ -4,9 +4,18 @@
 #include "score.hpp"
 
 namespace profit {
+
+inline std::optional<FactoryId> need_to_place_factory(ProductType type, const FieldState& state) {
+  for (auto [factory_id, factory] : state.factories) {
+    if (factory.type == type) {
+      return factory_id;
+    }
+  }
+  return std::nullopt;
+}
+
 inline bool solve_component(const ConnectedComponent& component, FieldState* state,
                             const profit::parsing::Input& input, const DistanceMap& merged) {
-
   bool changed_something = false;
 
   DEBUG("Starting with component with size " << component.size() << " \n");
@@ -29,10 +38,13 @@ inline bool solve_component(const ConnectedComponent& component, FieldState* sta
     if (count == 0) {
       continue;
     }
-    DEBUG("Trying to place factory\n");
-    auto factory_id = place_factory(input.products[i].type, merged, state);
+    auto factory_id = need_to_place_factory(product.type, *state);
     if (!factory_id) {
-      continue;
+      DEBUG("Trying to place factory\n");
+      factory_id = place_factory(input.products[i].type, merged, state);
+      if (!factory_id) {
+        continue;
+      }
     }
     DEBUG("Placed factory\n");
     for (auto resource_type : RESOURCE_TYPES) {
@@ -69,7 +81,6 @@ void simple_greedy_solver(const parsing::Input& input,
 
   std::vector<DistanceMap> distance_maps;
   distance_maps.reserve(deposits.size());
-  FieldState state = {occupancy_map, {}, {}};
 
   for (size_t i = 0; i < deposits.size(); i++) {
     distance_maps.emplace_back(
@@ -79,11 +90,14 @@ void simple_greedy_solver(const parsing::Input& input,
   const DistanceMap merged = merge(distance_maps, Factory::DIMENSIONS);
 
   std::vector<ConnectedComponent> connected_components = components_wrapper.extract();
+  std::vector<FieldState> field_states(connected_components.size(), {occupancy_map, {}, {}});
 
   bool keep_running = true;
-  while(keep_running) {
+  while (keep_running) {
     keep_running = false;
-    for (const auto& component : connected_components) {
+    for (uint32_t i = 0; i < connected_components.size(); i++) {
+      auto& component = connected_components[i];
+      auto& state = field_states[i];
       DEBUG("size: " << component.size() << "\n");
       keep_running |= solve_component(component, &state, input, merged);
       auto solution_score = score(state, input.turns, input);

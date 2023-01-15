@@ -88,6 +88,7 @@ inline std::pair<bool, std::vector<profit::PlaceableObject>> backtrack_parts(
     }
 
     if (finished) {
+      place(parts.back(), occupancy_map);
       return {true, parts};
     }
     object_egress = Vec2::from_scalar_index(predecessors.at(object_ingress), width);
