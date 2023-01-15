@@ -16,22 +16,9 @@ inline std::optional<FactoryId> get_realizing_factory(ProductType type, const Fi
   return std::nullopt;
 }
 
-inline bool solve_component(const ConnectedComponent& component, FieldState* state,
-                            const profit::parsing::Input& input, const DistanceMap& merged) {
-  bool changed_something = false;
-
-  DEBUG_PRINT("Starting with component with size " << component.size() << " \n");
-  AvailableResources resources = available_resources(component, input);
-  std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
-#ifndef NDEBUG
-  DEBUG_PRINT(" ----- Fabrication plan -----\n");
-  for (auto product : fabrication_plan) {
-    DEBUG_PRINT(product << "\n");
-  }
-  DEBUG_PRINT(" ----- Fabrication plan -----\n");
-#endif
-  // TODO: optimize by building product with higher scores first see #24
-  // TODO: optimize by building the correct proportions see #25
+inline bool try_placing_factories(FieldState* state, const profit::parsing::Input& input,
+                                  const DistanceMap& merged,
+                                  const std::vector<ProductCount>& fabrication_plan) {
   for (unsigned int i = 0; i < fabrication_plan.size(); i++) {
     auto product = input.products[i];
     auto count = fabrication_plan[i];
@@ -49,17 +36,33 @@ inline bool solve_component(const ConnectedComponent& component, FieldState* sta
     }
     DEBUG_PRINT("Placed factory\n");
   }
+}
+
+inline bool solve_component(const ConnectedComponent& component, FieldState* state,
+                            const profit::parsing::Input& input, const DistanceMap& merged) {
+  bool changed_something = false;
+
+  DEBUG_PRINT("Starting with component with size " << component.size() << " \n");
+  AvailableResources resources = available_resources(component, input);
+  std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
+#ifndef NDEBUG
+  DEBUG_PRINT(" ----- Fabrication plan -----\n");
+  for (auto product : fabrication_plan) {
+    DEBUG_PRINT(product << "\n");
+  }
+  DEBUG_PRINT(" ----- Fabrication plan -----\n");
+#endif
+  // TODO: optimize by building product with higher scores first see #24
+  // TODO: optimize by building the correct proportions see #25
+  try_placing_factories(state, input, merged, fabrication_plan);
 
   for (const auto& product : input.products) {
     for (auto resource_type : RESOURCE_TYPES) {
       DEBUG_PRINT("Starting with resource " << static_cast<int>(resource_type)
                                             << " requirements are "
                                             << product.requirements[resource_type] << "\n");
-      if (product.requirements[resource_type] == 0) {
-        continue;
-      }
       auto factory_id = get_realizing_factory(product.type, *state);
-      if (!factory_id) {
+      if (product.requirements[resource_type] == 0 || !factory_id) {
         continue;
       }
       for (auto deposit_id : component) {
