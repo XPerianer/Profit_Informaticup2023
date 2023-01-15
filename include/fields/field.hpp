@@ -97,20 +97,20 @@ class Field {
   geometry::TwoDimensionalVector<CellT, InitialValue> map_;
 };
 
-[[nodiscard]] inline std::vector<Vec2> neighbors(Vec2 cell) {
+[[nodiscard]] constexpr std::vector<Vec2> neighbors(Vec2 cell) {
   return {cell + Vec2{0, -1}, cell + Vec2{-1, 0}, cell + Vec2{1, 0}, cell + Vec2{0, 1}};
 }
 
 template <typename FieldT>
-[[nodiscard]] uint8_t any_neighbor_count(const FieldT& field, Vec2 cell,
-                                         const typename FieldT::CellT& cell_value) {
+[[nodiscard]] inline uint8_t any_neighbor_count(const FieldT& field, Vec2 cell,
+                                                const typename FieldT::CellT& cell_value) {
   return std::ranges::count_if(neighbors(cell),
                                [&](auto neighbor) { return field.at(neighbor) == cell_value; });
 }
 
 template <typename FieldT>
-[[nodiscard]] bool any_neighbor_is(const FieldT& field, Vec2 cell,
-                                   const typename FieldT::CellT& cell_value) {
+[[nodiscard]] inline bool any_neighbor_is(const FieldT& field, Vec2 cell,
+                                          const typename FieldT::CellT& cell_value) {
   return any_neighbor_count(field, cell, cell_value) > 0;
 }
 
