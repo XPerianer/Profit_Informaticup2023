@@ -18,8 +18,8 @@ using geometry::Coordinate;
 
 /* Assumes handle at top left */
 template <const Vec2& ObjectDimensions>
-inline PlacementMap placements_for(const OccupancyMap& occupancy_map,
-                                   const DistanceMap& distance_map) {
+[[nodiscard]] inline PlacementMap placements_for(const OccupancyMap& occupancy_map,
+                                                 const DistanceMap& distance_map) {
   PlacementMap placements(occupancy_map.dimensions());
   Coordinate last_invalid = -1;
 

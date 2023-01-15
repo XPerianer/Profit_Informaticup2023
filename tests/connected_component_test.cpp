@@ -27,7 +27,8 @@ class ConnectedComponentTest : public testing::Test {
     ConnectedComponentsWrapper components_wrapper(static_cast<DepositId>(deposits.size()),
                                                   occupancy_map.dimensions());
     for (size_t i = 0; i < deposits.size(); i++) {
-      distances_from(deposits[i], occupancy_map, &components_wrapper, static_cast<DepositId>(i));
+      std::ignore = distances_from(deposits[i], occupancy_map, &components_wrapper,
+                                   static_cast<DepositId>(i));
     }
 
     std::vector<ConnectedComponent> actual = components_wrapper.extract();

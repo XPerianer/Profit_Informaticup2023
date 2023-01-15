@@ -20,30 +20,31 @@ constexpr DistanceT NOT_REACHABLE = std::numeric_limits<DistanceT>::max();
 using DistanceMap = Field<DistanceT, NOT_REACHABLE, NOT_REACHABLE>;
 
 template <typename PlaceableT>
-inline void update_reachability_if_placeable(DistanceMap& distances,
+inline void update_reachability_if_placeable(DistanceMap* distances,
                                              const OccupancyMap& occupancy_map,
                                              const PlaceableT object, DistanceT distance,
-                                             std::queue<Vec2>& reached_ingresses) {
+                                             std::queue<Vec2>* reached_ingresses) {
   if (collides(object, occupancy_map)) {
     return;
   }
   for (const Vec2 downstream_ingress_cell : object.downstream_ingress_cells()) {
     bool is_occupied = occupancy_map.at(downstream_ingress_cell) != CellOccupancy::EMPTY;
-    bool was_reached_before = distances.at(downstream_ingress_cell) != NOT_REACHABLE;
+    bool was_reached_before = distances->at(downstream_ingress_cell) != NOT_REACHABLE;
     bool neighbored_to_egress =
         any_neighbor_is(occupancy_map, downstream_ingress_cell, CellOccupancy::EGRESS);
     if (is_occupied || was_reached_before || neighbored_to_egress) {
       continue;
     }
-    distances.set(downstream_ingress_cell, distance);
-    reached_ingresses.emplace(downstream_ingress_cell);
+    distances->set(downstream_ingress_cell, distance);
+    reached_ingresses->emplace(downstream_ingress_cell);
   }
 }
 
 /* Returns an approximation */
-inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& occupancy_map,
-                                  ConnectedComponentsWrapper* components_wrapper,
-                                  const DepositId deposit_id) {
+[[nodiscard]] inline DistanceMap distances_from(const Deposit& deposit,
+                                                const OccupancyMap& occupancy_map,
+                                                ConnectedComponentsWrapper* components_wrapper,
+                                                const DepositId deposit_id) {
   DistanceMap distances(occupancy_map.dimensions());
   // Invariant: For each cell in the queue: We've reached this cell in (distance) steps.
   // We can place objects with an ingress there.
@@ -51,9 +52,9 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
 
   for (Vec2 possible_ingress_location : outer_connected_border_cells(as_rectangle(deposit))) {
     for (auto rotation : ROTATIONS) {
-      update_reachability_if_placeable(distances, occupancy_map,
+      update_reachability_if_placeable(&distances, occupancy_map,
                                        Mine::with_ingress(possible_ingress_location, rotation), 1,
-                                       reached_ingresses);
+                                       &reached_ingresses);
     }
   }
 
@@ -64,12 +65,12 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
     auto next_distance = static_cast<DistanceT>(distances.at(reached_ingress) + 1);
 
     for (auto rotation : ROTATIONS) {
-      update_reachability_if_placeable(distances, occupancy_map,
+      update_reachability_if_placeable(&distances, occupancy_map,
                                        Conveyor3::with_ingress(reached_ingress, rotation),
-                                       next_distance, reached_ingresses);
-      update_reachability_if_placeable(distances, occupancy_map,
+                                       next_distance, &reached_ingresses);
+      update_reachability_if_placeable(&distances, occupancy_map,
                                        Conveyor4::with_ingress(reached_ingress, rotation),
-                                       next_distance, reached_ingresses);
+                                       next_distance, &reached_ingresses);
       for (auto combiner : {Combiner::with_left_ingress(reached_ingress, rotation),
                             Combiner::with_right_ingress(reached_ingress, rotation)}) {
         bool ingresses_connect_to_egress =
@@ -77,8 +78,8 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
               return any_neighbor_is(occupancy_map, ingress, CellOccupancy::EGRESS);
             });
         if (!ingresses_connect_to_egress) {
-          update_reachability_if_placeable(distances, occupancy_map, combiner, next_distance,
-                                           reached_ingresses);
+          update_reachability_if_placeable(&distances, occupancy_map, combiner, next_distance,
+                                           &reached_ingresses);
         }
       }
     }
@@ -89,7 +90,8 @@ inline DistanceMap distances_from(const Deposit& deposit, const OccupancyMap& oc
 
 /* At each cell: Minimum distance to reach object with dimensions by every map. Assumes handle
  * at top left. */
-inline DistanceMap merge(const std::vector<DistanceMap>& maps, const Vec2 dimensions = Vec2{1, 1}) {
+[[nodiscard]] inline DistanceMap merge(const std::vector<DistanceMap>& maps,
+                                       const Vec2 dimensions = Vec2{1, 1}) {
   DistanceMap result(maps[0].dimensions());
 
   auto min_distance_to_reach_object_at = [&](const Vec2 handle, const DistanceMap& map) {
