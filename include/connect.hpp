@@ -121,6 +121,53 @@ inline void set_part_as_target(const PlaceableObject& placeable, TargetMap* targ
       placeable);
 }
 
+inline bool recover_from_self_intersection(const Deposit& deposit,
+                                           std::vector<PlaceableObject>& parts, FieldState* state,
+                                           const parsing::Input& input) {
+  DEBUG_PRINT("Self-intersection inside connect\n");
+  // Try to remove parts from the previous path and hope that we can connect them
+  auto stop_intersection_handling = false;
+  while (!parts.empty() && !stop_intersection_handling) {
+    PredecessorMap predecessors(input.dimensions);
+    PredecessorMap object_connections(predecessors.dimensions());
+    TargetMap target_to_path(predecessors.dimensions());
+    set_part_as_target(parts.back(), &target_to_path);
+    // Try to run connect again with all parts without intersections on the field
+    auto connected_egress = calculate_path(deposit, target_to_path, &predecessors,
+                                           &object_connections, state->occupancy_map);
+    if (!connected_egress) {
+      auto back = parts.back();
+      parts.pop_back();
+      remove(back, &state->occupancy_map);
+      continue;
+    }
+    auto [extra_finished, extra_parts] =
+        backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
+    stop_intersection_handling = extra_finished;
+
+    if (!extra_finished) {
+      for (auto& part : extra_parts) {
+        remove(part, &state->occupancy_map);
+      }
+      auto back = parts.back();
+      parts.pop_back();
+      remove(back, &state->occupancy_map);
+      continue;
+    }
+    for (auto part : extra_parts) {
+      parts.push_back(part);
+    }
+  }
+
+  if (!stop_intersection_handling) {
+    for (auto& part : parts) {
+      remove(part, &state->occupancy_map);
+    }
+    return false;
+  }
+  return true;
+}
+
 // TODO: deduplicate with distance_map.hpp see #28
 inline std::optional<PipelineId> connect(const DepositId& deposit_id, const FactoryId factory_id,
                                          FieldState* state, const parsing::Input& input) {
@@ -159,45 +206,7 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
   auto [finished, parts] =
       backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
   if (!finished) {
-    DEBUG_PRINT("Self-intersection inside connect\n");
-    // Try to remove parts from the previous path and hope that we can connect them
-    auto stop_intersection_handling = false;
-    while (!parts.empty() && !stop_intersection_handling) {
-      PredecessorMap predecessors(input.dimensions);
-      PredecessorMap object_connections(predecessors.dimensions());
-      TargetMap target_to_path(predecessors.dimensions());
-      set_part_as_target(parts.back(), &target_to_path);
-      // Try to run connect again with all parts without intersections on the field
-      auto connected_egress = calculate_path(deposit, target_to_path, &predecessors,
-                                             &object_connections, state->occupancy_map);
-      if (!connected_egress) {
-        auto back = parts.back();
-        parts.pop_back();
-        remove(back, &state->occupancy_map);
-        continue;
-      }
-      auto [extra_finished, extra_parts] = backtrack_parts(
-          *connected_egress, predecessors, object_connections, &state->occupancy_map);
-      stop_intersection_handling = extra_finished;
-
-      if (!extra_finished) {
-        for (auto& part : extra_parts) {
-          remove(part, &state->occupancy_map);
-        }
-        auto back = parts.back();
-        parts.pop_back();
-        remove(back, &state->occupancy_map);
-        continue;
-      }
-      for (auto part : extra_parts) {
-        parts.push_back(part);
-      }
-    }
-
-    if (!stop_intersection_handling) {
-      for (auto& part : parts) {
-        remove(part, &state->occupancy_map);
-      }
+    if (!recover_from_self_intersection(deposit, parts, state, input) ) {
       return std::nullopt;
     }
   }
