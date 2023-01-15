@@ -62,7 +62,7 @@ inline bool solve_component(const ConnectedComponent& component, FieldState* sta
         DEBUG("Connecting " << deposit_id << " with " << *factory_id << "\n");
         auto pipeline_id = connect(deposit_id, *factory_id, state, input);
         if (!pipeline_id) {
-          DEBUG("Failed connecting");
+          DEBUG("Failed connecting " << deposit_id << " with " << *factory_id << "\n");
           continue;
         }
         changed_something = true;
@@ -100,7 +100,7 @@ void simple_greedy_solver(const parsing::Input& input,
       auto& state = field_states[i];
       DEBUG("size: " << component.size() << "\n");
       keep_running |= solve_component(component, &state, input, merged);
-      auto solution_score = score(state, input.turns, input);
+      auto solution_score = score(state, input.turns - 1, input);
       update_solution(Solution{solution_score, state.placed_objects()});
     }
   }

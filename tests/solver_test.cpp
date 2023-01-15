@@ -43,3 +43,20 @@ TEST(Solver, PlacesTwoMinesInTaskTwo) {
   EXPECT_EQ(best_solution.score, 90);
   EXPECT_EQ(best_solution.parts.size(), 9);  // One factory and two pathes, each 4 long
 }
+
+TEST(Solver, BuildsManyPipelinesInTaskThree) {
+  auto input = SolverTest::from_string(examples::TASK3);
+
+  Solution best_solution;
+  profit::simple_greedy_solver(input, [&](const Solution& solution) {
+    DEBUG("Update call with score " << solution.score << " and " << solution.parts.size() << "\n");
+    if (solution.score > best_solution.score || best_solution.parts.empty()) {
+      DEBUG("Best solution set new with score " << solution.score << " and "
+                                                << solution.parts.size() << "\n");
+      best_solution = solution;
+    }
+  });
+
+  EXPECT_EQ(best_solution.score, 10);
+  EXPECT_EQ(best_solution.parts.size(), 38);
+}

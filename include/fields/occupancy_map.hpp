@@ -43,18 +43,22 @@ inline OccupancyMap occupancies_from(const parsing::Input& input) {
 
 template <typename Placeable>
 inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map) {
-  return std::ranges::any_of(object.occupied_cells(), [&](const Vec2 cell) {
-    auto occupancy = occupancy_map.at(cell);
-    if constexpr (std::is_same_v<Placeable, Conveyor4> || std::is_same_v<Placeable, Conveyor3>) {
-      return occupancy != CellOccupancy::EMPTY &&
-             (occupancy != CellOccupancy::CONVEYOR_CROSSING || !object.can_overlap_at(cell));
-    } else {
-      return occupancy != CellOccupancy::EMPTY;
-    }
-  }) || any_neighbor_count(occupancy_map, object.egress(), CellOccupancy::INGRESS) > 1;
+  return std::ranges::any_of(object.occupied_cells(),
+                             [&](const Vec2 cell) {
+                               auto occupancy = occupancy_map.at(cell);
+                               if constexpr (std::is_same_v<Placeable, Conveyor4> ||
+                                             std::is_same_v<Placeable, Conveyor3>) {
+                                 return occupancy != CellOccupancy::EMPTY &&
+                                        (occupancy != CellOccupancy::CONVEYOR_CROSSING ||
+                                         !object.can_overlap_at(cell));
+                               } else {
+                                 return occupancy != CellOccupancy::EMPTY;
+                               }
+                             }) ||
+         any_neighbor_count(occupancy_map, object.egress(), CellOccupancy::INGRESS) > 1;
 }
 
-template<>
+template <>
 inline bool collides(const Factory& object, const OccupancyMap& occupancy_map) {
   return std::ranges::any_of(object.occupied_cells(), [&](const Vec2 cell) {
     auto occupancy = occupancy_map.at(cell);
