@@ -1,4 +1,4 @@
-#include "connected_component.hpp"
+#include "miscellany/connected_component.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
