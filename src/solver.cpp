@@ -61,8 +61,12 @@ inline bool solve_component(const ConnectedComponent& component, FieldState* sta
       DEBUG_PRINT("Starting with resource " << static_cast<int>(resource_type)
                                             << " requirements are "
                                             << product.requirements[resource_type] << "\n");
+
+      if (product.requirements[resource_type] == 0) {
+        continue;
+      }
       auto factory_id = get_realizing_factory(product.type, *state);
-      if (product.requirements[resource_type] == 0 || !factory_id) {
+      if (!factory_id) {
         continue;
       }
       for (auto deposit_id : component) {
