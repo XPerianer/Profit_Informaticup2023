@@ -107,4 +107,14 @@ bool any_neighbor_is(const FieldT& field, Vec2 cell, const typename FieldT::Cell
   return any_is;
 }
 
+template <typename FieldT>
+uint8_t any_neighbor_count(const FieldT& field, Vec2 cell, const typename FieldT::CellT& cell_value) {
+  uint8_t count = 0;
+  count += field.at(cell + Vec2{0, -1}) == cell_value;
+  count += field.at(cell + Vec2{-1, 0}) == cell_value;
+  count += field.at(cell + Vec2{1, 0}) == cell_value;
+  count += field.at(cell + Vec2{0, 1}) == cell_value;
+  return count;
+}
+
 }  // namespace profit

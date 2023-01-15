@@ -51,6 +51,14 @@ inline bool collides(const Placeable& object, const OccupancyMap& occupancy_map)
     } else {
       return occupancy != CellOccupancy::EMPTY;
     }
+  }) || any_neighbor_count(occupancy_map, object.egress(), CellOccupancy::INGRESS) > 1;
+}
+
+template<>
+inline bool collides(const Factory& object, const OccupancyMap& occupancy_map) {
+  return std::ranges::any_of(object.occupied_cells(), [&](const Vec2 cell) {
+    auto occupancy = occupancy_map.at(cell);
+    return occupancy != CellOccupancy::EMPTY;
   });
 }
 
