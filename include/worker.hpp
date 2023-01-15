@@ -51,16 +51,16 @@ struct Worker {
     sync_->worker_threads_count += number;
     pthread_mutex_unlock(&sync_->worker_threads_count_mutex);
     pthread_cond_signal(&sync_->worker_thread_condition);
-    DEBUG("cond_signal\n");
+    DEBUG_PRINT("cond_signal\n");
   }
 
   inline void update_solution(Solution solution) {
     pthread_mutex_lock(&sync_->best_solution_mutex);
-    DEBUG("Update call of solution with score " << solution.score << " and "
+    DEBUG_PRINT("Update call of solution with score " << solution.score << " and "
                                                 << solution.parts.size() << "parts\n");
     if (solution.score > solution_->score ||
         (solution.score == solution_->score && solution.parts.size() > solution_->parts.size())) {
-      DEBUG("Update executed\n");
+      DEBUG_PRINT("Update executed\n");
       (*solution_) = std::move(solution);
     }
     pthread_mutex_unlock(&sync_->best_solution_mutex);

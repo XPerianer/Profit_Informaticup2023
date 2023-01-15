@@ -159,7 +159,7 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
   auto [finished, parts] =
       backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
   if (!finished) {
-    DEBUG("Self-intersection inside connect\n");
+    DEBUG_PRINT("Self-intersection inside connect\n");
     // Try to remove parts from the previous path and hope that we can connect them
     auto stop_intersection_handling = false;
     while (!parts.empty() && !stop_intersection_handling) {

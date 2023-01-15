@@ -18,15 +18,15 @@ inline bool solve_component(const ConnectedComponent& component, FieldState* sta
                             const profit::parsing::Input& input, const DistanceMap& merged) {
   bool changed_something = false;
 
-  DEBUG("Starting with component with size " << component.size() << " \n");
+  DEBUG_PRINT("Starting with component with size " << component.size() << " \n");
   AvailableResources resources = available_resources(component, input);
   std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
 #ifndef NDEBUG
-  DEBUG(" ----- Fabrication plan -----\n");
+  DEBUG_PRINT(" ----- Fabrication plan -----\n");
   for (auto product : fabrication_plan) {
-    DEBUG(product << "\n");
+    DEBUG_PRINT(product << "\n");
   }
-  DEBUG(" ----- Fabrication plan -----\n");
+  DEBUG_PRINT(" ----- Fabrication plan -----\n");
 #endif
   // try to realize one by one
   // TODO: optimize by building product with higher scores first see #24
@@ -34,35 +34,36 @@ inline bool solve_component(const ConnectedComponent& component, FieldState* sta
   for (unsigned int i = 0; i < fabrication_plan.size(); i++) {
     auto product = input.products[i];
     auto count = fabrication_plan[i];
-    DEBUG("Starting with product " << i << ", count is " << count << "\n");
+    DEBUG_PRINT("Starting with product " << i << ", count is " << count << "\n");
     if (count == 0) {
       continue;
     }
     auto factory_id = need_to_place_factory(product.type, *state);
     if (!factory_id) {
-      DEBUG("Trying to place factory\n");
+      DEBUG_PRINT("Trying to place factory\n");
       factory_id = place_factory(input.products[i].type, merged, state);
       if (!factory_id) {
         continue;
       }
     }
-    DEBUG("Placed factory\n");
+    DEBUG_PRINT("Placed factory\n");
     for (auto resource_type : RESOURCE_TYPES) {
-      DEBUG("Starting with resource " << static_cast<int>(resource_type) << " requirements are "
-                                      << product.requirements[resource_type] << "\n");
+      DEBUG_PRINT("Starting with resource " << static_cast<int>(resource_type)
+                                            << " requirements are "
+                                            << product.requirements[resource_type] << "\n");
       if (product.requirements[resource_type] == 0) {
         continue;
       }
       for (auto deposit_id : component) {
         auto deposit = input.deposits[deposit_id];
-        DEBUG("Deposit type " << static_cast<int>(deposit.type) << "\n");
+        DEBUG_PRINT("Deposit type " << static_cast<int>(deposit.type) << "\n");
         if (deposit.type != resource_type) {
           continue;
         }
-        DEBUG("Connecting " << deposit_id << " with " << *factory_id << "\n");
+        DEBUG_PRINT("Connecting " << deposit_id << " with " << *factory_id << "\n");
         auto pipeline_id = connect(deposit_id, *factory_id, state, input);
         if (!pipeline_id) {
-          DEBUG("Failed connecting " << deposit_id << " with " << *factory_id << "\n");
+          DEBUG_PRINT("Failed connecting " << deposit_id << " with " << *factory_id << "\n");
           continue;
         }
         changed_something = true;
@@ -98,7 +99,7 @@ void simple_greedy_solver(const parsing::Input& input,
     for (uint32_t i = 0; i < connected_components.size(); i++) {
       auto& component = connected_components[i];
       auto& state = field_states[i];
-      DEBUG("size: " << component.size() << "\n");
+      DEBUG_PRINT("size: " << component.size() << "\n");
       keep_running |= solve_component(component, &state, input, merged);
       auto solution_score = score(state, input.turns, input);
       update_solution(Solution{solution_score, state.placed_objects()});
