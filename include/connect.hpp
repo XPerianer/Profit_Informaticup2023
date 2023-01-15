@@ -52,9 +52,9 @@ inline Rotation get_rotation_between(Vec2 start, Vec2 end) {
   return Rotation::DOWN_TO_UP;
 }
 
-inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
+inline std::pair<bool, std::vector<profit::PlaceableObject>> backtrack_parts(
     geometry::Vec2 ending_egress, PredecessorMap& predecessors, PredecessorMap& object_connections,
-    OccupancyMap* occupancy_map) {
+    OccupancyMap* occupancy_map, bool mine_at_end = true) {
   std::vector<PlaceableObject> parts;
   auto width = static_cast<geometry::Coordinate::UnderlyingT>(predecessors.dimensions().width());
 
@@ -66,8 +66,10 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
   while (true) {
     auto rotation = get_rotation_between(object_ingress, object_egress);
     if (predecessors.at(object_ingress) == INVALID_FIELD) {
-      parts.emplace_back(Mine::with_ingress(object_ingress, rotation));
       finished = true;
+    }
+    if (finished && mine_at_end) {
+      parts.emplace_back(Mine::with_ingress(object_ingress, rotation));
     } else {
       auto distance = geometry::manhattan_distance(object_egress, object_ingress);
 
@@ -82,20 +84,39 @@ inline std::optional<std::vector<profit::PlaceableObject>> backtrack_parts(
 
     if (collides(parts.back(), *occupancy_map)) {
       parts.pop_back();
-      for (auto& part : parts) {
-        remove(part, occupancy_map);
-      }
-      return std::nullopt;
+      return {false, parts};
     }
 
     if (finished) {
-      return parts;
+      return {true, parts};
     }
     object_egress = Vec2::from_scalar_index(predecessors.at(object_ingress), width);
     object_ingress = Vec2::from_scalar_index(object_connections.at(object_egress), width);
 
     place(parts.back(), occupancy_map);
   }
+}
+
+inline void set_part_as_target(const PlaceableObject& placeable, TargetMap* target_egress_fields) {
+  std::visit(
+      utils::Overloaded{[&](const Mine& mine) {
+                          for (auto egress : mine.upstream_egress_cells()) {
+                            target_egress_fields->safe_set(egress, TARGET);
+                          }
+                        },
+                        [](const Combiner&) { /* TODO */ },
+                        [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
+                        [&](const Conveyor3& conveyor) {
+                          for (auto egress : conveyor.upstream_egress_cells()) {
+                            target_egress_fields->safe_set(egress, TARGET);
+                          }
+                        },
+                        [&](const Conveyor4& conveyor) {
+                          for (auto egress : conveyor.upstream_egress_cells()) {
+                            target_egress_fields->safe_set(egress, TARGET);
+                          }
+                        }},
+      placeable);
 }
 
 // TODO: deduplicate with distance_map.hpp see #28
@@ -123,26 +144,8 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
       continue;
     }
     for (const auto& placeable : pipeline.parts) {
-      std::visit(
-          utils::Overloaded{[&](const Mine& mine) {
-                              for (auto egress : mine.upstream_egress_cells()) {
-                                target_egress_fields.safe_set(egress, TARGET);
-                              }
-                            },
-                            [](const Combiner&) { /* TODO */ },
-                            [](const Factory&) { FAIL("Pipeline should not contain a factory"); },
-                            [&](const Conveyor3& conveyor) {
-                              for (auto egress : conveyor.upstream_egress_cells()) {
-                                target_egress_fields.safe_set(egress, TARGET);
-                              }
-                            },
-                            [&](const Conveyor4& conveyor) {
-                              for (auto egress : conveyor.upstream_egress_cells()) {
-                                target_egress_fields.safe_set(egress, TARGET);
-                              }
-                            }},
-          placeable);
-    };
+      set_part_as_target(placeable, &target_egress_fields);
+    }
   }
 
   auto deposit = input.deposits[deposit_id];
@@ -151,20 +154,50 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
   if (!connected_egress) {
     return std::nullopt;
   }
-  auto parts =
+  auto [finished, parts] =
       backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
   // Potential problem: Dijkstra could self-intersect, check here again and if there was a
   // self-intersection, we say that we can not build that
   // TODO: We could recover more gracefully, for example by placing everything that can be placed
   // and then searching for non intersecting connections see #27
-  if (!parts) {
-    return std::nullopt;
+  if (!finished) {
+    DEBUG("Self-intersection inside connect\n");
+
+    PredecessorMap predecessors(input.dimensions);
+    PredecessorMap object_connections(predecessors.dimensions());
+    TargetMap target_to_path(predecessors.dimensions());
+    set_part_as_target(parts.back(), &target_to_path);
+    // Try to run connect again with all parts without intersections on the field
+    auto connected_egress = calculate_path(deposit, target_to_path, &predecessors,
+                                           &object_connections, state->occupancy_map);
+    if (!connected_egress) {
+      for (auto& part : parts) {
+        remove(part, &state->occupancy_map);
+      }
+      return std::nullopt;
+    }
+    auto [extra_finished, extra_parts] =
+        backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
+    DEBUG("finished: " << finished << "\n");
+
+    if (!extra_finished) {
+      for (auto& part : parts) {
+        remove(part, &state->occupancy_map);
+      }
+      for (auto& part : extra_parts) {
+        remove(part, &state->occupancy_map);
+      }
+      return std::nullopt;
+    }
+    for (auto part : extra_parts) {
+      parts.push_back(part);
+    }
   }
 
   Pipeline pipeline;
   pipeline.deposit_id = deposit_id;
   pipeline.factory_id = factory_id;
-  pipeline.parts = *parts;
+  pipeline.parts = parts;
 
   return state->add_pipeline(pipeline);
 }
@@ -197,43 +230,71 @@ inline std::optional<Vec2> visit_location_if_placable(
   return std::nullopt;
 }
 
-inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
-                                          PredecessorMap* predecessors,
-                                          PredecessorMap* object_connections,
-                                          OccupancyMap& occupancy_map) {
-  std::queue<Vec2> reached_ingresses;
+inline std::optional<Vec2> ingresses_from_deposits(std::queue<Vec2>* reached_ingresses,
+                                                   Deposit deposit, TargetMap& target_egress_fields,
+                                                   PredecessorMap* predecessors,
+                                                   PredecessorMap* object_connections,
+                                                   OccupancyMap& occupancy_map) {
   for (Vec2 possible_ingress_location :
        geometry::outer_connected_border_cells(as_rectangle(deposit))) {
     for (auto rotation : ROTATIONS) {
       if (auto connected_egress = visit_location_if_placable(
               possible_ingress_location, target_egress_fields, predecessors, object_connections,
               occupancy_map, Mine::with_ingress(possible_ingress_location, rotation),
-              &reached_ingresses);
+              reached_ingresses);
           connected_egress) {
         return connected_egress;
       }
     }
   }
+  return std::nullopt;
+}
 
-  while (!reached_ingresses.empty()) {
-    Vec2 ingress = reached_ingresses.front();
-    reached_ingresses.pop();
+inline std::optional<Vec2> connect_ingress_to_target(std::queue<Vec2>* reached_ingresses,
+                                                     TargetMap& target_egress_fields,
+                                                     PredecessorMap* predecessors,
+                                                     PredecessorMap* object_connections,
+                                                     OccupancyMap& occupancy_map) {
+  while (!reached_ingresses->empty()) {
+    Vec2 ingress = reached_ingresses->front();
+    reached_ingresses->pop();
 
     for (auto rotation : ROTATIONS) {
       if (auto connected_egress = visit_location_if_placable(
               ingress, target_egress_fields, predecessors, object_connections, occupancy_map,
-              Conveyor3::with_ingress(ingress, rotation), &reached_ingresses);
+              Conveyor3::with_ingress(ingress, rotation), reached_ingresses);
           connected_egress) {
         return connected_egress;
       }
       if (auto connected_egress = visit_location_if_placable(
               ingress, target_egress_fields, predecessors, object_connections, occupancy_map,
-              Conveyor4::with_ingress(ingress, rotation), &reached_ingresses);
+              Conveyor4::with_ingress(ingress, rotation), reached_ingresses);
           connected_egress) {
         return connected_egress;
       }
     }
   }
+  return std::nullopt;
+}
+
+inline std::optional<Vec2> calculate_path(Deposit deposit, TargetMap& target_egress_fields,
+                                          PredecessorMap* predecessors,
+                                          PredecessorMap* object_connections,
+                                          OccupancyMap& occupancy_map) {
+  std::queue<Vec2> reached_ingresses;
+
+  auto reached = ingresses_from_deposits(&reached_ingresses, deposit, target_egress_fields,
+                                         predecessors, object_connections, occupancy_map);
+  if (reached) {
+    return reached;
+  }
+
+  reached = connect_ingress_to_target(&reached_ingresses, target_egress_fields, predecessors,
+                                      object_connections, occupancy_map);
+  if (reached) {
+    return reached;
+  }
+
   return std::nullopt;
 }
 }  // namespace profit

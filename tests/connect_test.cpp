@@ -146,3 +146,26 @@ TEST(Connect, DoNotConnectWithSelfIntersections) {
 
   EXPECT_EQ(pipeline_id.has_value(), false);
 }
+
+TEST(Connect, RecoverFromSelfIntersection) {
+  auto input = ConnectionTest::from_string(examples::TASK2);
+  DepositId deposit_id = 0;
+
+  // Not reachable because of other side of split map
+  // In real code this should not happen, as both
+  // objects are in different connected components. However,
+  // objects could still become unreachable due to placed e.g.
+  // placed factories.
+  auto factory = Factory{
+      .handle = {21, 0},
+      .type = FactoryType::TYPE0,
+  };
+
+  FactoryId factory_id = 0;
+
+  FieldState state = from_input(input);
+  state.factories[factory_id] = factory;
+
+  auto pipeline_id = connect(deposit_id, factory_id, &state, input);
+  EXPECT_EQ(pipeline_id.has_value(), true);
+}
