@@ -27,7 +27,7 @@ struct Output {
   }
 };
 
-inline nlohmann::json serialize_object(const PlaceableObject& object) {
+[[nodiscard]] inline nlohmann::json serialize_object(const PlaceableObject& object) {
   return std::visit(utils::Overloaded{
                         [&](const Combiner& combiner) -> nlohmann::json {
                           return {{"type", "combiner"},
@@ -63,7 +63,7 @@ inline nlohmann::json serialize_object(const PlaceableObject& object) {
                     object);
 }
 
-inline nlohmann::json serialize_object(const Deposit& deposit) {
+[[nodiscard]] inline nlohmann::json serialize_object(const Deposit& deposit) {
   return {{"type", "deposit"},
           {"x", static_cast<int>(deposit.handle.x())},
           {"y", static_cast<int>(deposit.handle.y())},
@@ -72,7 +72,7 @@ inline nlohmann::json serialize_object(const Deposit& deposit) {
           {"subtype", static_cast<int>(deposit.type)}};
 }
 
-inline nlohmann::json serialize_object(const Obstacle& obstacle) {
+[[nodiscard]] inline nlohmann::json serialize_object(const Obstacle& obstacle) {
   return {{"type", "obstacle"},
           {"x", static_cast<int>(obstacle.handle.x())},
           {"y", static_cast<int>(obstacle.handle.y())},
@@ -80,14 +80,14 @@ inline nlohmann::json serialize_object(const Obstacle& obstacle) {
           {"height", static_cast<int>(obstacle.dimensions.y())}};
 }
 
-inline nlohmann::json serialize_product(const Product& product) {
+[[nodiscard]] inline nlohmann::json serialize_product(const Product& product) {
   return {{"type", "product"},
           {"subtype", static_cast<int>(product.type)},
           {"resources", product.requirements.as_array()},
           {"points", product.points}};
 }
 
-inline nlohmann::json serialize(const std::vector<PlaceableObject>& objects) {
+[[nodiscard]] inline nlohmann::json serialize(const std::vector<PlaceableObject>& objects) {
   nlohmann::json out = nlohmann::json::array();
   for (const auto& object : objects) {
     out.emplace_back(serialize_object(object));
@@ -95,7 +95,7 @@ inline nlohmann::json serialize(const std::vector<PlaceableObject>& objects) {
   return out;
 }
 
-inline nlohmann::json serialize_detailed(const Output& output) {
+[[nodiscard]] inline nlohmann::json serialize_detailed(const Output& output) {
   nlohmann::json out;
   out["width"] = static_cast<int>(output.dimensions.x());
   out["height"] = static_cast<int>(output.dimensions.y());
