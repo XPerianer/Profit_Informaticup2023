@@ -4,8 +4,20 @@
 #include "score.hpp"
 
 namespace profit {
-inline void solve_component(const ConnectedComponent& component, FieldState* state,
+
+inline std::optional<FactoryId> need_to_place_factory(ProductType type, const FieldState& state) {
+  for (auto [factory_id, factory] : state.factories) {
+    if (factory.type == type) {
+      return factory_id;
+    }
+  }
+  return std::nullopt;
+}
+
+inline bool solve_component(const ConnectedComponent& component, FieldState* state,
                             const profit::parsing::Input& input, const DistanceMap& merged) {
+  bool changed_something = false;
+
   DEBUG_PRINT("Starting with component with size " << component.size() << " \n");
   AvailableResources resources = available_resources(component, input);
   std::vector<ProductCount> fabrication_plan = pech(resources, input.products);
@@ -26,10 +38,13 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
     if (count == 0) {
       continue;
     }
-    DEBUG_PRINT("Trying to place factory\n");
-    auto factory_id = place_factory(input.products[i].type, merged, state);
+    auto factory_id = need_to_place_factory(product.type, *state);
     if (!factory_id) {
-      continue;
+      DEBUG_PRINT("Trying to place factory\n");
+      factory_id = place_factory(input.products[i].type, merged, state);
+      if (!factory_id) {
+        continue;
+      }
     }
     DEBUG_PRINT("Placed factory\n");
     for (auto resource_type : RESOURCE_TYPES) {
@@ -48,12 +63,14 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
         DEBUG_PRINT("Connecting " << deposit_id << " with " << *factory_id << "\n");
         auto pipeline_id = connect(deposit_id, *factory_id, state, input);
         if (!pipeline_id) {
-          DEBUG_PRINT("Failed connecting");
+          DEBUG_PRINT("Failed connecting " << deposit_id << " with " << *factory_id << "\n");
           continue;
         }
+        changed_something = true;
       }
     }
   }
+  return changed_something;
 }
 
 void simple_greedy_solver(const parsing::Input& input,
@@ -65,7 +82,6 @@ void simple_greedy_solver(const parsing::Input& input,
 
   std::vector<DistanceMap> distance_maps;
   distance_maps.reserve(deposits.size());
-  FieldState state = {occupancy_map, {}, {}};
 
   for (size_t i = 0; i < deposits.size(); i++) {
     distance_maps.emplace_back(
@@ -75,12 +91,19 @@ void simple_greedy_solver(const parsing::Input& input,
   const DistanceMap merged = merge(distance_maps, Factory::DIMENSIONS);
 
   std::vector<ConnectedComponent> connected_components = components_wrapper.extract();
+  std::vector<FieldState> field_states(connected_components.size(), {occupancy_map, {}, {}});
 
-  for (const auto& component : connected_components) {
-    DEBUG_PRINT("size: " << component.size() << "\n");
-    solve_component(component, &state, input, merged);
-    auto solution_score = score(state, input.turns, input);
-    update_solution(Solution{solution_score, state.placed_objects()});
+  bool keep_running = true;
+  while (keep_running) {
+    keep_running = false;
+    for (uint32_t i = 0; i < connected_components.size(); i++) {
+      auto& component = connected_components[i];
+      auto& state = field_states[i];
+      DEBUG_PRINT("size: " << component.size() << "\n");
+      keep_running |= solve_component(component, &state, input, merged);
+      auto solution_score = score(state, input.turns, input);
+      update_solution(Solution{solution_score, state.placed_objects()});
+    }
   }
 }
 }  // namespace profit

@@ -24,9 +24,10 @@ namespace profit {
 using FieldIndex = uint16_t;
 constexpr auto INVALID_FIELD = std::numeric_limits<FieldIndex>::max();
 
-enum Target : bool {
-  TARGET = true,
-  NO_TARGET = false,
+enum Target {
+  NO_TARGET = 0,
+  TARGET = 1,
+  CONVEYOR_TARGET = 2,
 };
 using TargetMap = Field<Target, NO_TARGET, NO_TARGET>;
 using PredecessorMap = Field<FieldIndex, INVALID_FIELD, INVALID_FIELD>;
@@ -88,6 +89,7 @@ inline std::pair<bool, std::vector<profit::PlaceableObject>> backtrack_parts(
     }
 
     if (finished) {
+      place(parts.back(), occupancy_map);
       return {true, parts};
     }
     object_egress = Vec2::from_scalar_index(predecessors.at(object_ingress), width);
@@ -101,7 +103,7 @@ inline void set_part_as_target(const PlaceableObject& placeable, TargetMap* targ
   std::visit(
       utils::Overloaded{[&](const Mine& mine) {
                           for (auto egress : mine.upstream_egress_cells()) {
-                            target_egress_fields->safe_set(egress, TARGET);
+                            target_egress_fields->safe_set(egress, CONVEYOR_TARGET);
                           }
                         },
                         [](const Combiner&) { /* TODO */ },
@@ -117,6 +119,53 @@ inline void set_part_as_target(const PlaceableObject& placeable, TargetMap* targ
                           }
                         }},
       placeable);
+}
+
+inline bool recover_from_self_intersection(const Deposit& deposit,
+                                           std::vector<PlaceableObject>& parts, FieldState* state,
+                                           const parsing::Input& input) {
+  DEBUG_PRINT("Self-intersection inside connect\n");
+  // Try to remove parts from the previous path and hope that we can connect them
+  auto stop_intersection_handling = false;
+  while (!parts.empty() && !stop_intersection_handling) {
+    PredecessorMap predecessors(input.dimensions);
+    PredecessorMap object_connections(predecessors.dimensions());
+    TargetMap target_to_path(predecessors.dimensions());
+    set_part_as_target(parts.back(), &target_to_path);
+    // Try to run connect again with all parts without intersections on the field
+    auto connected_egress = calculate_path(deposit, target_to_path, &predecessors,
+                                           &object_connections, state->occupancy_map);
+    if (!connected_egress) {
+      auto back = parts.back();
+      parts.pop_back();
+      remove(back, &state->occupancy_map);
+      continue;
+    }
+    auto [extra_finished, extra_parts] =
+        backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
+    stop_intersection_handling = extra_finished;
+
+    if (!extra_finished) {
+      for (auto& part : extra_parts) {
+        remove(part, &state->occupancy_map);
+      }
+      auto back = parts.back();
+      parts.pop_back();
+      remove(back, &state->occupancy_map);
+      continue;
+    }
+    for (auto part : extra_parts) {
+      parts.push_back(part);
+    }
+  }
+
+  if (!stop_intersection_handling) {
+    for (auto& part : parts) {
+      remove(part, &state->occupancy_map);
+    }
+    return false;
+  }
+  return true;
 }
 
 // TODO: deduplicate with distance_map.hpp see #28
@@ -156,41 +205,9 @@ inline std::optional<PipelineId> connect(const DepositId& deposit_id, const Fact
   }
   auto [finished, parts] =
       backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
-  // Potential problem: Dijkstra could self-intersect, check here again and if there was a
-  // self-intersection, we say that we can not build that
-  // TODO: We could recover more gracefully, for example by placing everything that can be placed
-  // and then searching for non intersecting connections see #27
   if (!finished) {
-    DEBUG_PRINT("Self-intersection inside connect\n");
-
-    PredecessorMap predecessors(input.dimensions);
-    PredecessorMap object_connections(predecessors.dimensions());
-    TargetMap target_to_path(predecessors.dimensions());
-    set_part_as_target(parts.back(), &target_to_path);
-    // Try to run connect again with all parts without intersections on the field
-    auto connected_egress = calculate_path(deposit, target_to_path, &predecessors,
-                                           &object_connections, state->occupancy_map);
-    if (!connected_egress) {
-      for (auto& part : parts) {
-        remove(part, &state->occupancy_map);
-      }
+    if (!recover_from_self_intersection(deposit, parts, state, input)) {
       return std::nullopt;
-    }
-    auto [extra_finished, extra_parts] =
-        backtrack_parts(*connected_egress, predecessors, object_connections, &state->occupancy_map);
-    DEBUG_PRINT("finished: " << finished << "\n");
-
-    if (!extra_finished) {
-      for (auto& part : parts) {
-        remove(part, &state->occupancy_map);
-      }
-      for (auto& part : extra_parts) {
-        remove(part, &state->occupancy_map);
-      }
-      return std::nullopt;
-    }
-    for (auto part : extra_parts) {
-      parts.push_back(part);
     }
   }
 
@@ -211,7 +228,10 @@ inline std::optional<Vec2> visit_location_if_placable(
     return std::nullopt;
   }
   auto width = occupancy_map.dimensions().width();
-  if (target_egress_fields.at(object.egress())) {
+  if ((std::is_same<Mine, PlaceableT>::value &&
+       target_egress_fields.at(object.egress()) == TARGET) ||
+      (!std::is_same<Mine, PlaceableT>::value &&
+       target_egress_fields.at(object.egress()) != NO_TARGET)) {
     object_connections->set(object.egress(), ingress.to_scalar_index(width));
     return object.egress();
   }
@@ -230,6 +250,13 @@ inline std::optional<Vec2> visit_location_if_placable(
   return std::nullopt;
 }
 
+inline bool can_place_ingress(Vec2 cell, const OccupancyMap& occupancy_map) {
+  return std::ranges::all_of(neighbors(cell), [&](auto neighbor) {
+    return !static_cast<bool>(occupancy_map.at(neighbor) == CellOccupancy::EGRESS &&
+                              any_neighbor_is(occupancy_map, neighbor, CellOccupancy::INGRESS));
+  });
+}
+
 inline std::optional<Vec2> ingresses_from_deposits(std::queue<Vec2>* reached_ingresses,
                                                    Deposit deposit, TargetMap& target_egress_fields,
                                                    PredecessorMap* predecessors,
@@ -237,6 +264,9 @@ inline std::optional<Vec2> ingresses_from_deposits(std::queue<Vec2>* reached_ing
                                                    OccupancyMap& occupancy_map) {
   for (Vec2 possible_ingress_location :
        geometry::outer_connected_border_cells(as_rectangle(deposit))) {
+    if (!can_place_ingress(possible_ingress_location, occupancy_map)) {
+      continue;
+    }
     for (auto rotation : ROTATIONS) {
       if (auto connected_egress = visit_location_if_placable(
               possible_ingress_location, target_egress_fields, predecessors, object_connections,
