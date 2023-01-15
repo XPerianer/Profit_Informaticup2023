@@ -62,7 +62,7 @@ struct Combiner {
 
   bool operator==(const Combiner& other) const = default;
 
-  static Combiner with_left_ingress(Vec2 coordinate, Rotation rotation) {
+  [[nodiscard]] static Combiner with_left_ingress(Vec2 coordinate, Rotation rotation) {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
@@ -78,7 +78,7 @@ struct Combiner {
     return Combiner{handle, rotation};
   }
 
-  static Combiner with_right_ingress(Vec2 coordinate, Rotation rotation) {
+  [[nodiscard]] static Combiner with_right_ingress(Vec2 coordinate, Rotation rotation) {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
@@ -153,7 +153,7 @@ struct Conveyor3 {
 
   bool operator==(const Conveyor3& other) const = default;
 
-  static Conveyor3 with_ingress(Vec2 coordinate, Rotation rotation) {
+  [[nodiscard]] static Conveyor3 with_ingress(Vec2 coordinate, Rotation rotation) {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
@@ -224,7 +224,7 @@ struct Conveyor4 {
 
   bool operator==(const Conveyor4& other) const = default;
 
-  static Conveyor4 with_ingress(Vec2 coordinate, Rotation rotation) {
+  [[nodiscard]] static Conveyor4 with_ingress(Vec2 coordinate, Rotation rotation) {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:
@@ -320,16 +320,9 @@ struct Factory {
   }
 };
 
-inline Rectangle as_rectangle(const Factory& factory) {
+[[nodiscard]] inline Rectangle as_rectangle(const Factory& factory) {
   return Rectangle::from_top_left_and_dimensions(factory.handle, Factory::DIMENSIONS);
 }
-
-// TODO when we need it
-/*
-inline Rectangle as_rectangle(const Conveyor3& conveyor) {
-  return Rectangle::from_top_left_and_dimensions(obstacle.handle, obstacle.dimensions);
-}
-*/
 
 struct Mine {
   constexpr static size_t OCCUPIED_CELL_COUNT = 6;
@@ -338,7 +331,7 @@ struct Mine {
 
   bool operator==(const Mine& other) const = default;
 
-  static Mine with_ingress(Vec2 coordinate, Rotation rotation) {
+  [[nodiscard]] static Mine with_ingress(Vec2 coordinate, Rotation rotation) {
     Vec2 handle = [&]() {
       switch (rotation) {
         case Rotation::LEFT_TO_RIGHT:

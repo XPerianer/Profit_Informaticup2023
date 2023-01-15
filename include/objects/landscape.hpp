@@ -31,15 +31,15 @@ struct Obstacle {
 
 using LandscapeObject = std::variant<Deposit, Obstacle>;
 
-inline Rectangle as_rectangle(const Deposit& deposit) {
+[[nodiscard]] inline Rectangle as_rectangle(const Deposit& deposit) {
   return Rectangle::from_top_left_and_dimensions(deposit.handle, deposit.dimensions);
 }
 
-inline Rectangle as_rectangle(const Obstacle& obstacle) {
+[[nodiscard]] inline Rectangle as_rectangle(const Obstacle& obstacle) {
   return Rectangle::from_top_left_and_dimensions(obstacle.handle, obstacle.dimensions);
 }
 
-inline StoredResourceCount initial_resource_count(const Deposit& deposit) {
+[[nodiscard]] inline StoredResourceCount initial_resource_count(const Deposit& deposit) {
   constexpr StoredResourceCount STORED_RESOURCES_PER_CELL = 5;
 
   return static_cast<StoredResourceCount>(deposit.dimensions.width()) *
