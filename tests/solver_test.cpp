@@ -135,3 +135,21 @@ TEST_F(SolverTest, VeryStrongConstrained) {
   EXPECT_EQ(best_solution_.score, 290);
   EXPECT_EQ(best_solution_.parts.size(), 3);
 }
+
+TEST_F(SolverTest, DivideAndConquer) {
+  auto input = SolverTest::from_string(examples::DIVIDE_AND_CONQUER);
+
+  profit::simple_greedy_solver(input, update_solution_);
+
+  EXPECT_EQ(best_solution_.score, 2160);
+  EXPECT_EQ(best_solution_.parts.size(), 342);
+}
+
+TEST_F(SolverTest, Circle) {
+  auto input = SolverTest::from_string(examples::CIRCLE);
+
+  profit::simple_greedy_solver(input, update_solution_);
+
+  EXPECT_EQ(best_solution_.score, 40);
+  EXPECT_EQ(best_solution_.parts.size(), 83);
+}

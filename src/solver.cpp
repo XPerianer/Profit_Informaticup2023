@@ -49,11 +49,18 @@ inline bool solve_component(const ConnectedComponent& component, FieldState* sta
       }
     }
     DEBUG_PRINT("Placed factory\n");
+  }
+
+  for (const auto& product : input.products) {
     for (auto resource_type : RESOURCE_TYPES) {
       DEBUG_PRINT("Starting with resource " << static_cast<int>(resource_type)
                                             << " requirements are "
                                             << product.requirements[resource_type] << "\n");
       if (product.requirements[resource_type] == 0) {
+        continue;
+      }
+      auto factory_id = get_realizing_factory(product.type, *state);
+      if (!factory_id) {
         continue;
       }
       for (auto deposit_id : component) {
