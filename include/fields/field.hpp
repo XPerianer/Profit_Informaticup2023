@@ -2,8 +2,8 @@
 
 #include <span>
 
-#include "geometry/two_dimensional_vector.hpp"
 #include "geometry/vec2.hpp"
+#include "miscellany/two_dimensional_vector.hpp"
 #include "miscellany/utils.hpp"
 
 namespace profit {
