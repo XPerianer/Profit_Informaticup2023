@@ -33,7 +33,8 @@ inline void solve_component(const ConnectedComponent& component, FieldState* sta
     }
     DEBUG("Placed factory\n");
     for (auto resource_type : RESOURCE_TYPES) {
-      DEBUG("Starting with resource " << static_cast<int>(resource_type) << " requirements are " << product.requirements[resource_type] << "\n");
+      DEBUG("Starting with resource " << static_cast<int>(resource_type) << " requirements are "
+                                      << product.requirements[resource_type] << "\n");
       if (product.requirements[resource_type] == 0) {
         continue;
       }
