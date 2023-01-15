@@ -32,10 +32,11 @@ TEST(Solver, PlacesTwoMinesInTaskTwo) {
 
   Solution best_solution;
   profit::simple_greedy_solver(input, [&](const Solution& solution) {
-    DEBUG_PRINT("Update call with score " << solution.score << " and " << solution.parts.size() << "\n");
+    DEBUG_PRINT("Update call with score " << solution.score << " and " << solution.parts.size()
+                                          << "\n");
     if (solution.score > best_solution.score || best_solution.parts.empty()) {
       DEBUG_PRINT("Best solution set new with score " << solution.score << " and "
-                                                << solution.parts.size() << "\n");
+                                                      << solution.parts.size() << "\n");
       best_solution = solution;
     }
   });
@@ -49,10 +50,11 @@ TEST(Solver, BuildsManyPipelinesInTaskThree) {
 
   Solution best_solution;
   profit::simple_greedy_solver(input, [&](const Solution& solution) {
-    DEBUG_PRINT("Update call with score " << solution.score << " and " << solution.parts.size() << "\n");
+    DEBUG_PRINT("Update call with score " << solution.score << " and " << solution.parts.size()
+                                          << "\n");
     if (solution.score > best_solution.score || best_solution.parts.empty()) {
       DEBUG_PRINT("Best solution set new with score " << solution.score << " and "
-                                                << solution.parts.size() << "\n");
+                                                      << solution.parts.size() << "\n");
       best_solution = solution;
     }
   });

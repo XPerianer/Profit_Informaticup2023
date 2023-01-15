@@ -57,7 +57,7 @@ struct Worker {
   inline void update_solution(Solution solution) {
     pthread_mutex_lock(&sync_->best_solution_mutex);
     DEBUG_PRINT("Update call of solution with score " << solution.score << " and "
-                                                << solution.parts.size() << "parts\n");
+                                                      << solution.parts.size() << "parts\n");
     if (solution.score > solution_->score ||
         (solution.score == solution_->score && solution.parts.size() > solution_->parts.size())) {
       DEBUG_PRINT("Update executed\n");
