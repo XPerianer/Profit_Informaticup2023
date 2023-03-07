@@ -6,16 +6,16 @@
 This is the repository for the solution of the Team uwunauten for the Informaticup 2023 hosted by the [German Society of Computer Science](https://gi.de). You can find more information about the competition [here](https://informaticup.github.io/).
 
 # Background for Task "Profit!"
-This years task was called "Profit!". The task was to place different components on a 2D-Grid to connect deposits with factories to enable the production of products. Solutions were scored by the products they were able to produce in a number of fixed timesteps of the simulation.
+This year's task was called "Profit!". The task was to place different components on a 2D-Grid to connect deposits with factories to enable the production of products. Solutions were scored by the products they were able to produce in a number of fixed timesteps of the simulation.
 More information can be found in the [offical task description](https://github.com/informatiCup/informatiCup2023/blob/main/informatiCup%202023%20-%20Profit!.pdf).
 
 # Solution
-Our main idea was to use split the task in different parts, and then combine these solutions into the global solution.
-At the beginning, we analyse the map for different parts that are not connected and can therefore be solved by themselves in a Divide and Conquer fashion.
+Our main idea was to split the task in different subproblems, and then combine these solutions into the global solution.
+In a Divide and Conquer fashion, we start off with determining connected components. Each connected component defines deposits that can reach other. Two connected components are shut off from each other, enabling us to split the map into multiple, independent subareas which we solve one by one.
 For each of the parts, we model the selection of products as a Knapsack problem and applied a greedy solving strategy.
 The connection between deposits and factories is done by a modified Dijkstra-Algorithm to prevent self-intersections. 
-To evaluate the score of given connections, we modeled the available resources as linear functions, which allows us to estimate the score within constant time, without the need for step-wise simulation.
-To allow the fast combination and testing of the different partial solutions we implemented our solution in modern C++20 with execution speed as a priority. More information is found in our [documentation (german)](https://github.com/XPerianer/Profit_Informaticup2023/blob/main/Ausarbeitung.pdf).
+To evaluate the score of given connections, we modeled the available resources as piecewise linear functions, which allows us to estimate the score within constant time, without the need for the specified turn-based simulation.
+To allow for the fast combination and testing of the different partial solutions, we implemented our solution in modern C++20 with execution speed as a priority. More information is found in our [documentation (german)](https://github.com/XPerianer/Profit_Informaticup2023/blob/main/Ausarbeitung.pdf).
 
 # Usage
 
