@@ -15,7 +15,9 @@ In a Divide and Conquer fashion, we start off with determining connected compone
 For each of the parts, we model the selection of products as a Knapsack problem and applied a greedy solving strategy.
 The connection between deposits and factories is done by a modified Dijkstra-Algorithm to prevent self-intersections. 
 To evaluate the score of given connections, we modeled the available resources as piecewise linear functions, which allows us to estimate the score within constant time, without the need for the specified turn-based simulation.
-To allow for the fast combination and testing of the different partial solutions, we implemented our solution in modern C++20 with execution speed as a priority. More information is found in our [documentation (german)](https://github.com/XPerianer/Profit_Informaticup2023/blob/main/Ausarbeitung.pdf).
+To allow for the fast combination and testing of the different partial solutions, we implemented our solution in modern C++20 with execution speed as a priority.
+Our solution aims to provide a solid setup which can be manually optimized after, rather than providing an already optimized score.
+More information is found in our [documentation (german)](https://github.com/XPerianer/Profit_Informaticup2023/blob/main/Ausarbeitung.pdf).
 
 # Usage
 
