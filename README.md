@@ -5,6 +5,7 @@
 # Solution of Team uwunauten for the Informaticup 2023
 This is the repository for the solution of the Team uwunauten for the Informaticup 2023 hosted by the [German Society of Computer Science](https://gi.de). You can find more information about the competition [here](https://informaticup.github.io/).
 
+
 # Background for Task "Profit!"
 This year's task was called "Profit!". The task was to place different components on a 2D-Grid to connect deposits with factories to enable the production of products. Solutions were scored by the products they were able to produce in a number of fixed timesteps of the simulation.
 More information can be found in the [offical task description](https://github.com/informatiCup/informatiCup2023/blob/main/informatiCup%202023%20-%20Profit!.pdf).
@@ -18,6 +19,8 @@ To evaluate the score of given connections, we modeled the available resources a
 To allow for the fast combination and testing of the different partial solutions, we implemented our solution in modern C++20 with execution speed as a priority.
 Our solution aims to provide a solid setup which can be manually optimized after, rather than providing an already optimized score.
 More information is found in our [documentation (german)](https://github.com/XPerianer/Profit_Informaticup2023/blob/main/Ausarbeitung.pdf).
+
+![image](https://user-images.githubusercontent.com/33000454/230955178-cb9baf8d-6330-4480-94af-23b703575a1f.png)
 
 # Usage
 
